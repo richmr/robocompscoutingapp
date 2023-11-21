@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <div class="match_selection">Match Selection</div>
+        
+    <div class="section scoring" id="scoring_controls" hidden>
+        <div class="container">
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="text-center">Game Mode:</h5>
+                </div>
+            </div>
+            <div class="row game_mode_group">
+                <div id="set-auton" class="six columns text-center game_mode">
+                    <i id="auton_icon" class="fa-solid fa-robot fa-4x"></i>
+                </div>
+                <div id="set-teleop" class="six columns text-center game_mode">
+                    <i id="tele_icon" class="fa-solid fa-gamepad fa-4x"></i>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="text-center">Object Scoring:</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div id="score_cone_background" class="six columns text-center">  
+                    <img id="score_cone" data-scorename="cone" class="score_tally" src="../images/cone.png" alt="Cone" width="75" height="75">
+                </div>
+                <div id="score_cube_background" class="six columns text-center">
+                    <img id="score_cube" data-scorename="cube" class="score_tally" src="../images/cube.png" alt="Cube" width="75" height="75">
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="text-center">Charge Station:</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div id="entered-charge-background" class="six columns text-center">
+                    <button id="entered-charge" data-scorename="Attempted charge" class="score_flag button-primary">Attempted</button>
+                </div>
+                <div id="charge-balanced-background" class="six columns text-center">
+                    <button id="charge-balanced" data-scorename="Succeeded charge" class="score_flag button-primary">Balanced</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="text-center">Other Events:</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div id="mobility-background" class="six columns text-center">
+                    <button id="mobility" data-scorename="Succeeded charge" class="button-primary">Mobility (Auton Only)</button>
+                </div>
+                <div id="robot-broke-background" class="six columns text-center">
+                    <button id="robot-broke" class="button-primary">Robot Broke</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+    <div class="section review_and_submit">TBD review_and_submit autogen</div>
+
+    <div id="error-modal" class="error_modal">Error Modal</div>
+
+    <div id="sending_data_modal" class="sending_data_modal">Sending Data</div>
+
+</body>

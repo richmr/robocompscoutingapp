@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "robocompscoutingapp"
 dynamic = ["version"]
-description = ''
+description = 'Easy to mod robot competition scouting app with centralized database and statistic consolidation'
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.11"
 license = "MIT"
 keywords = []
 authors = [
@@ -15,23 +15,20 @@ authors = [
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "click",
+  "fastapi",
+  "typer",
+  "uvicorn[standard]"
 ]
 
 [project.urls]
-Documentation = "https://github.com/unknown/robocompscoutingapp#readme"
-Issues = "https://github.com/unknown/robocompscoutingapp/issues"
-Source = "https://github.com/unknown/robocompscoutingapp"
+Documentation = "https://github.com/richmr/robocompscoutingapp#readme"
+Issues = "https://github.com/richmr/robocompscoutingapp/issues"
+Source = "https://github.com/richmr/robocompscoutingapp"
 
 [project.scripts]
 robocompscoutingapp = "robocompscoutingapp.cli:robocompscoutingapp"
@@ -43,6 +40,7 @@ path = "src/robocompscoutingapp/__about__.py"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "beautifulsoup4"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
