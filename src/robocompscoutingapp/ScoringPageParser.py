@@ -38,7 +38,7 @@ class ScoringPageParser:
             try:
                 mode_name = gm["data-modename"]
             except KeyError:
-                raise ScoringPageParseError(f"This line: {gm} does not declare the mode name in 'data-modename' attribute.")
+                raise ScoringPageParseError(f"This line: '{gm}' does not declare the mode name in 'data-modename' attribute.")
             
             if mode_name in game_modes:
                 raise ScoringPageParseError(f"Game mode {mode_name} has been used more than once.  Mode names must be unique")
