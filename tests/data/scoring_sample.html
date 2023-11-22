@@ -16,11 +16,11 @@
                 </div>
             </div>
             <div class="row game_mode_group">
-                <div id="set-auton" data-modename="Auton" class="six columns text-center game_mode">
-                    <i id="auton_icon" data-modename="Auton" class="fa-solid fa-robot fa-4x"></i>
+                <div id="set-auton" class="six columns text-center click_feedback">
+                    <i id="auton_icon" data-modename="Auton" class="fa-solid fa-robot fa-4x game_mode"></i>
                 </div>
-                <div id="set-teleop" data-modename="Teleop" class="six columns text-center game_mode">
-                    <i id="tele_icon" class="fa-solid fa-gamepad fa-4x"></i>
+                <div id="set-teleop" class="six columns text-center game_mode click_feedback">
+                    <i id="tele_icon" data-modename="Teleop" class="fa-solid fa-gamepad fa-4x game_mode"></i>
                 </div>
             </div>
             <div class="row">
@@ -29,10 +29,10 @@
                 </div>
             </div>
             <div class="row">
-                <div id="score_cone_background" class="six columns text-center">  
+                <div id="score_cone_background" class="six columns text-center click_feedback">  
                     <img id="score_cone" data-scorename="cone" class="score_tally" src="../images/cone.png" alt="Cone" width="75" height="75">
                 </div>
-                <div id="score_cube_background" class="six columns text-center">
+                <div id="score_cube_background" class="six columns text-center click_feedback">
                     <img id="score_cube" data-scorename="cube" class="score_tally" src="../images/cube.png" alt="Cube" width="75" height="75">
                 </div>
             </div>
@@ -42,10 +42,10 @@
                 </div>
             </div>
             <div class="row">
-                <div id="entered-charge-background" class="six columns text-center">
+                <div id="entered-charge-background" class="six columns text-center click_feedback">
                     <button id="entered-charge" data-scorename="Attempted charge" class="score_flag button-primary">Attempted</button>
                 </div>
-                <div id="charge-balanced-background" class="six columns text-center">
+                <div id="charge-balanced-background" class="six columns text-center click_feedback">
                     <button id="charge-balanced" data-scorename="Succeeded charge" class="score_flag button-primary">Balanced</button>
                 </div>
             </div>
@@ -55,10 +55,10 @@
                 </div>
             </div>
             <div class="row">
-                <div id="mobility-background" class="six columns text-center">
+                <div id="mobility-background" class="six columns text-center click_feedback">
                     <button id="mobility" data-scorename="Auton Mobility" data-onlyForMode="Auton" class="button-primary score_flag">Mobility (Auton Only)</button>
                 </div>
-                <div id="robot-broke-background" class="six columns text-center">
+                <div id="robot-broke-background" class="six columns text-center click_feedback">
                     <button id="robot-broke" data-scorename="Broke" class="button-primary score_flag">Robot Broke</button>
                 </div>
             </div>

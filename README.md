@@ -36,6 +36,8 @@ pip install robocompscoutingapp
     - first_event_ID: The first event we want to load and score (used to populate team database)
 - Have to figure out what to do with skeleton vs. not skeleton; advanced users can replace?
 - The classes for scoring items have to be applied to the tapped element itself.  Not the divs.  I think this will limit my background feedback.  But this can't be perfect.
+- Need to generate fully formed template file when asked
+- DB of file inputs that have been validated?  Validate should be separate command to get feedback
 
 ### Added classes
 
@@ -44,7 +46,7 @@ pip install robocompscoutingapp
 - error_modal: place holder for error messages (auto-append)
 - sending_data_modal: place holder for the (auto-append)
 - scoring: user defined scoring section 
-- game_mode_group: So game modes can be mutually exclusive selected
+- game_mode_group: So game modes can be mutually exclusive selected (superfluous?  Game mode can just be last selected)
 - game_mode: ID the game mode DIVs
     - When game_mode changes, tallies and yes/no must be reset
 - attr: data-modename: Official name of the mode, referenced by data-onlyForMode below
