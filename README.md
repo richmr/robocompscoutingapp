@@ -35,6 +35,7 @@ pip install robocompscoutingapp
     - first_events_API_key: The team's registered API key
     - first_event_ID: The first event we want to load and score (used to populate team database)
 - Have to figure out what to do with skeleton vs. not skeleton; advanced users can replace?
+- The classes for scoring items have to be applied to the tapped element itself.  Not the divs.  I think this will limit my background feedback.  But this can't be perfect.
 
 ### Added classes
 
@@ -46,8 +47,10 @@ pip install robocompscoutingapp
 - game_mode_group: So game modes can be mutually exclusive selected
 - game_mode: ID the game mode DIVs
     - When game_mode changes, tallies and yes/no must be reset
+- attr: data-modename: Official name of the mode, referenced by data-onlyForMode below
 - score_tally: designate a tally score item
-- item name is defined in data-scorename attr
+- attr: data-scorename: item name is defined in data-scorename attr
 - score_flag: designate a true/false score item (default false)
-- data-onlyForMode: should define modes this can be tallied/registered for (tied to the defined "id" attribute in the .game_mode)
+- attr: data-onlyForMode: should define modes this can be tallied/registered for (tied to the defined "id" attribute in the .game_mode)
+- click_feedback: Will change the background color of this element when it's immediate descendent is clicked
 
