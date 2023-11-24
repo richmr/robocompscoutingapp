@@ -6,6 +6,6 @@ class ScoringPageParseError(Exception):
     "Raised when the user-supplied scoring page has issues that will break processing"
     pass
 
-class ScoringPageParseWarning(Exception):
-    "Raised when the user-supplied scoring page has issues that deviate from norm but won't break processing"
+class ScoringPageParseWarning(Warning):
+    "Used when the user-supplied scoring page has issues that deviate from norm but won't break processing"
     pass

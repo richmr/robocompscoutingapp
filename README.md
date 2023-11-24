@@ -38,6 +38,8 @@ pip install robocompscoutingapp
 - The classes for scoring items have to be applied to the tapped element itself.  Not the divs.  I think this will limit my background feedback.  But this can't be perfect.
 - Need to generate fully formed template file when asked
 - DB of file inputs that have been validated?  Validate should be separate command to get feedback
+- Config file also?  With the API key and eventID?  Generated auto?  It really could be in the markup file.  But we shouldn't need to remake a markup file for each event.  Yes, TOML I think with set up assistance
+- Mode shift should, maybe, hide and show those items with data-onlyForMode?
 
 ### Added classes
 
@@ -53,6 +55,6 @@ pip install robocompscoutingapp
 - score_tally: designate a tally score item
 - attr: data-scorename: item name is defined in data-scorename attr
 - score_flag: designate a true/false score item (default false)
-- attr: data-onlyForMode: should define modes this can be tallied/registered for (tied to the defined "id" attribute in the .game_mode)
+- attr: data-onlyForMode: should define modes this can be tallied/registered for (tied to the defined "data-modename" attribute in the .game_mode)
 - click_feedback: Will change the background color of this element when it's immediate descendent is clicked
 
