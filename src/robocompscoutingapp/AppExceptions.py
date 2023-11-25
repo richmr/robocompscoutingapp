@@ -8,4 +8,9 @@ class ScoringPageParseError(Exception):
 
 class ScoringPageParseWarning(Warning):
     "Used when the user-supplied scoring page has issues that deviate from norm but won't break processing"
-    pass
+    
+    def __str__(self) -> str:
+        """
+        We just want the warning message here
+        """
+        return self.args[0]
