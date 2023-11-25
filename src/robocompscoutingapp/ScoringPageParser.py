@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from typing import List, Dict
 import warnings
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing_extensions import Annotated
 
 from robocompscoutingapp.AppExceptions import ScoringPageParseError, ScoringPageParseWarning
