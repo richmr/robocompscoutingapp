@@ -40,6 +40,14 @@ pip install robocompscoutingapp
 - DB of file inputs that have been validated?  Validate should be separate command to get feedback
 - Config file also?  With the API key and eventID?  Generated auto?  It really could be in the markup file.  But we shouldn't need to remake a markup file for each event.  Yes, TOML I think with set up assistance
 - Mode shift should, maybe, hide and show those items with data-onlyForMode?
+- I can separate logic for the mechanics part of the scoring and the animation
+    - Option setting to not set animation, already set by the team
+- Command line setting of static files directory?  Defaults to the package.  Easier to just tell people to edit the static dir?
+- I think if no "head" is found, then it adds the desired one.
+- The code that is added is only for the scoring mechanics.  Formatting and other effects are left to the user.
+- The template is a fully formed and realized version
+- Test mode to check visuals needed.  Scoring JS checks for presence of test=True param
+
 
 ### Added classes
 
