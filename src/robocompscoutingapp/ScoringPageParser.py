@@ -7,6 +7,7 @@ from typing_extensions import Annotated
 from robocompscoutingapp.AppExceptions import ScoringPageParseError, ScoringPageParseWarning
 from robocompscoutingapp.BaseParsingModel import BaseParsingModel, ParsingFunctionToCall
 from robocompscoutingapp.GlobalItems import ScoringClassTypes
+from robocompscoutingapp.GlobalItems import FancyText as ft
 
 class ScoringParseResult(BaseParsingModel):
     game_modes: Annotated[List, Field(default=[], description="List of game modes defined in the scoring element markup")]
@@ -33,7 +34,7 @@ class ScoringPageParser:
         """
         selection = self.soup.select(".game_mode_group")
         if len(selection) == 0:
-            warnings.warn(ScoringPageParseWarning("No element with 'game_mode_group' class present.  Its not mandatory but its a good idea to keep your game_mode selectors in one area of UI"))
+            warnings.warn(ScoringPageParseWarning("No element with 'game_mode_group' class present.  It's not mandatory but it's a good idea to keep your game_mode selectors in one area of UI"))
             return False
         elif len(selection) > 1:
             raise ScoringPageParseError("Multiple elements with 'game_mode_group' class.  There should be a max of one")
@@ -87,7 +88,7 @@ class ScoringPageParser:
                     try:
                         only_mode = element["data-onlyformode"]
                         if only_mode not in game_modes:
-                            raise ScoringPageParseError(f"This element {element} declares it is only for mode {only_mode} however that mode is not defined as a an available mode.  The only available modes detected are {game_modes}")
+                            raise ScoringPageParseError(f"This element {element} declares it is only for mode {only_mode} however that mode is not defined as an available mode.  The only available modes detected are {game_modes}")
                     except KeyError:
                         # Its okay if this attr is not set, and other exceptions need to be passed
                         pass
@@ -123,7 +124,31 @@ class ScoringPageParser:
         spr.errors = errors
         return spr
             
-   
+    def validateScoringElement(self) -> ScoringParseResult:
+        """
+        This is the "user readable output" part of parsing a scoring element
+        It parses the element and returns the SPR if valid after printing a success message
+        If the element has errors, prints them and raises the ScoringParseError exception, which is intended to be caught by the CLI tool
+        If has only warnings, prints them but still returns the ScoringParseResults
+        """
+        spr = self.parseScoringElement()
+        for err in spr.errors:
+            ft.error(err)
+        for wrn in spr.warnings:
+            ft.warning(wrn)
+        
+        if spr.hasErrors():
+            ft.error("The errors listed above must be fixed before I can continue")
+            raise ScoringPageParseError("Displayed errors must be fixed")
+        
+        if spr.hasWarnings():
+            ft.success("Scoring element passed validaton, but please read through warnings to make sure you didn't miss anything important to you!")
+            return spr
+        else:
+            ft.success("Scoring element passed validation!")
+            return spr
+        
+
 
 
 

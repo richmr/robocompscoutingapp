@@ -163,6 +163,36 @@ def test_full_page_parse(get_test_data_path: Path):
         assert spr.hasWarnings() == True
         assert len(spr.warnings) == 1
         
+def test_validation_output(capfd, get_test_data_path):
+    # Full success
+    test_file = get_test_data_path/"scoring_parse_success.html"
+    with test_file.open() as f:
+        spp = ScoringPageParser(f)
+        spr = spp.validateScoringElement()
+        assert spr.hasErrors() == False
+        assert spr.hasWarnings() == False
+        out, err = capfd.readouterr()
+        assert out == "[+] Scoring element passed validation!\n"
 
+    # Make sure errors propogate
+    test_file = get_test_data_path/"scoring_parse_err_warn.html"
+    with pytest.raises(ScoringPageParseError):
+        with test_file.open() as f:
+            spp = ScoringPageParser(f)
+            spr = spp.validateScoringElement()
+            
+    # Make sure warnings print
+    # Clear capfd?
+    out, err = capfd.readouterr()
+    test_file = get_test_data_path/"scoring_parse_warn.html"
+    with test_file.open() as f:
+        spp = ScoringPageParser(f)
+        spr = spp.validateScoringElement()
+        out, err = capfd.readouterr()
+        # The weird extra \n in here are necessary because capfd puts extra new lines in place every 80 char.
+        # This test is brittle for reasons outside of developer control and may not be useful in long term.
+        assert out == "[w] No element with 'game_mode_group' class present.  It's not mandatory but \nit's a good idea to keep your game_mode selectors in one area of UI\n" + \
+                        "[+] Scoring element passed validaton, but please read through warnings to make \nsure you didn't miss anything important to you!\n"
+        
 
     
