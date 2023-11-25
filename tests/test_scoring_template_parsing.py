@@ -1,7 +1,9 @@
+from pathlib import Path
 import pytest
 
 from robocompscoutingapp.ScoringPageParser import ScoringPageParser
 from robocompscoutingapp.AppExceptions import ScoringPageParseError, ScoringPageParseWarning
+from robocompscoutingapp.GlobalItems import ScoringClassTypes
 
 """
 Needed tests:
@@ -59,6 +61,7 @@ def test_game_mode():
         spp = ScoringPageParser("<div class='game_mode'></div><div data-modename='mode2' class='game_mode'></div>")
         gmodes = spp.collectGameModes()
 
+    # Test same game_mode
     with pytest.raises(ScoringPageParseError):
         spp = ScoringPageParser("<div data-modename='mode1' class='game_mode'></div><div data-modename='mode1' class='game_mode'></div>")
         gmodes = spp.collectGameModes()
@@ -132,6 +135,34 @@ def test_scoring_items():
             spp = ScoringPageParser(input)
             scoring_dict = spp.collectScoringItems()
 
-    
+@pytest.fixture
+def get_test_data_path() -> Path:
+    current_file_path = Path(__file__)
+    data_path = current_file_path.parent/"data"
+    return data_path
+
+def test_full_page_parse(get_test_data_path: Path):
+    # Full success
+    test_file = get_test_data_path/"scoring_parse_success.html"
+    with test_file.open() as f:
+        spp = ScoringPageParser(f)
+        spr = spp.parseScoringElement()
+        assert spr.hasErrors() == False
+        assert spr.hasWarnings() == False
+        assert len(spr.game_modes) == 2
+        for st in ScoringClassTypes.list():
+            assert st in spr.scoring_elements.keys()
+
+    # Make sure errors and warnings are collected correctly
+    test_file = get_test_data_path/"scoring_parse_err_warn.html"
+    with test_file.open() as f:
+        spp = ScoringPageParser(f)
+        spr = spp.parseScoringElement()
+        assert spr.hasErrors() == True
+        assert len(spr.errors) == 1
+        assert spr.hasWarnings() == True
+        assert len(spr.warnings) == 1
+        
+
 
     

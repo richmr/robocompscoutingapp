@@ -1,13 +1,22 @@
 from bs4 import BeautifulSoup
 from typing import List, Dict
 import warnings
+from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from robocompscoutingapp.AppExceptions import ScoringPageParseError, ScoringPageParseWarning
+from robocompscoutingapp.BaseParsingModel import BaseParsingModel, ParsingFunctionToCall
+from robocompscoutingapp.GlobalItems import ScoringClassTypes
+
+class ScoringParseResult(BaseParsingModel):
+    game_modes: Annotated[List, Field(default=[], description="List of game modes defined in the scoring element markup")]
+    scoring_elements: Annotated[Dict, Field(default={}, description="Discovered scoring activities")]   
+
 
 class ScoringPageParser:
 
-    def __init__(self, input_html) -> None:
-        self.soup = BeautifulSoup(input_html, features="html.parser")
+    def __init__(self, input_html_or_file_handle) -> None:
+        self.soup = BeautifulSoup(input_html_or_file_handle, features="html.parser")
 
     def scoringDivPresent(self) -> bool:
         """
@@ -24,7 +33,7 @@ class ScoringPageParser:
         """
         selection = self.soup.select(".game_mode_group")
         if len(selection) == 0:
-            warnings.warn("No element with 'game_mode_group' class present.  Its not mandatory but its a good idea to keep your game_mode selectors in one area of UI", ScoringPageParseWarning)
+            warnings.warn(ScoringPageParseWarning("No element with 'game_mode_group' class present.  Its not mandatory but its a good idea to keep your game_mode selectors in one area of UI"))
             return False
         elif len(selection) > 1:
             raise ScoringPageParseError("Multiple elements with 'game_mode_group' class.  There should be a max of one")
@@ -48,7 +57,7 @@ class ScoringPageParser:
             game_modes.append(mode_name)
 
         if len(game_modes) == 0:
-            warnings.warn(f"No elements with 'game_mode' class detected.  Please see the template file for examples if your competition has multiple phases", ScoringPageParseWarning)
+            warnings.warn(ScoringPageParseWarning(f"No elements with 'game_mode' class detected.  Please see the template file for examples if your competition has multiple phases"))
         
         return game_modes
     
@@ -56,14 +65,17 @@ class ScoringPageParser:
         """
         Returns dictionary of named scoring activities, organized by score type
         """
-        # Add possible scoring types here
-        scoring_class_markers = ["score_tally", "score_flag"]
+        
+        scoring_class_markers = ScoringClassTypes.list()
 
         scoring_dict = {key:[] for key in scoring_class_markers}
         found_score_names = []
 
         # Collect game modes in case a "data-onlyForMode" is applied
-        game_modes = self.collectGameModes()
+        # Suppress the warning from game_modes though, as already caught under normal parsing activity
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            game_modes = self.collectGameModes()
 
         for score_class in scoring_class_markers:
             selection = self.soup.select(f".{score_class}")
@@ -89,6 +101,29 @@ class ScoringPageParser:
             raise ScoringPageParseError("No scoring activities found in markup.  Please see template for guidance.")
                 
         return scoring_dict
+    
+    def parseScoringElement(self) -> ScoringParseResult:
+        errors = []
+        spr = ScoringParseResult()
+        with warnings.catch_warnings(record=True) as caught_warnings:
+            parsers = [
+                ParsingFunctionToCall(method_to_call=self.scoringDivPresent),
+                ParsingFunctionToCall(method_to_call=self.gameModeGroupPresent),
+                ParsingFunctionToCall(method_to_call=self.collectGameModes, field_to_store_result="game_modes"),
+                ParsingFunctionToCall(method_to_call=self.collectScoringItems, field_to_store_result="scoring_elements")
+            ]
+            for a_parser in parsers:
+                try:
+                    a_parser.runParse(spr)
+                except Exception as badnews:
+                    errors.append(str(badnews))
+        
+        # Convert to simple strings which is what I need for this application
+        spr.warnings = [str(cw.message) for cw in caught_warnings]
+        spr.errors = errors
+        return spr
+            
+   
 
 
 
