@@ -1,7 +1,7 @@
 """
 Collection of configuration items that are used across many parts of application
 """
-
+from rich import print
 from enum import Enum
 
 class ExtendedEnum(Enum):
@@ -20,3 +20,20 @@ class ScoringClassTypes(ExtendedEnum):
     """
     score_tally = "score_tally"     # Scoring events that additively increase per event (i.e. balls in a goal)
     score_flag = "score_flag"       # Scoring events that are True/False (i.e. it happened or didn't)
+
+# 'Rich' text 
+class FancyText:
+    err = "[bold red]\[!]"
+    wrn = "[yellow]\[w]"
+
+    @classmethod
+    def error(cls, message):
+        print(f"{cls.err} {message}")
+
+    @classmethod
+    def warning(cls, message):
+        print(f"{cls.wrn} {message}")
+
+    @classmethod
+    def success(cls, message):
+        print(f"[green]\[+] {message}[/green]")
