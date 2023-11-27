@@ -27,11 +27,15 @@ class ScoringPageParser:
         soup functions on None.  BUT all further tests will fail.
         """
         # Reset the soup to just this div
-        scoring_div = self.soup.find("div", {"class":"scoring"})
+        scoring_div = self.soup.find_all("div", {"class":"scoring"})
         if scoring_div is None:
             # First reset the soup
             self.soup = BeautifulSoup("", features="html.parser")
             raise ScoringPageParseError("No element with 'scoring' class present. All further parse tests will be invalid until this is fixed.")
+        if len(scoring_div) > 1:
+            # First reset the soup
+            self.soup = BeautifulSoup("", features="html.parser")
+            raise ScoringPageParseError("Multiple divs with scoring class. Only one is permitted.")
         # Reset the soup to just this div
         self.soup = scoring_div
         return True
