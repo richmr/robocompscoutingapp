@@ -22,10 +22,18 @@ class ScoringPageParser:
     def scoringDivPresent(self) -> bool:
         """
         Returns true if the div is present, raise exception if not
+        If the element is found, resets the soup so we only look for scoring tags in the scoring div
+        If the element is NOT found, will reset the soup to an empty file to prevent attempting to execute
+        soup functions on None.  BUT all further tests will fail.
         """
-        selection = self.soup.select(".scoring")
-        if len(selection) != 1:
-            raise ScoringPageParseError("No element with 'scoring' class present")
+        # Reset the soup to just this div
+        scoring_div = self.soup.find("div", {"class":"scoring"})
+        if scoring_div is None:
+            # First reset the soup
+            self.soup = BeautifulSoup("", features="html.parser")
+            raise ScoringPageParseError("No element with 'scoring' class present. All further parse tests will be invalid until this is fixed.")
+        # Reset the soup to just this div
+        self.soup = scoring_div
         return True
 
     def gameModeGroupPresent(self) -> bool:
