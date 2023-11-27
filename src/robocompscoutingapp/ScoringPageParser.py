@@ -28,7 +28,7 @@ class ScoringPageParser:
         """
         # Reset the soup to just this div
         scoring_div = self.soup.find_all("div", {"class":"scoring"})
-        if scoring_div is None:
+        if len(scoring_div) == 0:
             # First reset the soup
             self.soup = BeautifulSoup("", features="html.parser")
             raise ScoringPageParseError("No element with 'scoring' class present. All further parse tests will be invalid until this is fixed.")
@@ -37,7 +37,7 @@ class ScoringPageParser:
             self.soup = BeautifulSoup("", features="html.parser")
             raise ScoringPageParseError("Multiple divs with scoring class. Only one is permitted.")
         # Reset the soup to just this div
-        self.soup = scoring_div
+        self.soup = scoring_div[0]
         return True
 
     def gameModeGroupPresent(self) -> bool:
