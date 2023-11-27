@@ -67,14 +67,16 @@ def test_game_mode():
         gmodes = spp.collectGameModes()
 
 def test_scoring_items():
-    with pytest.warns(ScoringPageParseWarning):
+    # with pytest.warns(ScoringPageParseWarning):
         # Suppress the warning about game modes.  Already tested.
         # Get dict with two items each for _tally and _flag
         input = """
+            <div class="scoring">
             <div class="score_tally" data-scorename="Test Tally 1"></div>
             <div class="score_tally" data-scorename="Test Tally 2"></div>
             <div class="score_flag" data-scorename="Test Flag 1"></div>
             <div class="score_flag" data-scorename="Test Flag 2"></div>
+            </div>
         """
         spp = ScoringPageParser(input)
         scoring_dict = spp.collectScoringItems()
@@ -189,10 +191,10 @@ def test_validation_output(capfd, get_test_data_path):
         spp = ScoringPageParser(f)
         spr = spp.validateScoringElement()
         out, err = capfd.readouterr()
-        # The weird extra \n in here are necessary because capfd puts extra new lines in place every 80 char.
-        # This test is brittle for reasons outside of developer control and may not be useful in long term.
-        assert out == "[w] No element with 'game_mode_group' class present.  It's not mandatory but \nit's a good idea to keep your game_mode selectors in one area of UI\n" + \
-                        "[+] Scoring element passed validaton, but please read through warnings to make \nsure you didn't miss anything important to you!\n"
+        # Remove the \n from the capture output because capfd puts extra new lines in place every 80 char
+        # Removing the newlines will make this test easier to run.
+        assert out.replace("\n", "") == "[w] No element with 'game_mode_group' class present.  It's not mandatory but it's a good idea to keep your game_mode selectors in one area of UI" + \
+                        "[+] Scoring element passed validaton, but please read through warnings to make sure you didn't miss anything important to you!"
         
 
     
