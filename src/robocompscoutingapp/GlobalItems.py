@@ -1,8 +1,9 @@
 """
 Collection of configuration items that are used across many parts of application
 """
-from rich import print
+#from rich import print
 from enum import Enum
+import rich
 
 class ExtendedEnum(Enum):
     """
@@ -28,12 +29,17 @@ class FancyText:
 
     @classmethod
     def error(cls, message):
-        print(f"{cls.err} {message}")
+        rich.print(f"{cls.err} {message}")
 
     @classmethod
     def warning(cls, message):
-        print(f"{cls.wrn} {message}")
+        rich.print(f"{cls.wrn} {message}")
 
     @classmethod
     def success(cls, message):
-        print(f"[green]\[+] {message}[/green]")
+        rich.print(f"[green]\[+] {message}[/green]")
+
+    @classmethod
+    def print(cls, message):
+        # Pass through to rich.print to prevent needing to import if a specific message has specfic needs.
+        rich.print(cls, message) 
