@@ -4,6 +4,8 @@ Collection of configuration items that are used across many parts of application
 #from rich import print
 from enum import Enum
 import rich
+import pytest
+from pathlib import Path
 
 class ExtendedEnum(Enum):
     """
@@ -43,3 +45,10 @@ class FancyText:
     def print(cls, message):
         # Pass through to rich.print to prevent needing to import if a specific message has specfic needs.
         rich.print(cls, message) 
+
+# The location of the fully working template, to be used in test
+@pytest.fixture
+def getFullTemplateFile() -> Path:
+    current_file_path = Path(__file__)
+    working_template = current_file_path.parent/"web/pages/full_template.html"
+    return working_template
