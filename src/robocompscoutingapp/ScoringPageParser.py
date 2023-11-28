@@ -115,6 +115,15 @@ class ScoringPageParser:
                 
         return scoring_dict
     
+    def checkForReportSubmit(self) -> bool:
+        selection = self.soup.select(".report_submit")
+        if len(selection) == 0:
+            raise ScoringPageParseError("No report_submit element found.  This is required. It's usually a button at the bottom of the scoring element.")
+            return False
+        elif len(selection) > 1:
+            warnings.warn(ScoringPageParseWarning("Multiple elements with 'report_submit' class found.  That's ok, but did you mean it?"))
+        return True
+    
     def parseScoringElement(self) -> ScoringParseResult:
         errors = []
         spr = ScoringParseResult()
@@ -123,7 +132,8 @@ class ScoringPageParser:
                 ParsingFunctionToCall(method_to_call=self.scoringDivPresent),
                 ParsingFunctionToCall(method_to_call=self.gameModeGroupPresent),
                 ParsingFunctionToCall(method_to_call=self.collectGameModes, field_to_store_result="game_modes"),
-                ParsingFunctionToCall(method_to_call=self.collectScoringItems, field_to_store_result="scoring_elements")
+                ParsingFunctionToCall(method_to_call=self.collectScoringItems, field_to_store_result="scoring_elements"),
+                ParsingFunctionToCall(method_to_call=self.checkForReportSubmit)
             ]
             for a_parser in parsers:
                 try:
@@ -136,6 +146,8 @@ class ScoringPageParser:
         spr.errors = errors
         return spr
             
+    
+
     def validateScoringElement(self) -> ScoringParseResult:
         """
         This is the "user readable output" part of parsing a scoring element
