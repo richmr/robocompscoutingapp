@@ -3,7 +3,7 @@ import pytest
 
 from robocompscoutingapp.ScoringPageParser import ScoringPageParser
 from robocompscoutingapp.AppExceptions import ScoringPageParseError, ScoringPageParseWarning
-from robocompscoutingapp.GlobalItems import ScoringClassTypes
+from robocompscoutingapp.GlobalItems import ScoringClassTypes, getFullTemplateFile
 
 
 def test_scoring_class_parse():
@@ -176,5 +176,12 @@ def test_validation_output(capfd, get_test_data_path):
         assert out.replace("\n", "") == "[w] No element with 'game_mode_group' class present.  It's not mandatory but it's a good idea to keep your game_mode selectors in one area of UI" + \
                         "[+] Scoring element passed validaton, but please read through warnings to make sure you didn't miss anything important to you!"
         
-
+def test_template_validation(capfd, getFullTemplateFile):
+    with getFullTemplateFile.open() as f:
+        parser = ScoringPageParser(f)
+        result = parser.validateScoringElement()
+        assert result.hasErrors() == False
+        assert result.hasWarnings() == False
+        out, err = capfd.readouterr()
+        assert out == "[+] Scoring element passed validation!\n"
     
