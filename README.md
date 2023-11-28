@@ -52,6 +52,8 @@ pip install robocompscoutingapp
     - User makes just the scoring section to define what is scored and the rest are filled in with an assumed skeleton.css format
     - User makes all sections and the app just handles the communication.
 - The JS added by the app does NOT do animation unless set with a flag by user?  Nah needs to be in template.
+- Killing the review and submit.  Too much to automate.. at first
+- The error modal is up to user..  code will call window.submission_error?.(message).. up to display code to handle
 
 ### Added classes (scoring)
 - scoring: user defined scoring section 
@@ -63,6 +65,7 @@ pip install robocompscoutingapp
 - attr: data-scorename: item name is defined in data-scorename attr
 - score_flag: designate a true/false score item (default false)
 - attr: data-onlyForMode: should define modes this can be tallied/registered for (tied to the defined "data-modename" attribute in the .game_mode)
+- report_submit: the button that sends it
 
 ### Added classes (natch selection)
 - match_and_team_selection: where the match selection div will be added, if not give, will put at front of body
