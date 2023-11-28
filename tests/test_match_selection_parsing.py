@@ -3,7 +3,7 @@ import pytest
 
 from robocompscoutingapp.MatchAndTeamSelectionParser import MatchAndTeamSelectionParser
 from robocompscoutingapp.AppExceptions import MatchAndTeamSelectionParseError, MatchAndTeamSelectionParseWarning
-
+from robocompscoutingapp.GlobalItems import getFullTemplateFile
 
 def test_scoring_class_parse():
     parser = MatchAndTeamSelectionParser("<div class='match_and_team_selection'></div>")
@@ -160,6 +160,14 @@ def test_full_element_parse():
     assert pr.hasErrors() == True
     assert len(pr.errors) == 2
     assert pr.hasWarnings() == False
-    
+
+def test_validation_output(capfd, getFullTemplateFile):
+    with getFullTemplateFile.open() as f:
+        parser = MatchAndTeamSelectionParser(f)
+        result = parser.validate()
+        assert result.hasErrors() == False
+        assert result.hasWarnings() == False
+        out, err = capfd.readouterr()
+        assert out == "[+] Match selection element passed validation!\n"
 
     

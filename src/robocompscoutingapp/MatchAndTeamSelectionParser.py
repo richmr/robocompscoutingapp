@@ -78,3 +78,21 @@ class MatchAndTeamSelectionParser:
         pr.warnings = [str(cw.message) for cw in caught_warnings]
         pr.errors = errors
         return pr
+    
+    def validate(self) -> MatchAndTeamSelectionParseResult:
+        result = self.parseElement()
+        for err in result.errors:
+            ft.error(err)
+        for wrn in result.warnings:
+            ft.warning(wrn)
+
+        if result.hasErrors():
+            ft.error("The errors listed above must be fixed before I can continue")
+            raise MatchAndTeamSelectionParseError("Displayed errors must be fixed")
+        
+        if result.hasWarnings():
+            ft.success("Match selection element passed validaton, but please read through warnings to make sure you didn't miss anything important to you!")
+            return result
+        else:
+            ft.success("Match selection element passed validation!")
+            return result
