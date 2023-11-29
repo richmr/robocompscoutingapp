@@ -53,7 +53,9 @@ pip install robocompscoutingapp
     - User makes all sections and the app just handles the communication.
 - The JS added by the app does NOT do animation unless set with a flag by user?  Nah needs to be in template.
 - Killing the review and submit.  Too much to automate.. at first
-- The error modal is up to user..  code will call window.submission_error?.(message).. up to display code to handle
+- The error modal is up to user..  code will call window.submission_error?.(message).. up to display code to handle..
+- Actually needs to be a try..catch to print instructions to the console.
+- Provide a QR hook for the user to call if they want the QR code...
 
 ### Added classes (scoring)
 - scoring: user defined scoring section 
