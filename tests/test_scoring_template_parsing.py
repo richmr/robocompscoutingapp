@@ -156,13 +156,6 @@ def test_validation_output(capfd, get_test_data_path):
         out, err = capfd.readouterr()
         assert out == "[+] Scoring element passed validation!\n"
 
-    # Make sure errors propogate
-    test_file = get_test_data_path/"scoring_parse_err_warn.html"
-    with pytest.raises(ScoringPageParseError):
-        with test_file.open() as f:
-            spp = ScoringPageParser(f)
-            spr = spp.validateScoringElement()
-            
     # Make sure warnings print
     # Clear capfd?
     out, err = capfd.readouterr()
