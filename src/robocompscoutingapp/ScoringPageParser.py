@@ -161,18 +161,16 @@ class ScoringPageParser:
         for wrn in spr.warnings:
             ft.warning(wrn)
         
-        # if spr.hasErrors():
-        #     ft.error("The errors listed above must be fixed before I can continue")
-        #     raise ScoringPageParseError("Displayed errors must be fixed")
         
-        if spr.hasWarnings():
+        if spr.hasErrors():
+            # Don't say anything here, caught at higher level
+            pass
+        elif spr.hasWarnings():
             ft.success("Scoring element passed validaton, but please read through warnings to make sure you didn't miss anything important to you!")
-            return spr
         else:
             ft.success("Scoring element passed validation!")
-            return spr
         
-
+        return spr
 
 
 
