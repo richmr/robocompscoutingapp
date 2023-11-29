@@ -11,10 +11,9 @@ def broken_template_file() -> Path:
     return html_file_path
 
 def test_full_success(getFullTemplateFile):
-    with getFullTemplateFile.open() as f:
-        uhp = UserHTMLProcessing(f)
-        good = uhp.validate()
-        assert good == True
+    uhp = UserHTMLProcessing(getFullTemplateFile)
+    good = uhp.validate()
+    assert good == True
 
 def test_with_errors(broken_template_file):
     with broken_template_file.open() as f:

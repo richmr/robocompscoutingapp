@@ -16,13 +16,12 @@ cli_app = typer.Typer()
 def validate(html_file: Annotated[Path, typer.Argument(help="The finely crafted HTML file you wish to make sure is prepared to work with the RoboCompScoringApp server")],
              ):
     if html_file.exists():
-        with html_file.open() as f:
-            user_html_processing = UserHTMLProcessing(f)
-            successful_validation = user_html_processing.validate()
-            if not successful_validation:
-                ft.error("Please fix the errors above and run validation again")
-            else:
-                ft.success(f"{html_file} passed validation!")
+        user_html_processing = UserHTMLProcessing(html_file)
+        successful_validation = user_html_processing.validate()
+        if not successful_validation:
+            ft.error("Please fix the errors above and run validation again")
+        else:
+            ft.success(f"{html_file} passed validation!")
     else:
         ft.error(f"File {html_file} does not exist.")
 
