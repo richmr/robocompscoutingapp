@@ -20,12 +20,12 @@ class UserHTMLProcessing:
         Runs all validations and returns True if the file is ready for further processing
         The various parse results are stored as attributes to the instance for access.
         """
-        errors = False
+        errors = True
         self.scoring_parse_result = ScoringPageParser(self.html_file).validateScoringElement()
-        errors = errors or self.scoring_parse_result.hasErrors()
+        errors = errors and not self.scoring_parse_result.hasErrors()
 
         self.match_team_element_parse_result = MatchAndTeamSelectionParser(self.html_file).validate()
-        errors = errors or self.match_team_element_parse_result.hasErrors()
+        errors = errors and not self.match_team_element_parse_result.hasErrors()
 
         return errors
 

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Scout App - Scoring</title>
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="../css/normalize.css">
+  <link rel="stylesheet" href="../css/skeleton.css">
+  <link rel="stylesheet" href="../css/custom.css">
+
+  <!-- Scripts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/9a97c74805.js" crossorigin="anonymous"></script>
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico">
+
+  <!-- jQuery Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <div class="container match_and_team_selection">
+        <div class="row">
+            <div class="twelve columns">
+                <h3 class="text-center">Match Scoring</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="six columns">
+                <h5 class="text-right">Which match:</h5>
+            </div>
+            <div class="six columns">
+                <select class="u-full-width" class="break_match_selector">
+                    <option id="match_placeholder" value=-1>Loading matches...</option>
+                </select>
+            </div>
+        </div>
+        <div class="row" id="pick_team_row" hidden>
+            <div class="six columns">
+                <h5 class="text-right">Team you are scoring:</h5>
+            </div>
+            <div class="six columns">
+                <select class="u-full-width" class="team_selector">
+                    <option value=-1>Loading Teams for this match...</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCORING SECTION -->
+
+    <div class="section scoring" id="scoring_controls" hidden>
+        <div class="container">
+            <div class="row game_mode_group">
+                <div class="twelve columns">
+                    <h4 class="text-center">Game Mode:</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div id="set-auton" class="six columns text-center">
+                    <i id="auton_icon" data-modename="Auton" class="fa-solid fa-robot fa-4x game_mode"></i>
+                </div>
+                <div id="set-teleop" class="six columns text-center">
+                    <i id="tele_icon" data-modename="Teleop" class="fa-solid fa-gamepad fa-4x game_mode"></i>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="text-center">Object Scoring:</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div id="score_cone_background" class="six columns text-center">  
+                    <img id="score_cone" data-scorename="cone" class="score_tally" src="../images/cone.png" alt="Cone" width="75" height="75">
+                </div>
+                <div id="score_cube_background" class="six columns text-center">
+                    <img id="score_cube" data-scorename="cube" class="score_tally" src="../images/cube.png" alt="Cube" width="75" height="75">
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="text-center">Charge Station:</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div id="entered-charge-background" class="six columns text-center">
+                    <button id="entered-charge" data-scorename="Attempted charge" class="score_flag button-primary">Attempted</button>
+                </div>
+                <div id="charge-balanced-background" class="six columns text-center">
+                    <button id="charge-balanced" data-scorename="Charge Balanced" class="score_flag button-primary">Balanced</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="text-center">Other Events:</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div id="mobility-background" class="six columns text-center">
+                    <button id="mobility" data-scorename="Auton Mobility" data-onlyForMode="break_Auton" class="button-primary score_flag">Mobility (Auton Only)</button>
+                </div>
+                <div id="robot-broke-background" class="six columns text-center">
+                    <button data-scorename="Robot Broke" class="button-primary score_flag">Robot broke</button>
+                </div>
+            </div>
+            <div class="row">
+                <div id="mobility-background" class="twelve columns text-center">
+                    <button class="button-orange btn-big report_submit">Submit Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="error-modal" class="modal">
+        <h3>Error:</h3>
+        <p id="error-message">Nothing to see here</p>
+    </div>
+
+    <div id="sending_data_modal" class="modal">
+        <h3 id="sending_data_modal_title">Submitting data..</h3>
+        <p id="submit_message">Sending data, please wait..</p>
+        <div id="results_qr_code" class="u-full-width" hidden>
+            Please show this QR code to a network connected device.
+            <div id="actual_qr_code" class="qr_code_padding"></div>
+        </div>
+        <div id="data_modal_buttons" hidden>
+            <div id="qr_code_text"  hidden>DO NOT PUSH BUTTON UNLESS QR CODE HAS BEEN USED</div>
+            <a id="close_modal_next_match" class="button button-orange" href="#" >Reset Data and Score Next Match</a>
+        </div>
+    </div>
+
+    <script src="../js/appsecrets.js"></script>
+    <script src="../js/scoring.js"></script>
+    <script src="../js/qrcode.min.js"></script>
+</body>
