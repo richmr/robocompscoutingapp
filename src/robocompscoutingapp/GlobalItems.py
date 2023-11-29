@@ -26,7 +26,7 @@ class ScoringClassTypes(ExtendedEnum):
 
 # 'Rich' text 
 class FancyText:
-    err = "[bold red]\[!]"
+    err = "[red]\[!]"
     wrn = "[yellow]\[w]"
 
     @classmethod
