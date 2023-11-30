@@ -81,3 +81,50 @@ pip install robocompscoutingapp
 - error_modal: place holder for error messages (auto-append)
 - sending_data_modal: place holder for the (auto-append)
 - click_feedback: Will change the background color of this element when it's immediate descendent is clicked
+
+### Commands
+- validate: simple check to make sure required fields are there
+    - If pass it stores the hash as validated
+    - Files that don't pass don't make the table
+- prepare: 
+    - Takes the user file, 
+    - adds the server functional code,
+        - No. Checks for correct script tag to load the functional code
+        - Well the initial script might just be a loader?
+        - That may be a winner and allow for test loads 
+    - stores the file in the server location
+        - This won't work.. will break relationship between pages/js/css
+        - Perhaps named by the hash?
+    - toml file stores the name of the file to serve
+- test
+    - Gui only - Just serves it with some fake data to make sure the gui works
+    - Automated - Injects JS that tests the scoring functions (complicated, selenium needed)
+    - Allows submission but its all fake data (test.db)
+- configure
+    - Event ID
+    - API key
+    - scoring file
+    - location of the static folder 
+    - saves toml
+- deploy
+    - Runs server in daemon mode (unless turned off)
+    - Per items in configure
+    - Requires the event ID and the First API
+- generate
+    - Basically prints the template to stdout, redirect to save
+    - No more.  Generates a whole directory structure with a template
+    - And a db folder for the actual scoring data?
+    - Maybe a minimum template also?  Just the basics with comments for other things to add
+- data_dump
+    - Will dump CSV for the last event that was deployed
+    - No..  leave the file where it is, users can deal with the db file on their own
+
+### Tables
+- Validated user files
+    - PK: hash of file
+    - validated: bool
+    - prepared: bool
+    - tested: bool
+- DB are dynamically named after the hash of the source file
+- Check the table design from before
+
