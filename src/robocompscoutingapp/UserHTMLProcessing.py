@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from robocompscoutingapp.ScoringPageParser import ScoringPageParser, ScoringParseResult
 from robocompscoutingapp.MatchAndTeamSelectionParser import MatchAndTeamSelectionParser, MatchAndTeamSelectionParseResult
-
+from robocompscoutingapp.JSScriptParser import JSScriptParser
 
 
 class UserHTMLProcessing:
@@ -30,6 +30,11 @@ class UserHTMLProcessing:
 
             self.match_team_element_parse_result = MatchAndTeamSelectionParser(f).validate()
             errors.append(self.match_team_element_parse_result.hasErrors())
+
+            f.seek(0)
+
+            self.js_parse_result = JSScriptParser(f).validate()
+            errors.append(self.js_parse_result.hasErrors())
 
         return not max(errors)  # If any hasErrors is True this will return False as in "not good"
 
