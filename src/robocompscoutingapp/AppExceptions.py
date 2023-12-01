@@ -31,4 +31,10 @@ class MatchAndTeamSelectionParseError(Exception):
 class MatchAndTeamSelectionParseWarning(RCSAWarning):
     pass
 
+##### JavaScript Parsing #############
 
+class JavaScriptParseError(Exception):
+    pass
+
+class JavaScriptParseWarning(RCSAWarning):
+    pass

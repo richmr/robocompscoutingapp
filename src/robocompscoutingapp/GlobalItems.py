@@ -52,3 +52,6 @@ def getFullTemplateFile() -> Path:
     current_file_path = Path(__file__)
     working_template = current_file_path.parent/"web/pages/full_template.html"
     return working_template
+
+rcsa_fixed_script_prefix = "/rcsa"
+rcsa_js_loader = f"{rcsa_fixed_script_prefix}/rcsa_loader.js"
