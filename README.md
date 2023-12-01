@@ -91,7 +91,7 @@ pip install robocompscoutingapp
     - adds the server functional code,
         - No. Checks for correct script tag to load the functional code
         - Well the initial script might just be a loader?
-        - That may be a winner and allow for test loads 
+        - That may be a winner and allow for test loads (https://www.educative.io/answers/how-to-dynamically-load-a-js-file-in-javascript) 
     - stores the file in the server location
         - This won't work.. will break relationship between pages/js/css
         - Perhaps named by the hash?
@@ -127,4 +127,7 @@ pip install robocompscoutingapp
     - tested: bool
 - DB are dynamically named after the hash of the source file
 - Check the table design from before
+
+### JS tips
+- https://stackoverflow.com/questions/4146502/jquery-selectors-on-custom-data-attributes-using-html5
 
