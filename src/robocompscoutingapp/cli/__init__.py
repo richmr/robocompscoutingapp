@@ -55,6 +55,8 @@ def initialize(destination_path: Annotated[Path, typer.Argument(help="The destin
                 initialize(destination_path=destination_path, overwrite=True)
     except Exception as badnews:
         ft.error(f"Unable to initialize the target directory because {badnews}")
+
+    ft.success(f"File structure built at {destination_path.absolute()}.  Please see the readme.txt for more information")
     
 
 def robocompscoutingapp():
