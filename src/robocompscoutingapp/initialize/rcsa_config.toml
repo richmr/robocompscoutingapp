@@ -1,0 +1,22 @@
+# If you want to enable automatic loading of team and match data for event use this section
+# You can also manually load this data.  Check the load_data command for more information
+# Leaving these as false below will result in a warning if the team and match information 
+# is not loaded in the db and you use the "run" command
+[FRC_events]
+# Place the event ID you are scoring here.  
+first_event_id = false
+APIKey = false
+URL_Root = "https://frc-api.firstinspires.org/v3.0/"
+
+# By default the server is only configured to run locally for testing
+# You will need to replace this IP_Address with 0.0.0.0 (or other public interface) to make this publicly available
+# Failure to change the IP when using "run" command will result in a warning
+[Server_Config]
+IP_Address = "127.0.0.1"
+port = "80"
+user_static_folder = false
+# If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
+FQDN = false
+
+
+

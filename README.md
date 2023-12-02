@@ -106,6 +106,8 @@ pip install robocompscoutingapp
     - scoring file
     - location of the static folder 
     - saves toml
+- load_data
+    - Allow for manual load of team lists and match data?
 - run
     - Runs server in daemon mode (unless turned off)
     - Per items in configure
@@ -125,6 +127,7 @@ pip install robocompscoutingapp
             |- images/
             |- scoring_data/xxx.db
             |- scoring.html
+            |- readme.txt
 - data_dump - X
     - Will dump CSV for the last event that was deployed
     - No..  leave the file where it is, users can deal with the db file on their own
@@ -151,3 +154,5 @@ pip install robocompscoutingapp
 ### JS tips
 - https://stackoverflow.com/questions/4146502/jquery-selectors-on-custom-data-attributes-using-html5
 
+### Possible libraries
+- https://github.com/Colepng/frc-api
