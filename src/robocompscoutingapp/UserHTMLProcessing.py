@@ -19,6 +19,25 @@ class UserHTMLProcessing:
         """
         Runs all validations and returns True if the file is ready for further processing
         The various parse results are stored as attributes to the instance for access.
+
+        Returns
+        -------
+        bool
+            Validation was successful
+        """
+        errors = self.validateHTML()
+        return errors
+        
+
+    def validateHTML(self) -> bool:
+        """
+        Performs the validation of HTML elements of user-supplied scoring page.  The results of each parse are
+        stored in the indicated instance attributes
+
+        Returns
+        -------
+        bool
+            HTML Validaton was successful
         """
         errors = []
         with self.html_file.open() as f:
@@ -37,5 +56,4 @@ class UserHTMLProcessing:
             errors.append(self.js_parse_result.hasErrors())
 
         return not max(errors)  # If any hasErrors is True this will return False as in "not good"
-
-
+    
