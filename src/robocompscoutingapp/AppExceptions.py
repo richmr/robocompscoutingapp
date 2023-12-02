@@ -16,11 +16,15 @@ class RCSAWarning(Warning):
 ####### Scoring Parse ########
 
 class ScoringPageParseError(Exception):
-    "Raised when the user-supplied scoring page has issues that will break processing"
+    """
+    Raised when the user-supplied scoring page has issues that will break processing
+    """
     pass
 
 class ScoringPageParseWarning(RCSAWarning):
-    "Used when the user-supplied scoring page has issues that deviate from norm but won't break processing"
+    """
+    Used when the user-supplied scoring page has issues that deviate from norm but won't break processing
+    """
     pass
 
 ####### Match and Team Selection Parse ########

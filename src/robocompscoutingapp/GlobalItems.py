@@ -10,6 +10,7 @@ from pathlib import Path
 class ExtendedEnum(Enum):
     """
     Taken from: https://stackoverflow.com/questions/29503339/how-to-get-all-values-from-python-enum-class
+    Generates a list of value names for this enum
     """
     @classmethod
     def list(cls):
@@ -44,7 +45,7 @@ class FancyText:
     @classmethod
     def print(cls, message):
         # Pass through to rich.print to prevent needing to import if a specific message has specfic needs.
-        rich.print(cls, message) 
+        rich.print(message) 
 
 # The location of the fully working template, to be used in test
 @pytest.fixture

@@ -125,9 +125,10 @@ pip install robocompscoutingapp
             |- js/
             |- css/
             |- images/
-            |- scoring_data/xxx.db
+            |- database/xxx.db
             |- scoring.html
             |- readme.txt
+    - Done
 - data_dump - X
     - Will dump CSV for the last event that was deployed
     - No..  leave the file where it is, users can deal with the db file on their own

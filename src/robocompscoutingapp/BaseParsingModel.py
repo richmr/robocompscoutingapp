@@ -29,6 +29,11 @@ class ParsingFunctionToCall(BaseModel):
     def runParse(self, destination_object: Any):
         """
         Will run this parse, and store the result in the destination object (per the field_to_store_result field)
+
+        Parameter
+        ---------
+        destination_object: any
+            The object to store results in.  Will override any value already in the field_to_store_result
         """
         result = self.method_to_call()
         if self.field_to_store_result is not None:
