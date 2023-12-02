@@ -23,7 +23,8 @@ dependencies = [
   "fastapi",
   "typer",
   "uvicorn[standard]",
-  "rich"
+  "rich",
+  "tomlkit"
 ]
 
 [project.urls]
