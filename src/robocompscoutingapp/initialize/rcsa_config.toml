@@ -14,6 +14,7 @@ URL_Root = "https://frc-api.firstinspires.org/v3.0/"
 [Server_Config]
 IP_Address = "127.0.0.1"
 port = "80"
+# this will be set automatically when using "initialize" command
 user_static_folder = false
 # If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
 FQDN = false
