@@ -86,7 +86,7 @@ pip install robocompscoutingapp
 - validate: simple check to make sure required fields are there
     - If pass it stores the hash as validated
     - Files that don't pass don't make the table
-- prepare: 
+- prepare - X 
     - Takes the user file, 
     - adds the server functional code,
         - No. Checks for correct script tag to load the functional code
@@ -100,24 +100,44 @@ pip install robocompscoutingapp
     - Gui only - Just serves it with some fake data to make sure the gui works
     - Automated - Injects JS that tests the scoring functions (complicated, selenium needed)
     - Allows submission but its all fake data (test.db)
-- configure
+- configure X - not needed due to initialize
     - Event ID
     - API key
     - scoring file
     - location of the static folder 
     - saves toml
-- deploy
+- run
     - Runs server in daemon mode (unless turned off)
     - Per items in configure
     - Requires the event ID and the First API
-- generate
+    - Checks the cwd for the TOML
+- initialize
     - Basically prints the template to stdout, redirect to save
     - No more.  Generates a whole directory structure with a template
     - And a db folder for the actual scoring data?
     - Maybe a minimum template also?  Just the basics with comments for other things to add
-- data_dump
+    - Sets TOML with blanks for Event ID, API key, full path to the user's static files
+    - Dir structure:
+        |- rcsa_config.toml
+        |- static
+            |- js/
+            |- css/
+            |- images/
+            |- scoring_data/xxx.db
+            |- scoring.html
+- data_dump - X
     - Will dump CSV for the last event that was deployed
     - No..  leave the file where it is, users can deal with the db file on their own
+- Example
+    - Full working example with my preferred design and animations
+    - Generates a whole directory structure but filled in (basically Charged Up)
+    - Fully working out the gate
+- Intended flow:
+    - Initialize
+    - Validate
+    - test
+    - run
+
 
 ### Tables
 - Validated user files
