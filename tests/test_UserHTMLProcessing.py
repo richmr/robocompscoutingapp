@@ -48,7 +48,7 @@ def test_with_database(getTestConfig, getFullTemplateFile, broken_template_file)
 
     # Now establish tempdir and modify the config
     with tempfile.TemporaryDirectory() as tempdir:
-        config["Server_Config"]["user_static_folder"] = tempdir
+        config["Server_Config"]["scoring_database"] = f"{tempdir}/rcsa_scoring.db"
 
         # Test for proper None return
         uhp = UserHTMLProcessing(broken_template_file)

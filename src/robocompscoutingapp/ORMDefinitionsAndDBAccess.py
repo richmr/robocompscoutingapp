@@ -20,7 +20,7 @@ from sqlalchemy.sql import func
 # from sqlalchemy import Column, Integer, Text, Float, DateTime, ForeignKey, PickleType
 # from sqlalchemy.orm import declarative_base, relationship
 
-from robocompscoutingapp.GlobalItems import RCSA_Config, rcsa_database_name
+from robocompscoutingapp.GlobalItems import RCSA_Config #, rcsa_database_name
 
 class rcsa_scoring_tables(DeclarativeBase):
     
@@ -66,11 +66,9 @@ class RCSA_DB:
             The pathlib Path object to the sqlite file
         """
         if type(self)._sqlASessionMaker is None:
-            database_file = Path(RCSA_Config().getConfig()["Server_Config"]["user_static_folder"])/f"database"
+            database_file = Path(RCSA_Config().getConfig()["Server_Config"]["scoring_database"])
             # Make sure dir exist
-            database_file.mkdir(parents=True, exist_ok=True)
-            # add the name of the database file
-            database_file = database_file/f"{rcsa_database_name}"
+            database_file.parent.mkdir(parents=True, exist_ok=True)
             sqlAConnectionStr = f"sqlite:///{database_file}"
             sqlAEngine = create_engine(sqlAConnectionStr)
             type(self)._sqlASessionMaker = sessionmaker(bind=sqlAEngine)

@@ -17,7 +17,7 @@ def test_create_database(getTestConfig):
         RCSA_DB()
         #  Now open the session
         with RCSA_DB.getSQLSession() as session:
-            db_file = Path(config["Server_Config"]["user_static_folder"])/f"database/{rcsa_database_name}"
+            db_file = Path(config["Server_Config"]["scoring_database"])
             assert db_file.exists()
 
             # check declared tables are made

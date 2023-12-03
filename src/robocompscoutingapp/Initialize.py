@@ -49,6 +49,8 @@ class Initialize:
         rcsa_config_file = TOMLFile(self.dst_path/rcsa_config_filename)
         rcsa_config = rcsa_config_file.read()
         rcsa_config["Server_Config"]["user_static_folder"] = str(self.dst_path.absolute()/"static")
+        rcsa_config["Server_Config"]["scoring_database"] = str(self.dst_path.absolute()/"rcsa_scoring.db")
+        
         rcsa_config_file.write(rcsa_config)
 
         

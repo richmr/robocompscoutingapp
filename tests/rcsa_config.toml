@@ -16,6 +16,7 @@ IP_Address = "127.0.0.1"
 port = "80"
 # this will be set automatically when using "initialize" command
 user_static_folder = "data/test_init/static"
+scoring_database = "data/test_init/rcsa_scoring.db"
 # If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
 FQDN = false
 
