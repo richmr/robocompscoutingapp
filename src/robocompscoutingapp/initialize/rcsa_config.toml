@@ -17,6 +17,8 @@ port = "80"
 # These will be set automatically when using "initialize" command
 user_static_folder = false
 scoring_database = false
+log_folder = false
+scoring_page = "scoring.html"
 # If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
 FQDN = false
 
