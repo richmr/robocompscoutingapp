@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from robocompscoutingapp.ScoringPageParser import ScoringPageParser, ScoringParseResult
 from robocompscoutingapp.MatchAndTeamSelectionParser import MatchAndTeamSelectionParser, MatchAndTeamSelectionParseResult
 from robocompscoutingapp.JSScriptParser import JSScriptParser
+from robocompscoutingapp.ORMDefinitionsAndDBAccess import ScoringPageStatus, RCSA_DB
 
 
 class UserHTMLProcessing:
@@ -57,3 +58,5 @@ class UserHTMLProcessing:
 
         return not max(errors)  # If any hasErrors is True this will return False as in "not good"
     
+    def createValidatedPageEntry(self):
+        pass
