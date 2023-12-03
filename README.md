@@ -132,6 +132,8 @@ pip install robocompscoutingapp
 - data_dump - X
     - Will dump CSV for the last event that was deployed
     - No..  leave the file where it is, users can deal with the db file on their own
+- data_clean
+    - Functions to clean the data out of the db?
 - Example
     - Full working example with my preferred design and animations
     - Generates a whole directory structure but filled in (basically Charged Up)
