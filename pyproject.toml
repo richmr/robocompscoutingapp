@@ -24,7 +24,8 @@ dependencies = [
   "typer",
   "uvicorn[standard]",
   "rich",
-  "tomlkit"
+  "tomlkit",
+  "SQLAlchemy"
 ]
 
 [project.urls]
