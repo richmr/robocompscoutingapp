@@ -4,6 +4,8 @@ Functions to fully validate, process, and prepare the user's HTML for scoring
 
 from pathlib import Path
 from pydantic import BaseModel
+import hashlib
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from robocompscoutingapp.ScoringPageParser import ScoringPageParser, ScoringParseResult
 from robocompscoutingapp.MatchAndTeamSelectionParser import MatchAndTeamSelectionParser, MatchAndTeamSelectionParseResult
@@ -15,6 +17,10 @@ class UserHTMLProcessing:
 
     def __init__(self, path_to_user_file:Path) -> None:
         self.html_file = path_to_user_file
+        # Call RCSA_DB to ensure it is ready
+        RCSA_DB()
+        # Need a single dbsession to prevent detached records
+        self.dbsession = RCSA_DB.getSQLSession()
 
     def validate(self) -> bool:
         """
@@ -26,8 +32,18 @@ class UserHTMLProcessing:
         bool
             Validation was successful
         """
-        errors = self.validateHTML()
-        return errors
+        # Have we already validated this page?
+        existing = self.checkForValidatedPageEntry()
+        if existing is not None:
+            return existing.validated
+        
+        # Nope, so lets validate
+        success = self.validateHTML()
+        print("****** success",success)
+        if success:
+            self.createValidatedPageEntry()
+
+        return success
         
 
     def validateHTML(self) -> bool:
@@ -38,7 +54,7 @@ class UserHTMLProcessing:
         Returns
         -------
         bool
-            HTML Validaton was successful
+            HTML Validation was successful
         """
         errors = []
         with self.html_file.open() as f:
@@ -59,4 +75,37 @@ class UserHTMLProcessing:
         return not max(errors)  # If any hasErrors is True this will return False as in "not good"
     
     def createValidatedPageEntry(self):
-        pass
+        """
+        Adds a validated page entry to the database for tracking
+        """
+        print("******* Creating")
+        self.dbsession.add(ScoringPageStatus(scoring_page_hash=self.getFileHash(), validated=True))
+        self.dbsession.commit()
+
+    def checkForValidatedPageEntry(self) -> ScoringPageStatus:
+        """
+        Checks database for this page existing already
+        
+        Returns
+        -------
+        ScoringPageStatus
+            A valid ORM object
+        """
+        try:
+            # Find the object
+            page_result = self.dbsession.query(ScoringPageStatus).filter_by(scoring_page_hash=self.getFileHash()).one()
+            # Return the current status
+            return page_result              
+        except NoResultFound:
+            # Needs to be added
+            print("******* No findy")
+            return None
+
+    def getFileHash(self) -> str:
+        """
+        Returns the SHA256 hash of the file
+        """
+        with self.html_file.open(mode="rb") as f:
+            digest = hashlib.file_digest(f, "sha256")
+            return digest.hexdigest()
+
