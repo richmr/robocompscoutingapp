@@ -8,6 +8,8 @@ import shutil
 from tomlkit import TOMLDocument, table, comment
 from tomlkit.toml_file import TOMLFile
 
+from robocompscoutingapp.GlobalItems import rcsa_config_filename
+
 class Initialize:
 
     def __init__(self, target_directory:Path) -> None:
@@ -44,7 +46,7 @@ class Initialize:
         """
         Sets the user_static_folder to the static folder in the initialized folder structure
         """
-        rcsa_config_file = TOMLFile(self.dst_path/"rcsa_config.toml")
+        rcsa_config_file = TOMLFile(self.dst_path/rcsa_config_filename)
         rcsa_config = rcsa_config_file.read()
         rcsa_config["Server_Config"]["user_static_folder"] = str(self.dst_path.absolute()/"static")
         rcsa_config_file.write(rcsa_config)
