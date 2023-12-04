@@ -113,6 +113,7 @@ pip install robocompscoutingapp
     - Per items in configure
     - Requires the event ID and the First API
     - Checks the cwd for the TOML
+
 - initialize
     - Basically prints the template to stdout, redirect to save
     - No more.  Generates a whole directory structure with a template
@@ -143,6 +144,7 @@ pip install robocompscoutingapp
     - Validate
     - test
     - run
+    - stop (daemon)
 
 
 ### Tables
@@ -159,3 +161,8 @@ pip install robocompscoutingapp
 
 ### Possible libraries
 - https://github.com/Colepng/frc-api
+
+### run
+- integrates data in the scoring page to the tables
+    - Checks scoring page was validated: no = error
+    - 
