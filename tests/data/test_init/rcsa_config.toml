@@ -14,8 +14,11 @@ URL_Root = "https://frc-api.firstinspires.org/v3.0/"
 [Server_Config]
 IP_Address = "127.0.0.1"
 port = "80"
-# this will be set automatically when using "initialize" command
+# These will be set automatically when using "initialize" command
 user_static_folder = "/Users/mrich/Documents/code/robocompscoutingapp/tests/data/test_init/static"
+scoring_database = "/Users/mrich/Documents/code/robocompscoutingapp/tests/data/test_init/rcsa_scoring.db"
+log_folder = "/Users/mrich/Documents/code/robocompscoutingapp/tests/data/test_init/logs"
+scoring_page = "test_rename.html"
 # If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
 FQDN = false
 

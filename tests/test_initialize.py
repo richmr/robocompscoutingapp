@@ -3,6 +3,8 @@ from pathlib import Path
 import tempfile
 from tomlkit import TOMLDocument, table, comment
 from tomlkit.toml_file import TOMLFile
+import shutil
+import os
 
 from robocompscoutingapp.Initialize import Initialize
 
@@ -21,6 +23,21 @@ def test_overall_initialize():
         with pytest.raises(FileExistsError):
             init.initialize()
 
+def test_TOML_updating(tmp_path):
+    # Copy the TOML file over
+    shutil.copy("tests/rcsa_config.toml", tmp_path)
+    os.chdir(tmp_path)
+    # Test
+    init = Initialize(Path("."))
+    assert init.isTOMLInDir() == True
+
+    # Update test
+    init.updateTOML(["Server_Config", "scoring_page"], "updated.file")
+
+    # Check
+    config = TOMLFile("rcsa_config.toml").read()
+    assert config["Server_Config"]["scoring_page"] == "updated.file"
         
+
 
 

@@ -11,6 +11,7 @@ from robocompscoutingapp.ScoringPageParser import ScoringPageParser, ScoringPars
 from robocompscoutingapp.MatchAndTeamSelectionParser import MatchAndTeamSelectionParser, MatchAndTeamSelectionParseResult
 from robocompscoutingapp.JSScriptParser import JSScriptParser
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import ScoringPageStatus, RCSA_DB
+from robocompscoutingapp.Initialize import Initialize
 
 
 class UserHTMLProcessing:
@@ -39,7 +40,6 @@ class UserHTMLProcessing:
         
         # Nope, so lets validate
         success = self.validateHTML()
-        print("****** success",success)
         if success:
             self.createValidatedPageEntry()
 
@@ -78,7 +78,6 @@ class UserHTMLProcessing:
         """
         Adds a validated page entry to the database for tracking
         """
-        print("******* Creating")
         self.dbsession.add(ScoringPageStatus(scoring_page_hash=self.getFileHash(), validated=True))
         self.dbsession.commit()
 
@@ -98,7 +97,6 @@ class UserHTMLProcessing:
             return page_result              
         except NoResultFound:
             # Needs to be added
-            print("******* No findy")
             return None
 
     def getFileHash(self) -> str:

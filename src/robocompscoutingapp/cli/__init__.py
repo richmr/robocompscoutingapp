@@ -27,6 +27,18 @@ def validate(html_file: Annotated[Path, typer.Argument(help="The finely crafted 
             ft.error("Please fix the errors above and run validation again")
         else:
             ft.success(f"{html_file} passed validation!")
+            # Update TOML?
+            init = Initialize(html_file)
+            # If user is following proscribed dir structure, the TOML should be one directory above this file
+            path_to_toml = html_file.absolute().parents[1]
+            if init.isTOMLInDir(tgt_dir=path_to_toml):
+                ft.print("I found a rcsa_config.toml file in this directory.")
+                doit = Confirm.ask(f"Would you like me to update the scoring_page setting to {html_file.name}?")
+                if doit:
+                    try:
+                        init.updateTOML(["Server_Config", "scoring_page"], html_file.name, tgt_dir=path_to_toml)
+                    except Exception as badnews:
+                        ft.error(f"Whoops.  I couldn't update because {badnews}.  You will need to do it manually")
     else:
         ft.error(f"File {html_file} does not exist.")
 
