@@ -40,11 +40,17 @@ class rcsa_scoring_tables(DeclarativeBase):
 class ScoringPageStatus(rcsa_scoring_tables):
     __tablename__ = "ScoringPageStatus"
 
-    scoring_page_hash: Mapped[str] = mapped_column(primary_key=True)
+    scoring_page_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    scoring_page_hash: Mapped[str] = mapped_column(default="none")
     # Has this page passed validation
     validated: Mapped[bool] = mapped_column(default=False)
     # Has this page passed rcsa automatic testing
     tested: Mapped[bool] = mapped_column(default=False)
+
+
+
+
+######### DB ACCESS ############    
 
 class RCSA_DB:
     """
