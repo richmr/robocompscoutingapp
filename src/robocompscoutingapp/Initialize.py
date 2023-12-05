@@ -2,7 +2,7 @@
 Tools to support initialize command
 """
 from pathlib import Path
-from importlib import resources
+from importlib_resources import files
 import shutil
 
 from tomlkit import TOMLDocument, table, comment
@@ -16,8 +16,8 @@ class Initialize:
         self.dst_path = target_directory
 
         # set the src directory
-        with resources.path("robocompscoutingapp", "Initialize") as src_path:
-            self.src_path = src_path.parent/"initialize"
+        self.src_path = files('robocompscoutingapp.Initialize').joinpath("initialize")
+        
 
     def initialize(self, overwrite:bool=False):
         """
