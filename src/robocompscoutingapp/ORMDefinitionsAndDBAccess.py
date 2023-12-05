@@ -71,17 +71,17 @@ class RCSA_DB:
         db_file_path:Path
             The pathlib Path object to the sqlite file
         """
-        if type(self)._sqlASessionMaker is None:
-            database_file = Path(RCSA_Config.getConfig()["Server_Config"]["scoring_database"])
-            # Make sure dir exist
-            database_file.parent.mkdir(parents=True, exist_ok=True)
-            sqlAConnectionStr = f"sqlite:///{database_file}"
-            sqlAEngine = create_engine(sqlAConnectionStr)
-            type(self)._sqlASessionMaker = sessionmaker(bind=sqlAEngine)
-            rcsa_scoring_tables.metadata.create_all(sqlAEngine)
-        else:
-            # Should be no need to do anything extra
-            pass            
+        # if type(self)._sqlASessionMaker is None:
+        #     database_file = Path(RCSA_Config.getConfig()["Server_Config"]["scoring_database"])
+        #     # Make sure dir exist
+        #     database_file.parent.mkdir(parents=True, exist_ok=True)
+        #     sqlAConnectionStr = f"sqlite:///{database_file}"
+        #     sqlAEngine = create_engine(sqlAConnectionStr)
+        #     type(self)._sqlASessionMaker = sessionmaker(bind=sqlAEngine)
+        #     rcsa_scoring_tables.metadata.create_all(sqlAEngine)
+        # else:
+        #     # Should be no need to do anything extra
+        #     pass            
 
     @classmethod
     def getSQLSession(cls, reset:bool = False) -> session:
@@ -99,12 +99,16 @@ class RCSA_DB:
         session
             SQLAlchemy session object
         """
+        if reset:
+            cls._sqlASessionMaker = None
+            cls._sqlAConnectionStr = None
+
         if cls._sqlASessionMaker is None:
             database_file = Path(RCSA_Config.getConfig()["Server_Config"]["scoring_database"])
             # Make sure dir exist
             database_file.parent.mkdir(parents=True, exist_ok=True)
-            sqlAConnectionStr = f"sqlite:///{database_file}"
-            sqlAEngine = create_engine(sqlAConnectionStr)
+            cls._sqlAConnectionStr = f"sqlite:///{database_file}"
+            sqlAEngine = create_engine(cls._sqlAConnectionStr)
             cls._sqlASessionMaker = sessionmaker(bind=sqlAEngine)
             rcsa_scoring_tables.metadata.create_all(sqlAEngine)
         return cls._sqlASessionMaker()
