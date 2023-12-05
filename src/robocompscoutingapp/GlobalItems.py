@@ -84,27 +84,42 @@ class RCSA_Config:
         test_TOML_document:TOMLDocument
             Test hook to allow automated tests to override loaded document
         """
-        if type(self)._TOMLDocument is None:
-            if test_TOML_document is None:
-                toml_path = Path(rcsa_config_filename)
-                if not toml_path.exists():
-                    raise FileNotFoundError(f"{rcsa_config_filename} expected in current working directory.  Run this app from the directory you created with 'initialize'")
-                # type(self) here to set the class, not instance variable
-                type(self)._TOMLDocument = TOMLFile(toml_path).read()
-            else:
-                type(self)._TOMLDocument = test_TOML_document
-        else:
-            # Should be no need to do anything extra
-            pass            
+        # if type(self)._TOMLDocument is None:
+        #     if test_TOML_document is None:
+        #         toml_path = Path(rcsa_config_filename)
+        #         if not toml_path.exists():
+        #             raise FileNotFoundError(f"{rcsa_config_filename} expected in current working directory.  Run this app from the directory you created with 'initialize'")
+        #         # type(self) here to set the class, not instance variable
+        #         type(self)._TOMLDocument = TOMLFile(toml_path).read()
+        #     else:
+        #         type(self)._TOMLDocument = test_TOML_document
+        # else:
+        #     # Should be no need to do anything extra
+        #     pass
+        pass            
 
     @classmethod
-    def getConfig(cls) -> TOMLDocument:
+    def getConfig(cls, reset:bool = False) -> TOMLDocument:
         """
-        Class method to access the singleton SQL Alchemy session maker.
-        Use like 'with RCSA_DB.getSQLSession as dbsession:'
+        Class method to access the singleton Configuration page.
+
+        Parameters
+        ----------
+        reset:bool
+            Forces the stored _TOMLDocument to reset to None.  This is mainly used in testing to ensure changes to configs don't leak into subsequent tests        
         
         Returns
-        session
-            SQLAlchemy session object
+        -------
+        TOMLDocument
+            A TOMLDocument representing the configuration settings
         """
+        if reset:
+            cls._TOMLDocument = None
+            
+        if cls._TOMLDocument is None:
+            toml_path = Path(rcsa_config_filename)
+            if not toml_path.exists():
+                raise FileNotFoundError(f"{rcsa_config_filename} expected in current working directory.  Run this app from the directory you created with 'initialize'")
+            # type(self) here to set the class, not instance variable
+            cls._TOMLDocument = TOMLFile(toml_path).read()
         return cls._TOMLDocument

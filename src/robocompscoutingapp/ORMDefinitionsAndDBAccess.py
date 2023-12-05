@@ -72,7 +72,7 @@ class RCSA_DB:
             The pathlib Path object to the sqlite file
         """
         if type(self)._sqlASessionMaker is None:
-            database_file = Path(RCSA_Config().getConfig()["Server_Config"]["scoring_database"])
+            database_file = Path(RCSA_Config.getConfig()["Server_Config"]["scoring_database"])
             # Make sure dir exist
             database_file.parent.mkdir(parents=True, exist_ok=True)
             sqlAConnectionStr = f"sqlite:///{database_file}"
@@ -84,15 +84,29 @@ class RCSA_DB:
             pass            
 
     @classmethod
-    def getSQLSession(cls) -> session:
+    def getSQLSession(cls, reset:bool = False) -> session:
         """
         Class method to access the singleton SQL Alchemy session maker.
         Use like 'with RCSA_DB.getSQLSession as dbsession:'
+
+        Parameters
+        ----------
+        reset:bool
+            Forces the stored _sqlASessionMaker to reset to None.  This is mainly used in testing to ensure tests work with the desired database        
         
         Returns
+        -------
         session
             SQLAlchemy session object
         """
+        if cls._sqlASessionMaker is None:
+            database_file = Path(RCSA_Config.getConfig()["Server_Config"]["scoring_database"])
+            # Make sure dir exist
+            database_file.parent.mkdir(parents=True, exist_ok=True)
+            sqlAConnectionStr = f"sqlite:///{database_file}"
+            sqlAEngine = create_engine(sqlAConnectionStr)
+            cls._sqlASessionMaker = sessionmaker(bind=sqlAEngine)
+            rcsa_scoring_tables.metadata.create_all(sqlAEngine)
         return cls._sqlASessionMaker()
 
 """ From last year, here for guidance

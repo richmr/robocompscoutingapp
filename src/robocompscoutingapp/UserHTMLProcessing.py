@@ -19,7 +19,7 @@ class UserHTMLProcessing:
     def __init__(self, path_to_user_file:Path) -> None:
         self.html_file = path_to_user_file
         # Call RCSA_DB to ensure it is ready
-        RCSA_DB()
+        # RCSA_DB()
         # Need a single dbsession to prevent detached records
         self.dbsession = RCSA_DB.getSQLSession()
 
