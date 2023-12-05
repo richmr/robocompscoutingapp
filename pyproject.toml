@@ -25,7 +25,8 @@ dependencies = [
   "uvicorn[standard]",
   "rich",
   "tomlkit",
-  "SQLAlchemy"
+  "SQLAlchemy",
+  "importlib_resources"
 ]
 
 [project.urls]
