@@ -74,7 +74,7 @@ class RCSA_Config:
     _TOMLDocument = None
 
     @classmethod
-    def getConfig(cls, reset:bool = False) -> TOMLDocument:
+    def getConfig(cls, reset:bool = False, test_TOML:TOMLDocument = None) -> TOMLDocument:
         """
         Class method to access the singleton Configuration page.
 
@@ -83,6 +83,9 @@ class RCSA_Config:
         reset:bool
             Forces the stored _TOMLDocument to reset to None.  This is mainly used in testing to ensure changes to configs don't leak into subsequent tests        
         
+        test_TOML:TOMLDocument
+            Sets the Config document to the provided TOML.  Used for test configurations mainly
+
         Returns
         -------
         TOMLDocument
@@ -90,6 +93,9 @@ class RCSA_Config:
         """
         if reset:
             cls._TOMLDocument = None
+
+        if test_TOML is not None:
+            cls._TOMLDocument = test_TOML
 
         if cls._TOMLDocument is None:
             toml_path = Path(rcsa_config_filename)
