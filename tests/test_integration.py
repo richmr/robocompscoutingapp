@@ -2,6 +2,8 @@ import pytest
 from pathlib import Path
 from tomlkit import TOMLDocument, table
 
+from sqlalchemy import select, delete
+
 from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.AppExceptions import IntegrationPageNotValidated
@@ -43,12 +45,34 @@ def setupTempDB(temp_path):
     validated = uhp.validate()
     assert validated == True
 
-def test_scoring_modes(tmp_path):
-    # Just make sure fake 
-    setupTempDB(tmp_path)
+def deleteIntegrationEntries():
+    todelete = [
+        ModesForScoringPage
+    ]
+    with RCSA_DB.getSQLSession() as dbsession:
+        for table in todelete:
+            dbsession.execute(delete(ModesForScoringPage))
+        dbsession.commit()
 
+def test_scoring_modes(tmp_path):
+    # Just make sure fake game modes are working
+    setupTempDB(tmp_path)    
     # Integrate it
     integrate = Integrate()
-    result = integrate.integrate()
+    scoring_page_id = 1
+    game_modes = ["auton","teleop"]
+    result = integrate.addGameModesToDatabase(scoring_page_id, game_modes)
+    assert "auton" in result
+    assert "teleop" in result
 
+    # Verify in the database
+    with RCSA_DB.getSQLSession() as db:
+        rows = db.execute(select(ModesForScoringPage))
+        for row in rows.scalars():
+            print(row)
+            assert result[row.mode_name] == row.mode_id
+
+    
+    # teardown the db
+    deleteIntegrationEntries()
     

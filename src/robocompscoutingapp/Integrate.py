@@ -61,8 +61,9 @@ class Integrate:
             for game_mode in game_modes:
                 gm = ModesForScoringPage(scoring_page_id=scoring_page_id, mode_name=game_mode)
                 dbsession.add(gm)
+                dbsession.commit()
                 game_mode_dict[game_mode] = gm.mode_id
-            dbsession.commit()
+            
         return game_mode_dict
 
     def addToDatabase(self):
