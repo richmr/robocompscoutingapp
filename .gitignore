@@ -153,3 +153,4 @@ cython_debug/
 
 
 .DS_Store
+tests/data/test_init/rcsa_scoring.db

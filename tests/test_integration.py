@@ -4,6 +4,13 @@ from tomlkit import TOMLDocument, table
 
 from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
+from robocompscoutingapp.AppExceptions import IntegrationPageNotValidated
+from robocompscoutingapp.Integrate import Integrate
+from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
+    ScoringPageStatus,
+    ModesForScoringPage,
+    RCSA_DB
+)
 
 def gen_test_config(temp_dir_path:Path):
     new_doc = TOMLDocument()
@@ -22,7 +29,26 @@ def test_not_validated_error(tmp_path):
     assert valid_found is None
 
     # Now check to make sure Integrate throws the error
+    with pytest.raises(IntegrationPageNotValidated):
+        integration = Integrate()
+        integration.verifyScoringPageValidated()
 
 
-def test_scoring_modes():
-    pass
+def setupTempDB(temp_path):
+    # Ensures the target page is entered into the DB
+    RCSA_Config.getConfig(test_TOML=gen_test_config(temp_path))
+    # Process working file
+    file = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
+    uhp = UserHTMLProcessing(file)
+    validated = uhp.validate()
+    assert validated == True
+
+def test_scoring_modes(tmp_path):
+    # Just make sure fake 
+    setupTempDB(tmp_path)
+
+    # Integrate it
+    integrate = Integrate()
+    result = integrate.integrate()
+
+    

@@ -6,7 +6,33 @@
 
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <div class="match_selection">Match Selection</div>
+  <div class="container match_and_team_selection">
+    <div class="row">
+        <div class="twelve columns">
+            <h3 class="text-center">Match Scoring</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="six columns">
+            <h5 class="text-right">Which match:</h5>
+        </div>
+        <div class="six columns">
+            <select class="u-full-width" class="match_selector">
+                <option id="match_placeholder" value=-1>Loading matches...</option>
+            </select>
+        </div>
+    </div>
+    <div class="row" id="pick_team_row" hidden>
+        <div class="six columns">
+            <h5 class="text-right">Team you are scoring:</h5>
+        </div>
+        <div class="six columns">
+            <select class="u-full-width" class="team_selector">
+                <option value=-1>Loading Teams for this match...</option>
+            </select>
+        </div>
+    </div>
+  </div>
         
     <div class="section scoring" id="scoring_controls" hidden>
         <div class="container">
@@ -62,6 +88,11 @@
                     <button id="robot-broke" data-scorename="Broke" class="button-primary score_flag">Robot Broke</button>
                 </div>
             </div>
+            <div class="row">
+                <div id="mobility-background" class="twelve columns text-center">
+                    <button class="button-orange btn-big report_submit">Submit Report</button>
+                </div>
+            </div>
         </div>
     </div>
  
@@ -70,5 +101,7 @@
     <div id="error-modal" class="error_modal">Error Modal</div>
 
     <div id="sending_data_modal" class="sending_data_modal">Sending Data</div>
+
+    <script src="/rcsa/rcsa_loader.js"></script>
 
 </body>

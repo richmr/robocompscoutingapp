@@ -42,3 +42,9 @@ class JavaScriptParseError(Exception):
 
 class JavaScriptParseWarning(RCSAWarning):
     pass
+
+#### Integration ##############
+
+class IntegrationPageNotValidated(Exception):
+    pass
+

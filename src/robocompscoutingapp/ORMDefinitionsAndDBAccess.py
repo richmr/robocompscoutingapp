@@ -44,10 +44,17 @@ class ScoringPageStatus(rcsa_scoring_tables):
     scoring_page_hash: Mapped[str] = mapped_column(default="none")
     # Has this page passed validation
     validated: Mapped[bool] = mapped_column(default=False)
+    # Has this page been integrated into the database for scoring
+    integrated: Mapped[bool] = mapped_column(default=False)
     # Has this page passed rcsa automatic testing
     tested: Mapped[bool] = mapped_column(default=False)
 
+class ModesForScoringPage(rcsa_scoring_tables):
+    __tablename__ = "ModesForScoringPage"
 
+    mode_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    scoring_page_id: Mapped[int] = mapped_column(ForeignKey("ScoringPageStatus.scoring_page_id"))
+    mode_name: Mapped[str]
 
 
 ######### DB ACCESS ############    
