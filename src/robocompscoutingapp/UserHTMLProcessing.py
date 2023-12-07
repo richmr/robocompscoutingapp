@@ -6,6 +6,7 @@ from pathlib import Path
 from pydantic import BaseModel
 import hashlib
 from sqlalchemy.exc import IntegrityError, NoResultFound
+from sqlalchemy import select
 
 from robocompscoutingapp.ScoringPageParser import ScoringPageParser, ScoringParseResult
 from robocompscoutingapp.MatchAndTeamSelectionParser import MatchAndTeamSelectionParser, MatchAndTeamSelectionParseResult
@@ -93,7 +94,7 @@ class UserHTMLProcessing:
         """
         try:
             # Find the object
-            page_result = self.dbsession.query(ScoringPageStatus).filter_by(scoring_page_hash=self.getFileHash()).one()
+            page_result = self.dbsession.execute(select(ScoringPageStatus).filter_by(scoring_page_hash=self.getFileHash())).one()
             # Return the current status
             return page_result              
         except NoResultFound:
