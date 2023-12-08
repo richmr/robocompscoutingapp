@@ -9,6 +9,7 @@ from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.AppExceptions import IntegrationPageNotValidated
 from robocompscoutingapp.Integrate import Integrate
+from robocompscoutingapp.ScoringPageParser import ScoringPageParser, ScoringParseResult
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
     ModesForScoringPage,
@@ -112,3 +113,29 @@ def test_scoring_items(tmp_path):
     # teardown the db
     deleteIntegrationEntries()
     
+def test_full_integration(tmp_path):
+    setupTempDB(tmp_path)
+    scoring_page_id = getScoringPageID()
+    
+    # Values from the integration_test.html
+    expected_modes = ['Auton', 'Teleop']
+    expected_items = {'score_tally': ['cone', 'cube'], 'score_flag': ['Attempted charge', 'Succeeded charge', 'Auton Mobility', 'Broke']}
+
+    integrate = Integrate()
+    (mode_id_dict,  scoring_item_id_dict) = integrate.integrate()
+    assert mode_id_dict is not None
+    assert scoring_item_id_dict is not None
+
+    # Verify in DB
+    with RCSA_DB.getSQLSession() as db:
+        for index, (key, value) in enumerate(expected_items.items()):
+            for an_item in value:
+                item = db.scalars(select(ScoringItemsForScoringPage).filter_by(name=an_item)).one()
+                assert item.type == key
+                
+        for mode in expected_modes:
+            item = db.scalars(select(ModesForScoringPage).filter_by(mode_name=mode)).one()
+            assert item.scoring_page_id == scoring_page_id
+    
+    # teardown the db
+    deleteIntegrationEntries()

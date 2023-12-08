@@ -109,9 +109,14 @@ class Integrate:
 
     def integrate(self):
         db_result = self.verifyScoringPageValidated()
+        scoring_page_id = db_result.scoring_page_id
         # Get the scoring page result
         spr = self.getScoringPageResult()
-        return
+        # Store items in db
+        mode_id_dict = self.addGameModesToDatabase(scoring_page_id, spr.game_modes)
+        scoring_item_id_dict = self.addScoringItemsToDatabase(scoring_page_id, spr.scoring_elements)
+                
+        return (mode_id_dict, scoring_item_id_dict)
 
 
 

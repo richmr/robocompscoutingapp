@@ -155,3 +155,4 @@ cython_debug/
 .DS_Store
 tests/data/test_init/rcsa_scoring.db
 robocompscoutingapp.code-workspace
+data/test_init/rcsa_scoring.db
