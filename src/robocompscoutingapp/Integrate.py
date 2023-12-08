@@ -3,6 +3,7 @@ Functions to ensure databases are ready to receive scoring information
 """
 from pathlib import Path
 from pydantic import BaseModel
+from sqlalchemy import select
 
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.GlobalItems import RCSA_Config
@@ -104,8 +105,19 @@ class Integrate:
         
         return to_return
 
-    def addToDatabase(self):
-        pass
+    def updateToIntegrated(self, scoring_page_id:int):
+        """
+        Updates the record for this page in the database to indicate it has been successfully integrated
+
+        Parameters
+        ----------
+        scoring_page_id:int
+            The primary key for this page
+        """
+        with RCSA_DB.getSQLSession() as db:
+            this_page = db.scalars(select(ScoringPageStatus).where(ScoringPageStatus.scoring_page_id==scoring_page_id)).one()
+            this_page.integrated = True
+            db.commit()
 
     def integrate(self):
         db_result = self.verifyScoringPageValidated()
@@ -115,7 +127,8 @@ class Integrate:
         # Store items in db
         mode_id_dict = self.addGameModesToDatabase(scoring_page_id, spr.game_modes)
         scoring_item_id_dict = self.addScoringItemsToDatabase(scoring_page_id, spr.scoring_elements)
-                
+        # Update the database
+        self.updateToIntegrated(scoring_page_id)        
         return (mode_id_dict, scoring_item_id_dict)
 
 

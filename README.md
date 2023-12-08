@@ -165,4 +165,4 @@ pip install robocompscoutingapp
 ### run
 - integrates data in the scoring page to the tables
     - Checks scoring page was validated: no = error
-    - 
+    - Adds modes and scoring items for this validated page

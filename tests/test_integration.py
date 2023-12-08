@@ -136,6 +136,9 @@ def test_full_integration(tmp_path):
         for mode in expected_modes:
             item = db.scalars(select(ModesForScoringPage).filter_by(mode_name=mode)).one()
             assert item.scoring_page_id == scoring_page_id
+
+        this_page = db.scalars(select(ScoringPageStatus).filter_by(scoring_page_id=scoring_page_id)).one()
+        assert this_page.integrated == True
     
     # teardown the db
     deleteIntegrationEntries()
