@@ -11,6 +11,7 @@ from robocompscoutingapp.ScoringPageParser import ScoringPageParser, ScoringPars
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
     ModesForScoringPage,
+    ScoringItemsForScoringPage,
     RCSA_DB
 )
 
@@ -65,6 +66,43 @@ class Integrate:
                 game_mode_dict[game_mode] = gm.mode_id
             
         return game_mode_dict
+
+    def addScoringItemsToDatabase(self, scoring_page_id:int, scoring_items:dict) -> dict:
+        """
+        Stores the discovered scoring items in the data base so we have accurate IDs
+
+        Parameters
+        ----------
+        scoring_page_id:int
+            The primary key for the designated scoring page
+
+        scoring_items:dict
+            Dictionary of the scoring_elements from a ScoringPageResult
+
+        Returns
+        -------
+        dict
+            Dictionary of the scoring items with their primary key in the data base
+        """
+        to_return = {}
+        with RCSA_DB.getSQLSession() as db:
+            for index, (key, value) in enumerate(scoring_items.items()):
+                if isinstance(value, str):
+                    # Prevent issues, single item instead of list as expected
+                    si = ScoringItemsForScoringPage(scoring_page_id=scoring_page_id, name=value, type=key)
+                    db.add(si)
+                    db.commit()
+                    to_return[value] = si.scoring_item_id
+                elif isinstance(value, list):
+                    for an_item in value:
+                        si = ScoringItemsForScoringPage(scoring_page_id=scoring_page_id, name=an_item, type=key)
+                        db.add(si)
+                        db.commit()
+                        to_return[an_item] = si.scoring_item_id
+                else:
+                    raise TypeError(f"I don't know how to handle a {type(value)} object")
+        
+        return to_return
 
     def addToDatabase(self):
         pass

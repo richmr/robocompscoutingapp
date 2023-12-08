@@ -1,6 +1,7 @@
 import pytest
 from pathlib import Path
 from tomlkit import TOMLDocument, table
+from functools import reduce
 
 from sqlalchemy import select, delete
 
@@ -11,6 +12,7 @@ from robocompscoutingapp.Integrate import Integrate
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
     ModesForScoringPage,
+    ScoringItemsForScoringPage,
     RCSA_DB
 )
 
@@ -45,6 +47,13 @@ def setupTempDB(temp_path):
     validated = uhp.validate()
     assert validated == True
 
+def getScoringPageID():
+    with RCSA_DB.getSQLSession() as db:
+        # Should hopefully only be one loaded for these tests
+        sps = db.scalars(select(ScoringPageStatus)).one()
+        assert isinstance(sps, ScoringPageStatus)
+        return sps.scoring_page_id
+
 def deleteIntegrationEntries():
     todelete = [
         ModesForScoringPage
@@ -59,7 +68,7 @@ def test_scoring_modes(tmp_path):
     setupTempDB(tmp_path)    
     # Integrate it
     integrate = Integrate()
-    scoring_page_id = 1
+    scoring_page_id = getScoringPageID()
     game_modes = ["auton","teleop"]
     result = integrate.addGameModesToDatabase(scoring_page_id, game_modes)
     assert "auton" in result
@@ -72,6 +81,33 @@ def test_scoring_modes(tmp_path):
             print(row)
             assert result[row.mode_name] == row.mode_id
 
+    # teardown the db
+    deleteIntegrationEntries()
+
+def test_scoring_items(tmp_path):
+    setupTempDB(tmp_path)
+    integrate = Integrate()
+    scoring_page_id = getScoringPageID()
+    scoring_items = {
+        "score_tally":[
+            "bottles",
+            "cans"
+        ],
+        "score_flag": [
+            "dieded"
+        ]
+    }
+    result = integrate.addScoringItemsToDatabase(scoring_page_id, scoring_items)
+    assert "bottles" in result
+    assert "dieded" in result
+
+    # Verify in the database
+    with RCSA_DB.getSQLSession() as db:
+        for index, (key, value) in enumerate(scoring_items.items()):
+            for an_item in value:
+                item = db.scalars(select(ScoringItemsForScoringPage).filter_by(name=an_item)).one()
+                assert item.type == key
+                assert item.scoring_item_id == result[an_item]
     
     # teardown the db
     deleteIntegrationEntries()

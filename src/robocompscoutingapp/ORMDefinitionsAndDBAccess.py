@@ -56,6 +56,13 @@ class ModesForScoringPage(rcsa_scoring_tables):
     scoring_page_id: Mapped[int] = mapped_column(ForeignKey("ScoringPageStatus.scoring_page_id"))
     mode_name: Mapped[str]
 
+class ScoringItemsForScoringPage(rcsa_scoring_tables):
+    __tablename__ = "ScoringItemsForScoringPage"
+
+    scoring_item_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    scoring_page_id: Mapped[int] = mapped_column(ForeignKey("ScoringPageStatus.scoring_page_id"))
+    name: Mapped[str]
+    type: Mapped[str]
 
 ######### DB ACCESS ############    
 
@@ -71,7 +78,7 @@ class RCSA_DB:
     def getSQLSession(cls, reset:bool = False) -> session:
         """
         Class method to access the singleton SQL Alchemy session maker.
-        Use like 'with RCSA_DB.getSQLSession as dbsession:'
+        Use like 'with RCSA_DB.getSQLSession() as dbsession:'
 
         Parameters
         ----------
