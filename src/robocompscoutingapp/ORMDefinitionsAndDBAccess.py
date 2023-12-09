@@ -6,7 +6,8 @@ from sqlalchemy import (
     ForeignKey, 
     DateTime, 
     create_engine,
-    Integer
+    Integer,
+    UniqueConstraint
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -51,13 +52,20 @@ class ScoringPageStatus(rcsa_scoring_tables):
 
 class ModesForScoringPage(rcsa_scoring_tables):
     __tablename__ = "ModesForScoringPage"
+    __table_args__ = (
+        UniqueConstraint("scoring_page_id", "mode_name", name="unique_modes_per_page"),
+    )
 
     mode_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     scoring_page_id: Mapped[int] = mapped_column(ForeignKey("ScoringPageStatus.scoring_page_id"))
     mode_name: Mapped[str]
+    
 
 class ScoringItemsForScoringPage(rcsa_scoring_tables):
     __tablename__ = "ScoringItemsForScoringPage"
+    __table_args__ = (
+        UniqueConstraint("scoring_page_id", "name", name="scoringItemsU_1"),
+    )
 
     scoring_item_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     scoring_page_id: Mapped[int] = mapped_column(ForeignKey("ScoringPageStatus.scoring_page_id"))
