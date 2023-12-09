@@ -4,6 +4,7 @@ from tomlkit import TOMLDocument, table
 from functools import reduce
 
 from sqlalchemy import select, delete
+from sqlalchemy.exc import IntegrityError
 
 from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
@@ -57,11 +58,12 @@ def getScoringPageID():
 
 def deleteIntegrationEntries():
     todelete = [
-        ModesForScoringPage
+        ModesForScoringPage,
+        ScoringItemsForScoringPage
     ]
     with RCSA_DB.getSQLSession() as dbsession:
         for table in todelete:
-            dbsession.execute(delete(ModesForScoringPage))
+            dbsession.execute(delete(table))
         dbsession.commit()
 
 def test_scoring_modes(tmp_path):
@@ -112,7 +114,23 @@ def test_scoring_items(tmp_path):
     
     # teardown the db
     deleteIntegrationEntries()
+
+def test_unique_constraint(tmp_path):
+    # Really here because I want to see what sqlalchemy throws
+    setupTempDB(tmp_path)
+    scoring_page_id = getScoringPageID()
     
+    with pytest.raises(IntegrityError):
+        with RCSA_DB.getSQLSession() as db:
+            newmode1 = ModesForScoringPage(scoring_page_id=scoring_page_id, mode_name="test")
+            newmode2 = ModesForScoringPage(scoring_page_id=scoring_page_id, mode_name="test")
+            db.add(newmode1)
+            db.add(newmode2)
+            db.commit()
+
+    # teardown the db
+    deleteIntegrationEntries()
+
 def test_full_integration(tmp_path):
     setupTempDB(tmp_path)
     scoring_page_id = getScoringPageID()
@@ -140,5 +158,15 @@ def test_full_integration(tmp_path):
         this_page = db.scalars(select(ScoringPageStatus).filter_by(scoring_page_id=scoring_page_id)).one()
         assert this_page.integrated == True
     
+    # verify re-run doesn't add more database entries
+    (mode_id_dict2,  scoring_item_id_dict2) = integrate.integrate()
+    # this might work?
+    assert mode_id_dict2 == mode_id_dict
+    assert scoring_item_id_dict2 == scoring_item_id_dict
+
+    # Double check the unique constraint holds
+    with pytest.raises(IntegrityError):
+        integrate.addScoringItemsToDatabase(scoring_page_id, expected_items)
+
     # teardown the db
     deleteIntegrationEntries()

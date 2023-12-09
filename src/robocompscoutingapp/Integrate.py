@@ -119,16 +119,64 @@ class Integrate:
             this_page.integrated = True
             db.commit()
 
+    def getModeIDDict(self, scoring_page_id:int) -> dict:
+        """
+        Gets the mode ID data for the scoring page from the database
+
+        Parameters
+        ----------
+        scoring_page_id:int
+            The primary key for this page
+
+        Returns
+        -------
+        dict
+            Dictionary of mode names and their assigned IDs
+        """
+        toreturn = {}
+        with RCSA_DB.getSQLSession() as db:
+            modes = db.scalars(select(ModesForScoringPage).filter_by(scoring_page_id=scoring_page_id))
+            for mode in modes:
+                toreturn[mode.mode_name] = mode.mode_id
+        return toreturn
+    
+    def getScoringItemIDDict(self, scoring_page_id:int) -> dict:
+        """
+        Gets the mode ID data for the scoring page from the database
+
+        Parameters
+        ----------
+        scoring_page_id:int
+            The primary key for this page
+
+        Returns
+        -------
+        dict
+            Dictionary of scoring names and their assigned IDs
+        """
+        toreturn = {}
+        with RCSA_DB.getSQLSession() as db:
+            items = db.scalars(select(ScoringItemsForScoringPage).filter_by(scoring_page_id=scoring_page_id))
+            for item in items:
+                toreturn[item.name] = item.scoring_item_id
+        
+        return toreturn
+
     def integrate(self):
         db_result = self.verifyScoringPageValidated()
         scoring_page_id = db_result.scoring_page_id
-        # Get the scoring page result
-        spr = self.getScoringPageResult()
-        # Store items in db
-        mode_id_dict = self.addGameModesToDatabase(scoring_page_id, spr.game_modes)
-        scoring_item_id_dict = self.addScoringItemsToDatabase(scoring_page_id, spr.scoring_elements)
-        # Update the database
-        self.updateToIntegrated(scoring_page_id)        
+        if not db_result.integrated:
+            # Get the scoring page result
+            spr = self.getScoringPageResult()
+            # Store items in db
+            mode_id_dict = self.addGameModesToDatabase(scoring_page_id, spr.game_modes)
+            scoring_item_id_dict = self.addScoringItemsToDatabase(scoring_page_id, spr.scoring_elements)
+            # Update the database
+            self.updateToIntegrated(scoring_page_id)
+        else:
+            mode_id_dict = self.getModeIDDict(scoring_page_id)
+            scoring_item_id_dict = self.getScoringItemIDDict(scoring_page_id)
+
         return (mode_id_dict, scoring_item_id_dict)
 
 
