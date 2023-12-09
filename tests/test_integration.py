@@ -26,11 +26,23 @@ def gen_test_config(temp_dir_path:Path):
     new_doc["Server_Config"] = server_config
     return new_doc
 
-def test_not_validated_error(tmp_path):
-    RCSA_Config.getConfig(test_TOML=gen_test_config(tmp_path))
-    # Check for validated file (giggle check)
+def setupTempDB(temp_path):
+    # Ensures the target page is entered into the DB
+    RCSA_Config.getConfig(test_TOML=gen_test_config(temp_path))
+    RCSA_DB.getSQLSession(reset=True)
+    # Process working file
     file = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
     uhp = UserHTMLProcessing(file)
+    validated = uhp.validate()
+    assert validated == True
+
+def test_not_validated_error(tmp_path):
+    setupTempDB(tmp_path)
+    # Check for validated file (giggle check)
+    # Need a different file because the one in the config will now have been added to the database
+    config = RCSA_Config.getConfig()
+    config["Server_Config"]["scoring_page"] = "tests/data/integration_test_data/not_validated.html"
+    uhp = UserHTMLProcessing(config["Server_Config"]["scoring_page"])
     valid_found = uhp.checkForValidatedPageEntry()
     assert valid_found is None
 
@@ -40,14 +52,7 @@ def test_not_validated_error(tmp_path):
         integration.verifyScoringPageValidated()
 
 
-def setupTempDB(temp_path):
-    # Ensures the target page is entered into the DB
-    RCSA_Config.getConfig(test_TOML=gen_test_config(temp_path))
-    # Process working file
-    file = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
-    uhp = UserHTMLProcessing(file)
-    validated = uhp.validate()
-    assert validated == True
+
 
 def getScoringPageID():
     with RCSA_DB.getSQLSession() as db:

@@ -26,6 +26,7 @@ def test_overall_initialize():
 def test_TOML_updating(tmp_path):
     # Copy the TOML file over
     shutil.copy("tests/rcsa_config.toml", tmp_path)
+    cwd = os.getcwd()
     os.chdir(tmp_path)
     # Test
     init = Initialize(Path("."))
@@ -37,6 +38,7 @@ def test_TOML_updating(tmp_path):
     # Check
     config = TOMLFile("rcsa_config.toml").read()
     assert config["Server_Config"]["scoring_page"] == "updated.file"
+    os.chdir(cwd)
         
 
 
