@@ -13,7 +13,7 @@ from robocompscoutingapp.GlobalItems import rcsa_config_filename
 class Initialize:
 
     def __init__(self, target_directory:Path) -> None:
-        self.dst_path = target_directory
+        self.dst_path = Path(target_directory)
 
         # set the src directory
         self.src_path = files('robocompscoutingapp.Initialize').joinpath("initialize")
