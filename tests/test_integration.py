@@ -1,7 +1,6 @@
 import pytest
 from pathlib import Path
 from tomlkit import TOMLDocument, table
-from functools import reduce
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError
