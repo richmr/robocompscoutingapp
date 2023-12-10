@@ -104,3 +104,24 @@ class RCSA_Config:
             # type(self) here to set the class, not instance variable
             cls._TOMLDocument = TOMLFile(toml_path).read()
         return cls._TOMLDocument
+    
+from contextlib import contextmanager
+import os
+
+@contextmanager
+def temp_chdir(tgt_dir):
+    """
+    Context manager to temporarily change directory and then return to original on completion.
+    This is mainly used for testing in this app
+    
+    Parameters
+    ----------
+    tgt_dir:str
+        The string path of where you want to change the working directory to
+    """
+    cwd = os.getcwd()
+    try:
+        os.chdir(tgt_dir)
+        yield
+    finally:
+        os.chdir(cwd)
