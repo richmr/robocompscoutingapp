@@ -50,10 +50,10 @@ class Initialize:
         rcsa_config = rcsa_config_file.read()
         rcsa_config["Server_Config"]["user_static_folder"] = str(self.dst_path.absolute()/"static")
         rcsa_config["Server_Config"]["scoring_database"] = str(self.dst_path.absolute()/"rcsa_scoring.db")
-        rcsa_config["Server_Config"]["log_folder"] = str(self.dst_path.absolute()/"logs")
+        rcsa_config["Server_Config"]["log_filename"] = str(self.dst_path.absolute()/"logs/rcsa_logs.log")
         
         rcsa_config_file.write(rcsa_config)
-
+   
     def isTOMLInDir(self, tgt_dir:Path = Path('.')) -> bool:
         """
         This examines the current working directory for the TOML file

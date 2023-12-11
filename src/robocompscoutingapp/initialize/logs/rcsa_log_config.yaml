@@ -1,0 +1,41 @@
+# Hints from:
+# https://stackoverflow.com/questions/49753085/python-configure-logger-with-yaml-to-open-logfile-in-write-mode
+# https://gist.github.com/liviaerxin/d320e33cbcddcc5df76dd92948e5be3b
+# File cannot be used as-is, templated parameters ($$...) below need to be filled in.
+version: 1
+disable_existing_loggers: False
+formatters:
+  default:
+    # "()": uvicorn.logging.DefaultFormatter
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  access:
+    # "()": uvicorn.logging.AccessFormatter
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handlers:
+  default:
+    formatter: default
+    class: logging.FileHandler
+    filename: $log_filename
+    encoding: utf8
+  file:
+    formatter: access
+    class: logging.FileHandler
+    filename: $log_filename
+    encoding: utf8
+  console:
+    class: logging.StreamHandler
+    formatter: access
+    stream: ext://sys.stdout
+loggers:
+  uvicorn.error:
+    level: $log_level
+    handlers: $handlers
+    propagate: no
+  uvicorn.access:
+    level: $log_level
+    handlers: $handlers
+    propagate: no
+root:
+  level: $log_level
+  handlers: $handlers
+  propagate: no

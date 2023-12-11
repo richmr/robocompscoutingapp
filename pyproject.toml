@@ -26,7 +26,8 @@ dependencies = [
   "rich",
   "tomlkit",
   "SQLAlchemy",
-  "importlib_resources"
+  "importlib_resources",
+  "requests"
 ]
 
 [project.urls]

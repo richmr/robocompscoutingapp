@@ -167,6 +167,7 @@ pip install robocompscoutingapp
     - Checks scoring page was validated: no = error
     - Adds modes and scoring items for this validated page, sets to integrated
 - Starts server and begins listening
+- I think the test 
 
 Need test data load
 ### API

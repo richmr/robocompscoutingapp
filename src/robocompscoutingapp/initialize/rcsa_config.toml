@@ -17,7 +17,10 @@ port = "8080"
 # These will be set automatically when using "initialize" command
 user_static_folder = false
 scoring_database = false
-log_folder = false
+log_filename = false
+# This must be "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
+# See: https://docs.python.org/3/library/logging.html#levels
+log_level = "INFO"
 scoring_page = "scoring.html"
 # If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
 FQDN = "localhost"
