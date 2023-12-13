@@ -13,7 +13,7 @@ URL_Root = "https://frc-api.firstinspires.org/v3.0/"
 # Failure to change the IP when using "run" command will result in a warning
 [Server_Config]
 IP_Address = "127.0.0.1"
-port = "8080"
+port = 8080
 # These will be set automatically when using "initialize" command
 user_static_folder = false
 scoring_database = false
