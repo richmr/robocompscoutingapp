@@ -68,6 +68,7 @@ class Initialize:
         bool
             Is TOML file in the provided directory
         """
+        tgt_dir = Path(tgt_dir)
         file = tgt_dir/rcsa_config_filename
         return file.exists()
     
@@ -91,6 +92,7 @@ class Initialize:
         -------
             None
         """
+        tgt_dir = Path(tgt_dir)
         file = tgt_dir/rcsa_config_filename
         rcsa_config_file = TOMLFile(file)
         rcsa_config = rcsa_config_file.read()

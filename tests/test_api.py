@@ -1,3 +1,4 @@
+import tempfile
 import pytest
 from pathlib import Path
 # from tomlkit import TOMLDocument, table
@@ -62,8 +63,65 @@ scoring_item_id  scoring_page_id  name        type
 sqlite> 
 """
 
+class SingletonTestEnv:
+
+    _server = None
+    _temp_dir_obj = None
+    _original_wd = None
+    _instance_count = 0
+    _ok_to_end = False
+    _shutdown_received = False
+    _success = True
+
+    @classmethod
+    @contextmanager
+    def activateTestEnv(cls):
+        """
+        Starts server and generates temporary directory on first call
+        Subsequent calls get the URL for server and the tempdir in a tuple
+        After last return, the server is shutdown and the system directory is returned to previous
+        """
+        if cls._server is None:
+            cls._original_wd = os.getcwd()
+            cls._temp_dir_obj = tempfile.TemporaryDirectory()
+            init = Initialize(cls._temp_dir_obj.name)
+            init.initialize(overwrite=True)
+            # Update the location of the scoring page
+            init.updateTOML(["Server_Config", "scoring_page"], f"{cls._temp_dir_obj.name}/static/scoring.html", tgt_dir = cls._temp_dir_obj.name)
+            os.chdir(cls._temp_dir_obj.name)
+            uhp = UserHTMLProcessing(f"{cls._temp_dir_obj.name}/static/scoring.html")
+            uhp.validate()
+            # Integrate it to set the data
+            int = Integrate()
+            int.integrate()
+            cls._server = RunAPIServer()
+            cls._server.run()
+        try:
+            cls._instance_count += 1
+            yield (serverBaseURL(), cls._temp_dir_obj.name)
+        except Exception as badnews:
+            print("Failed test detected")
+            print(f"Temp dir: {cls._temp_dir_obj.name}")
+            cls._success = False
+            os.chdir(cls._original_wd)
+            raise(badnews)
+        finally:
+            cls._instance_count -= 1
+            if cls._instance_count == 0:
+                if cls._shutdown_received:
+                    cls._server.stop()
+                    if cls._success:
+                        cls._temp_dir_obj.cleanup()
+                    os.chdir(cls._original_wd)
+
+    @classmethod
+    def shutdown(cls):
+        cls._shutdown_received = True
+
+   
+
 @contextmanager
-def gen_test_end_and_enter(temp_dir_path:Path):
+def gen_test_env_and_enter(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
@@ -103,50 +161,38 @@ def gen_test_environment(temp_dir_path:Path):
         int = Integrate()
         int.integrate()
 
-def start_uvicorn_server():
-    # return uvicorn server instance to allow clean stop
-    pass
 
-
-
-# def test_fake(tmpdir):
-#     gen_test_environment(tmpdir)
-#     assert False
-
-
-
-def test_yaml_overwrite(tmpdir):
-    with gen_test_end_and_enter(tmpdir):
-        server = RunAPIServer()
-        server.setupLoggingYAML()
-        # Verify 
+def test_yaml_overwrite():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
         with open("logs/rcsa_log_config.yaml") as f:
             y = yaml.safe_load(f)
-            assert y["handlers"]["default"]["filename"] == f"{tmpdir}/logs/rcsa_logs.log"
-            assert y["handlers"]["access"]["filename"] == f"{tmpdir}/logs/rcsa_logs.log"
+            assert y["handlers"]["default"]["filename"] == f"{temp_dir}/logs/rcsa_logs.log"
+            assert y["handlers"]["file"]["filename"] == f"{temp_dir}/logs/rcsa_logs.log"
             assert y["loggers"]["uvicorn.error"]["level"] == f"INFO"
             assert y["loggers"]["uvicorn.access"]["level"] == f"INFO"
-            
-def test_server_alive(tmpdir):
-    with gen_test_end_and_enter(tmpdir):
-        server = RunAPIServer()
-        server.run()
+
+def test_server_alive():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
         url = serverBaseURL()+"/lifecheck"
         life = requests.get(url).json()
         assert life["alive"] == True
-        server.stop()
+        
+def test_shutdown():
+    # Not really a test
+    with SingletonTestEnv.activateTestEnv():
+        SingletonTestEnv.shutdown()
 
-def test_modes_and_scoring_items_api(tmpdir):
-    gen_test_environment(tmpdir)
-    start_uvicorn_server
+# def test_modes_and_scoring_items_api(tmpdir):
+#     gen_test_environment(tmpdir)
+#     start_uvicorn_server
 
 
-def setupTempDB(temp_path):
-    # Ensures the target page is entered into the DB
-    RCSA_Config.getConfig(test_TOML=gen_test_config(temp_path))
-    RCSA_DB.getSQLSession(reset=True)
-    # Process working file
-    file = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
-    uhp = UserHTMLProcessing(file)
-    validated = uhp.validate()
-    assert validated == True
+# def setupTempDB(temp_path):
+#     # Ensures the target page is entered into the DB
+#     RCSA_Config.getConfig(test_TOML=gen_test_config(temp_path))
+#     RCSA_DB.getSQLSession(reset=True)
+#     # Process working file
+#     file = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
+#     uhp = UserHTMLProcessing(file)
+#     validated = uhp.validate()
+#     assert validated == True
