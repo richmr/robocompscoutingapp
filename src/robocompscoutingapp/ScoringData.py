@@ -2,12 +2,27 @@ from sqlalchemy import select
 from pydantic import BaseModel, ConfigDict
 from typing import Dict
 
+from robocompscoutingapp.GlobalItems import RCSA_Config
+from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
     ModesForScoringPage,
     ScoringItemsForScoringPage,
     RCSA_DB
 )
+
+_scoring_page_id = None
+
+def getCurrentScoringPageID():
+    """
+    Uses current scoring page hash to get the scoring page ID
+    """
+    global _scoring_page_id
+    if _scoring_page_id is None:
+        sp = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
+        uhp = UserHTMLProcessing(sp)
+        _scoring_page_id = uhp.checkForValidatedPageEntry().scoring_page_id
+    return _scoring_page_id
 
 class GameMode(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -34,6 +49,11 @@ def getGameModeAndScoringElements(scoring_page_id:int) -> ModesAndItems:
     ----------
     scoring_page_id:int
         Primary key for the scoring page
+
+    Returns
+    -------
+    ModesAndItems
+        Model with all modes and items
     """
     with RCSA_DB.getSQLSession() as db:
         modes = db.scalars(select(ModesForScoringPage).filter_by(scoring_page_id=scoring_page_id)).all()

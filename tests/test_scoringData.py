@@ -14,7 +14,8 @@ from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.Initialize import Initialize
 from robocompscoutingapp.Integrate import Integrate
 from robocompscoutingapp.ScoringData import (
-    getGameModeAndScoringElements
+    getGameModeAndScoringElements,
+    getCurrentScoringPageID
 )
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
@@ -70,3 +71,7 @@ def test_getGameModeAndScoringElements(tmpdir):
         mai = getGameModeAndScoringElements(1)
         assert len(mai.modes) == 2
         assert len(mai.scoring_items) == 6
+
+def test_scoring_page_id(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        assert getCurrentScoringPageID() == 1

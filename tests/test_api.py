@@ -176,7 +176,17 @@ def test_server_alive():
         url = serverBaseURL()+"/lifecheck"
         life = requests.get(url).json()
         assert life["alive"] == True
-        
+
+def test_scoring_page():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+        r = requests.get(f"{baseurl}/scoring/scoring.html")
+        assert "<!-- EXISTS -->" in r.text
+
+def test_analysis_page():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+        r = requests.get(f"{baseurl}/analysis/foldercheck.html")
+        assert "exists" in r.text
+
 def test_shutdown():
     # Not really a test
     with SingletonTestEnv.activateTestEnv():
