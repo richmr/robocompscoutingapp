@@ -9,6 +9,8 @@ from pathlib import Path
 from tomlkit import TOMLDocument, table, comment
 from tomlkit.toml_file import TOMLFile
 
+from robocompscoutingapp.FirstEventsAPI import FirstEventsConfig
+
 class ExtendedEnum(Enum):
     """
     Taken from: https://stackoverflow.com/questions/29503339/how-to-get-all-values-from-python-enum-class
@@ -72,6 +74,7 @@ class RCSA_Config:
     """
 
     _TOMLDocument = None
+    _FirstConfig = None
 
     @classmethod
     def getConfig(cls, reset:bool = False, test_TOML:TOMLDocument = None) -> TOMLDocument:
@@ -104,6 +107,13 @@ class RCSA_Config:
             # type(self) here to set the class, not instance variable
             cls._TOMLDocument = TOMLFile(toml_path).read()
         return cls._TOMLDocument
+    
+    @classmethod
+    def getFirstConfig(cls) -> FirstEventsConfig:
+        if cls._FirstConfig is None:
+            config = cls.getConfig()["FRC_events"]
+            cls._FirstConfig = FirstEventsConfig.model_validate(config)
+        return cls._FirstConfig
     
 from contextlib import contextmanager
 import os

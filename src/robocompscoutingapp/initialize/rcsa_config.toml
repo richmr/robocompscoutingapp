@@ -11,6 +11,8 @@ APIKey_File = "~/.FRCEVENTSAPI"
 
 # Place the event ID you are scoring here.
 first_event_id = false
+# If you know your district code, place it here to get faster results from First Events
+district_id = false
 URL_Root = "https://frc-api.firstinspires.org/v3.0/"
 
 # By default the server is only configured to run locally for testing
