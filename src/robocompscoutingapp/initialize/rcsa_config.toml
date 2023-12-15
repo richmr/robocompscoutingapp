@@ -3,9 +3,14 @@
 # Leaving these as false below will result in a warning if the team and match information 
 # is not loaded in the db and you use the "run" command
 [FRC_events]
-# Place the event ID you are scoring here.  
+# Provide path to the file holding your FRC Events API Key here
+# This file should only contain the API key in Base64 encoding as shown at: https://frc-api-docs.firstinspires.org/?version=216cd832-1976-40b0-855b-3a4d92166c08#authorization
+# Example: echo -n "sampleuser:7eaa6338-a097-4221-ac04-b6120fcc4d49" | base64 > ~/.FRCEVENTSAPI
+# DO NOT include this file in your repository!!
+APIKey_File = "~/.FRCEVENTSAPI"
+
+# Place the event ID you are scoring here.
 first_event_id = false
-APIKey = false
 URL_Root = "https://frc-api.firstinspires.org/v3.0/"
 
 # By default the server is only configured to run locally for testing

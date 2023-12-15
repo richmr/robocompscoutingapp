@@ -11,7 +11,9 @@ import logging
 from contextlib import asynccontextmanager, contextmanager
 
 from robocompscoutingapp.GlobalItems import RCSA_Config
-from robocompscoutingapp.ScoringData import getCurrentScoringPageID
+from robocompscoutingapp.ScoringData import (
+    getCurrentScoringPageID
+)
 
 
 _scoring_page_id = None
@@ -31,8 +33,16 @@ async def lifespan(app:FastAPI):
 
 rcsa_api_app = FastAPI(title="RoboCompScoutingApp", lifespan=lifespan)
 
-#lifecycle, get the scoring page ID
-
 @rcsa_api_app.get("/lifecheck")
 def lifecheck():
     return {"alive":True}
+
+from robocompscoutingapp.ScoringData import (
+    getGameModeAndScoringElements,
+    ModesAndItems
+) 
+
+@rcsa_api_app.get("/api/gameModesAndScoringElements")
+def gameModeAndScoringElements() -> ModesAndItems:
+    return getGameModeAndScoringElements(_scoring_page_id)
+

@@ -187,6 +187,15 @@ def test_analysis_page():
         r = requests.get(f"{baseurl}/analysis/foldercheck.html")
         assert "exists" in r.text
 
+def test_gameModeandScoringElements():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+        r = requests.get(f"{baseurl}/api/gameModesAndScoringElements")
+        result = r.json()
+        assert len(result["modes"]) == 2
+        assert len(result["scoring_items"]) == 6
+
+#### Keep this test last!
+
 def test_shutdown():
     # Not really a test
     with SingletonTestEnv.activateTestEnv():
