@@ -109,9 +109,25 @@ class RCSA_Config:
         return cls._TOMLDocument
     
     @classmethod
-    def getFirstConfig(cls) -> FirstEventsConfig:
+    def getFirstConfig(cls, reset:bool = False) -> FirstEventsConfig:
+        """
+        Class method to access the singleton FIRST Config object.
+
+        Parameters
+        ----------
+        reset:bool
+            Forces the stored _FirstConfig to reset to None.  This is mainly used in testing to ensure changes to configs don't leak into subsequent tests        
+       
+        Returns
+        -------
+        FirstEventsConfig
+            A FirstEventsConfig object representing the configuration settings
+        """
+        if reset:
+            cls._FirstConfig = None
+
         if cls._FirstConfig is None:
-            config = cls.getConfig()["FRC_events"]
+            config = cls.getConfig(reset=reset)["FRC_events"]
             cls._FirstConfig = FirstEventsConfig.model_validate(config)
         return cls._FirstConfig
     
