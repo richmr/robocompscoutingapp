@@ -1,5 +1,5 @@
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Union, List
 import requests
 import datetime
@@ -24,11 +24,15 @@ class FirstEvent(BaseModel):
     dateEnd:datetime.datetime
 
 class FirstTeam(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     eventCode:str
     nameShort:str
     teamNumber:int
 
 class FirstMatch(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     eventCode:str
     description:str
     matchNumber:int

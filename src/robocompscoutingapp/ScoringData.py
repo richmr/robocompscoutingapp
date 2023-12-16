@@ -68,9 +68,6 @@ def getGameModeAndScoringElements(scoring_page_id:int) -> ModesAndItems:
 
 from robocompscoutingapp.FirstEventsAPI import FirstMatch, FirstTeam
 
-class MatchesAndTeams(BaseModel):
-    matches:Dict[int, FirstMatch]
-    teams:Dict[int, FirstTeam]
 
 def storeTeams(team_list:List[FirstTeam]):
     """
@@ -114,11 +111,26 @@ def storeMatches(match_list:List[FirstMatch]):
             except Exception as badnews:
                 raise(f"Unable to add team {match.matchNumber} for event {match.eventCode} because {badnews}")
 
+class MatchesAndTeams(BaseModel):
+    matches:Dict[int, FirstMatch]
+    teams:Dict[int, FirstTeam]
 
 def getMatchesAndTeams() -> MatchesAndTeams:
     """
     Returns matches and teams for the event (event code is part of configuration)
     """
-    pass
+    with RCSA_DB.getSQLSession() as db:
+        # Get the event code
+        eventCode = RCSA_Config.getFirstConfig().first_event_id
+        # get all the matches
+        matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)). all()
+        matches = { m.matchNumber:FirstMatch.model_validate(m) for m in matches_db }
+        # get all the teams
+        teams_db = db.scalars(select(TeamsForEvent)).all()
+        teams = { t.teamNumber: FirstTeam.model_validate(t) for t in teams_db }
+        return MatchesAndTeams(
+            matches=matches,
+            teams=teams
+        )
 
 

@@ -18,7 +18,8 @@ from robocompscoutingapp.ScoringData import (
     getGameModeAndScoringElements,
     getCurrentScoringPageID, 
     storeTeams,
-    storeMatches
+    storeMatches,
+    getMatchesAndTeams
 )
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
@@ -125,3 +126,32 @@ def test_storeMatches(tmpdir):
         with RCSA_DB.getSQLSession() as db:
             db_match = db.scalars(select(MatchesForEvent)).one()
             assert db_match.scored == False
+
+def test_getMatchesAndTeams(tmpdir):
+     with gen_test_env_and_enter(tmpdir):
+        # set event code
+        RCSA_Config.getFirstConfig().first_event_id = "CALA"
+        # Store some results
+        team = FirstTeam(
+            eventCode="CALA",
+            nameShort="Flame of the West",
+            teamNumber=2584
+        )
+        # save it
+        storeTeams([team])
+        match = FirstMatch(
+            eventCode = "CALA",
+            description = "Test 1",
+            matchNumber = 1,
+            Red1 = 1,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 4,
+            Blue2 = 5,
+            Blue3 = 6
+        )
+        storeMatches([match])
+     
+        result = getMatchesAndTeams()
+        assert len(result.matches) == 1
+        assert len(result.teams) == 1
