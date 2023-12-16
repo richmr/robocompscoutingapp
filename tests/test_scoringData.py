@@ -19,7 +19,11 @@ from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageID, 
     storeTeams,
     storeMatches,
-    getMatchesAndTeams
+    getMatchesAndTeams,
+    addScoresToDB,
+    Score,
+    ScoredMatchForTeam,
+    teamAlreadyScoredForThisMatch
 )
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
@@ -27,7 +31,8 @@ from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringItemsForScoringPage,
     TeamsForEvent,
     MatchesForEvent,
-    RCSA_DB
+    RCSA_DB,
+    ScoresForEvent
 )
 from robocompscoutingapp.FirstEventsAPI import (
     FirstTeam,
@@ -155,3 +160,31 @@ def test_getMatchesAndTeams(tmpdir):
         result = getMatchesAndTeams()
         assert len(result.matches) == 1
         assert len(result.teams) == 1
+
+def test_addScores(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        scores = [
+            Score(scoring_item_id=1, value=1),
+            Score(scoring_item_id=2, value=True),
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=1,
+            teamNumber=2584,
+            scores=scores
+        )
+        addScoresToDB("CALA", score_obj)
+
+        # verify results
+        with RCSA_DB.getSQLSession() as db:
+            test = db.scalars(select(ScoresForEvent).filter_by(
+                matchNumber=1,
+                eventCode = "CALA",
+                teamNumber =2584,
+                scoring_item_id = 1
+            )).one()
+            assert test.value == "1"
+
+        # Also verify this works
+        assert teamAlreadyScoredForThisMatch(2584, 1, "CALA") == True
+
+    

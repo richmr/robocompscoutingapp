@@ -105,11 +105,12 @@ class MatchesForEvent(rcsa_scoring_tables):
 class ScoresForEvent(rcsa_scoring_tables):
     __tablename__ = "ScoresForEvent"
     __table_args__ = (
-        UniqueConstraint("eventCode", "teamNumber", "scoring_item_id",  
+        UniqueConstraint("eventCode", "teamNumber", "scoring_item_id", "matchNumber", 
                          name="ScoresForEvent_uniq_score_item_per_team_per_event"),
     )
 
     score_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    matchNumber: Mapped[int]
     eventCode:Mapped[str]
     teamNumber:Mapped[int]
     scoring_item_id:Mapped[int]

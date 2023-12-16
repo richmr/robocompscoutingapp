@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, ConfigDict
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
@@ -112,7 +112,7 @@ def storeMatches(match_list:List[FirstMatch]):
                 raise(f"Unable to add team {match.matchNumber} for event {match.eventCode} because {badnews}")
 
 class MatchesAndTeams(BaseModel):
-    # using dicts here to help with finding info from the scoring page late
+    # using dicts here to help with finding info from the scoring page later
     matches:Dict[int, FirstMatch]   # int is the matchNumber
     teams:Dict[int, FirstTeam]      # int is the teamNumber
 
@@ -124,7 +124,7 @@ def getMatchesAndTeams() -> MatchesAndTeams:
         # Get the event code
         eventCode = RCSA_Config.getFirstConfig().first_event_id
         # get all the matches
-        matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)). all()
+        matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)).all()
         matches = { m.matchNumber:FirstMatch.model_validate(m) for m in matches_db }
         # get all the teams
         teams_db = db.scalars(select(TeamsForEvent)).all()
@@ -133,5 +133,67 @@ def getMatchesAndTeams() -> MatchesAndTeams:
             matches=matches,
             teams=teams
         )
+
+
+
+def teamAlreadyScoredForThisMatch(teamNumber:int, matchNumber:int, eventCode:str) -> bool:
+    """
+    Returns true if this team has already had its scores for this event filed
+
+    Parameters
+    ----------
+    teamNumber:int
+        Official team number
+    matchNumber:int
+        Match number for this score
+    eventCode:str
+        Official eventCode for this event
+
+    Returns
+    -------
+    bool
+        True if there are alredy scores for this team, match, and event; False otherwise
+    """
+    with RCSA_DB.getSQLSession() as db:
+        check = db.scalars(select(ScoresForEvent).filter_by(eventCode=eventCode, teamNumber=teamNumber, matchNumber=matchNumber)).all()
+        if len(check) > 0:
+            return True
+        else:
+            return False
+
+class Score(BaseModel):
+    scoring_item_id:int
+    value:Union[str, int, bool, float]
+
+class ScoredMatchForTeam(BaseModel):
+    matchNumber:int
+    teamNumber:int
+    scores:List[Score]
+
+def addScoresToDB(eventCode:str, match_score:ScoredMatchForTeam):
+    """
+    Saves the recorded scores to the DB
+
+    Parameters
+    ----------
+    eventCode:str
+        Event code for the scored event
+    match_score:ScoredMatchForTeam
+        ScoredMatchForTeam object
+    """
+    with RCSA_DB.getSQLSession() as db:
+        try:
+            to_add = [ScoresForEvent(**a_score.model_dump() | {
+                "eventCode":eventCode,
+                "matchNumber":match_score.matchNumber,
+                "teamNumber":match_score.teamNumber
+            }) for a_score in match_score.scores]
+            db.add_all(to_add)
+            db.commit()
+        except IntegrityError:
+            raise Exception(f"Your submitted scoring had multiple score entries for the same scoring item, please check.  No scoring data saved.")
+        except Exception as badnews:
+            raise Exception(f"Unable to add scores to DB because {badnews}")
+        
 
 
