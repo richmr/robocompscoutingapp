@@ -1,6 +1,7 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, ConfigDict
-from typing import Dict
+from typing import Dict, List
 
 from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
@@ -8,6 +9,9 @@ from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
     ModesForScoringPage,
     ScoringItemsForScoringPage,
+    TeamsForEvent,
+    MatchesForEvent,
+    ScoresForEvent,
     RCSA_DB
 )
 
@@ -61,5 +65,60 @@ def getGameModeAndScoringElements(scoring_page_id:int) -> ModesAndItems:
         items = db.scalars(select(ScoringItemsForScoringPage).filter_by(scoring_page_id=scoring_page_id)).all()
         item_dict = {i.name:ScoringItem.model_validate(i) for i in items}
         return ModesAndItems(modes=mode_dict, scoring_items=item_dict)
+
+from robocompscoutingapp.FirstEventsAPI import FirstMatch, FirstTeam
+
+class MatchesAndTeams(BaseModel):
+    matches:Dict[int, FirstMatch]
+    teams:Dict[int, FirstTeam]
+
+def storeTeams(team_list:List[FirstTeam]):
+    """
+    Saves the list of teams to the database
+
+    Parameters
+    ----------
+    team_list:List[FirstTeam]
+        List of FirstTeam objects (Directly from FirstAPI.getTeamsAtEvent)
+    """
+    with RCSA_DB.getSQLSession() as db:
+        for team in team_list:
+            try:
+                new_db_team = TeamsForEvent(**team.model_dump())
+                db.add(new_db_team)
+                db.commit()
+            except IntegrityError:
+                # Already added for this event
+                db.rollback()
+            except Exception as badnews:
+                raise(f"Unable to add team {team.teamNumber} for event {team.eventCode} because {badnews}")
+        
+def storeMatches(match_list:List[FirstMatch]):
+    """
+    Saves the list of teams to the database
+
+    Parameters
+    ----------
+    match_list:List[FirstMatch]
+        List of FirstMatch objects (Directly from FirstAPI.getMatchesAtEvent)
+    """
+    with RCSA_DB.getSQLSession() as db:
+        for match in match_list:
+            try:
+                new_db_team = MatchesForEvent(**match.model_dump())
+                db.add(new_db_team)
+                db.commit()
+            except IntegrityError:
+                # Already added for this event
+                db.rollback()
+            except Exception as badnews:
+                raise(f"Unable to add team {match.matchNumber} for event {match.eventCode} because {badnews}")
+
+
+def getMatchesAndTeams() -> MatchesAndTeams:
+    """
+    Returns matches and teams for the event (event code is part of configuration)
+    """
+    pass
 
 
