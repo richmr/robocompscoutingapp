@@ -112,8 +112,9 @@ def storeMatches(match_list:List[FirstMatch]):
                 raise(f"Unable to add team {match.matchNumber} for event {match.eventCode} because {badnews}")
 
 class MatchesAndTeams(BaseModel):
-    matches:Dict[int, FirstMatch]
-    teams:Dict[int, FirstTeam]
+    # using dicts here to help with finding info from the scoring page late
+    matches:Dict[int, FirstMatch]   # int is the matchNumber
+    teams:Dict[int, FirstTeam]      # int is the teamNumber
 
 def getMatchesAndTeams() -> MatchesAndTeams:
     """
