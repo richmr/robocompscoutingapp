@@ -6,6 +6,7 @@ from contextlib import contextmanager
 import os
 import yaml
 import requests
+from sqlalchemy import select
 
 from uvicorn import Config
 
@@ -15,13 +16,21 @@ from robocompscoutingapp.Initialize import Initialize
 from robocompscoutingapp.Integrate import Integrate
 from robocompscoutingapp.ScoringData import (
     getGameModeAndScoringElements,
-    getCurrentScoringPageID
+    getCurrentScoringPageID, 
+    storeTeams,
+    storeMatches
 )
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
     ModesForScoringPage,
     ScoringItemsForScoringPage,
+    TeamsForEvent,
+    MatchesForEvent,
     RCSA_DB
+)
+from robocompscoutingapp.FirstEventsAPI import (
+    FirstTeam,
+    FirstMatch
 )
 
 @contextmanager
@@ -75,3 +84,44 @@ def test_getGameModeAndScoringElements(tmpdir):
 def test_scoring_page_id(tmpdir):
     with gen_test_env_and_enter(tmpdir):
         assert getCurrentScoringPageID() == 1
+
+def test_storeTeams(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        # Quick fake team
+        team = FirstTeam(
+            eventCode="CALA",
+            nameShort="Flame of the West",
+            teamNumber=2584
+        )
+        # save it
+        storeTeams([team])
+        # If we make it here, really no reason why it wouldn't work
+        # Try it again to see if integrity error fails smoothly
+        storeTeams([team])
+
+        # Now make sure it wasn't added twice
+        with RCSA_DB.getSQLSession() as db:
+            teams = db.scalars(select(TeamsForEvent)).all()
+            assert len(teams) == 1
+        
+def test_storeMatches(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        match = FirstMatch(
+            eventCode = "CALA",
+            description = "Test 1",
+            matchNumber = 1,
+            Red1 = 1,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 4,
+            Blue2 = 5,
+            Blue3 = 6
+        )
+        storeMatches([match])
+        # Test integrity error
+        storeMatches([match])
+
+        # Make sure it was stored once
+        with RCSA_DB.getSQLSession() as db:
+            db_match = db.scalars(select(MatchesForEvent)).one()
+            assert db_match.scored == False

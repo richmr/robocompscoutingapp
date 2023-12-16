@@ -58,82 +58,7 @@ def test_team_selector():
         assert parser.teamSelectorParse() == True
 
 
-# def test_scoring_items():
-#     # with pytest.warns(ScoringPageParseWarning):
-#         # Suppress the warning about game modes.  Already tested.
-#         # Get dict with two items each for _tally and _flag
-#         input = """
-#             <div class="scoring">
-#             <div class="score_tally" data-scorename="Test Tally 1"></div>
-#             <div class="score_tally" data-scorename="Test Tally 2"></div>
-#             <div class="score_flag" data-scorename="Test Flag 1"></div>
-#             <div class="score_flag" data-scorename="Test Flag 2"></div>
-#             </div>
-#         """
-#         parser = MatchAndTeamSelectionParser(input)
-#         scoring_dict = parser.collectScoringItems()
-#         assert "score_tally" in scoring_dict.keys()
-#         assert ["Test Tally 1", "Test Tally 2"].sort() == scoring_dict["score_tally"].sort()
-#         assert "score_flag" in scoring_dict.keys()
-#         assert ["Test Flag 1", "Test Flag 2"].sort() == scoring_dict["score_flag"].sort()    
 
-#         # Fail because no scoring items found
-#         with pytest.raises(MatchAndTeamSelectionParseError):
-#             input = """
-#                 <div  data-scorename="Test Tally 1"></div>
-#                 <div  data-scorename="Test Tally 2"></div>
-#                 <div  data-scorename="Test Flag 1"></div>
-#                 <div  data-scorename="Test Flag 2"></div>
-#             """
-#             parser = MatchAndTeamSelectionParser(input)
-#             scoring_dict = parser.collectScoringItems()
-
-#         # Fail because two scoring items with same name in same mode found
-#         with pytest.raises(MatchAndTeamSelectionParseError):
-#             input = """
-#                 <div class="score_tally" data-scorename="Same Name"></div>
-#                 <div class="score_tally" data-scorename="Same Name"></div>
-#                 <div class="score_flag" data-scorename="Test Flag 1"></div>
-#                 <div class="score_flag" data-scorename="Test Flag 2"></div>
-#             """
-#             parser = MatchAndTeamSelectionParser(input)
-#             scoring_dict = parser.collectScoringItems()
-
-#         # Fail because two scoring items with same name in different modes found
-#         with pytest.raises(MatchAndTeamSelectionParseError):
-#             input = """
-#                 <div class="score_tally" data-scorename="Same Name"></div>
-#                 <div class="score_tally" data-scorename="Test Tally 2"></div>
-#                 <div class="score_flag" data-scorename="Test Flag 1"></div>
-#                 <div class="score_flag" data-scorename="Same Name"></div>
-#             """
-#             parser = MatchAndTeamSelectionParser(input)
-#             scoring_dict = parser.collectScoringItems()
-
-#         # Fail because scoring item with onlyformode has mode that does not exist
-#         with pytest.raises(MatchAndTeamSelectionParseError):
-#             input = """
-#                 <div class="score_tally" data-onlyformode="not exist" data-scorename="Same Name"></div>
-#                 <div class="score_tally" data-scorename="Test Tally 2"></div>
-#                 <div class="score_flag" data-scorename="Test Flag 1"></div>
-#                 <div class="score_flag" data-scorename="Same Name"></div>
-#             """
-#             parser = MatchAndTeamSelectionParser(input)
-#             scoring_dict = parser.collectScoringItems()
-
-#         # Fail because no activity name defined
-#         with pytest.raises(MatchAndTeamSelectionParseError):
-#             input = """
-#                 <div class="score_tally"></div>
-#             """
-#             parser = MatchAndTeamSelectionParser(input)
-#             scoring_dict = parser.collectScoringItems()
-
-# @pytest.fixture
-# def get_test_data_path() -> Path:
-#     current_file_path = Path(__file__)
-#     data_path = current_file_path.parent/"data"
-#     return data_path
 
 def test_full_element_parse():
     # Full success
@@ -141,6 +66,7 @@ def test_full_element_parse():
         <div class="match_and_team_selection">
             <select class="match_selector"></select>
             <select class="team_selector"></select>
+            <button class="button btn-big begin_scoring">Begin Scoring</button>
         </div>
     """
     parser = MatchAndTeamSelectionParser(test_html)
@@ -158,7 +84,7 @@ def test_full_element_parse():
     parser = MatchAndTeamSelectionParser(test_html)
     pr = parser.parseElement()
     assert pr.hasErrors() == True
-    assert len(pr.errors) == 2
+    assert len(pr.errors) == 3
     assert pr.hasWarnings() == False
 
 def test_validation_output(capfd, getFullTemplateFile):
