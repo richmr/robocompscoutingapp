@@ -72,6 +72,50 @@ class ScoringItemsForScoringPage(rcsa_scoring_tables):
     name: Mapped[str]
     type: Mapped[str]
 
+# Items below here abandon my convention of parameters being all lower_case to better match the output from the First Event APIs
+
+class TeamsForEvent(rcsa_scoring_tables):
+    __tablename__ = "TeamsForEvent"
+    __table_args__ = (
+        UniqueConstraint("eventCode", "teamNumber", name="TeamsForEvent_unique_team_per_event"),
+    )
+    team_for_event_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    eventCode: Mapped[str]
+    nameShort: Mapped[str]
+    teamNumber: Mapped[int]
+
+class MatchesForEvent(rcsa_scoring_tables):
+    __tablename__ = "MatchesForEvent"
+    __table_args__ = (
+        UniqueConstraint("eventCode", "matchNumber", name="MatchesForEvent_uniq_match_per_event"),
+    )
+
+    match_per_event: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) 
+    eventCode:Mapped[str]
+    description:Mapped[str]
+    matchNumber:Mapped[int]
+    Red1:Mapped[int]
+    Red2:Mapped[int]
+    Red3:Mapped[int]
+    Blue1:Mapped[int]
+    Blue2:Mapped[int]
+    Blue3:Mapped[int]
+    scored:Mapped[bool] = mapped_column(default=False)
+
+class ScoresForEvent(rcsa_scoring_tables):
+    __tablename__ = "ScoresForEvent"
+    __table_args__ = (
+        UniqueConstraint("eventCode", "teamNumber", "scoring_item_id",  
+                         name="ScoresForEvent_uniq_score_item_per_team_per_event"),
+    )
+
+    score_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    eventCode:Mapped[str]
+    teamNumber:Mapped[int]
+    scoring_item_id:Mapped[int]
+    value:Mapped[str] # Strings are most flexible here, interpretation up to the code that handles "type" of scoring item
+
+
 ######### DB ACCESS ############    
 
 class RCSA_DB:
