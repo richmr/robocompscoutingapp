@@ -59,6 +59,17 @@ class MatchAndTeamSelectionParser:
             raise MatchAndTeamSelectionParseError("Multiple selection elements with 'team_selector' class. Only one is permitted.")
         return True
     
+    def beginScoringButtonParse(self) -> bool:
+        """
+        Returns true if the begin_scoring button is present
+        """
+        target_div = self.soup.find_all("button", {"class":"begin_scoring"})
+        if len(target_div) == 0:
+            raise MatchAndTeamSelectionParseError("No button element with 'begin_scoring' class present.  This should be present after the match and team selection")
+        if len(target_div) > 1:
+            raise MatchAndTeamSelectionParseWarning("Multiple button elements with 'begin_scoring' class. This is ok, but did you want this?")
+        return True
+    
     def parseElement(self) -> MatchAndTeamSelectionParseResult:
         errors = []
         pr = MatchAndTeamSelectionParseResult()
@@ -67,6 +78,7 @@ class MatchAndTeamSelectionParser:
                 ParsingFunctionToCall(method_to_call=self.matchDivPresent),
                 ParsingFunctionToCall(method_to_call=self.matchSelectorParse),
                 ParsingFunctionToCall(method_to_call=self.teamSelectorParse),
+                ParsingFunctionToCall(method_to_call=self.beginScoringButtonParse)
             ]
             for a_parser in parsers:
                 try:
