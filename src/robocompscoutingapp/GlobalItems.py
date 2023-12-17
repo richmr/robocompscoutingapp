@@ -8,6 +8,9 @@ import pytest
 from pathlib import Path
 from tomlkit import TOMLDocument, table, comment
 from tomlkit.toml_file import TOMLFile
+from pydantic import BaseModel, Field, field_validator
+from typing import Union
+from typing_extensions import Annotated
 
 from robocompscoutingapp.FirstEventsAPI import FirstEventsConfig
 
@@ -68,6 +71,41 @@ rcsa_database_name = "rcsa_scoring.db"
 # name for the primary config file
 rcsa_config_filename = "rcsa_config.toml"
 
+# Models to store the information from the TOML config
+# I do this so I get better coding hints and autofill across files. I'm a bit lazy
+class SecretsConfig(BaseModel):
+    basic_auth_username:Union[str, bool] 
+    basic_auth_password:Union[str, bool] 
+    FRC_Events_API_Username:str
+    FRC_Events_API_Auth_Token:str
+
+class FRCEventsConfig(BaseModel):
+    first_event_id:Union[str,bool] 
+    district_id:Union[str,bool] 
+    URL_Root:str 
+
+class ServerConfig(BaseModel):
+    IP_Address:str  
+    port:int 
+    user_static_folder:Union[bool, Path] 
+    scoring_database:Union[bool, Path] 
+    log_filename:Union[bool, Path] 
+    log_level:str
+    scoring_page:Path
+    FQDN:str 
+
+    @field_validator("log_level")
+    @classmethod
+    def log_level_validator(cls, v:str):
+        if v not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            raise ValueError(f'{v} must be "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"')
+        return v
+
+class RCSAConfig(BaseModel):
+    Secrets:SecretsConfig
+    FRCEvents:FRCEventsConfig
+    ServerConfig:ServerConfig    
+
 class RCSA_Config:
     """
     Class that connects to the toml file and returns TOML object to use
@@ -75,9 +113,10 @@ class RCSA_Config:
 
     _TOMLDocument = None
     _FirstConfig = None
+    _RCSAConfig = None
 
     @classmethod
-    def getConfig(cls, reset:bool = False, test_TOML:TOMLDocument = None) -> TOMLDocument:
+    def getConfig(cls, reset:bool = False, test_TOML:TOMLDocument = None) -> RCSAConfig:
         """
         Class method to access the singleton Configuration page.
 
@@ -104,9 +143,33 @@ class RCSA_Config:
             toml_path = Path(rcsa_config_filename)
             if not toml_path.exists():
                 raise FileNotFoundError(f"{rcsa_config_filename} expected in current working directory.  Run this app from the directory you created with 'initialize'")
-            # type(self) here to set the class, not instance variable
             cls._TOMLDocument = TOMLFile(toml_path).read()
-        return cls._TOMLDocument
+
+            cls.resetRCSAConfig()
+
+        return cls._RCSAConfig
+    
+    @classmethod
+    def resetRCSAConfig(cls):
+        """
+        Reloads RCSA config from the contents of the _TOMLDocument
+        """
+        # Convert to models
+        serverConfig = ServerConfig.model_validate(cls._TOMLDocument["ServerConfig"])
+        frcEventsConfig = FRCEventsConfig.model_validate(cls._TOMLDocument["FRCEvents"])
+
+        # Secrets has to be read from the correct file
+        secrets_toml = Path(cls._TOMLDocument["Secrets"]["secrets_file"])
+        if not secrets_toml.expanduser().absolute().exists():
+            raise FileNotFoundError(f"Secrets file not found at {secrets_toml}.  Please set this to the correct location for the secrets file.")
+        secrets_doc = TOMLFile(secrets_toml.expanduser().absolute()).read()
+        secretsConfig = SecretsConfig.model_validate(secrets_doc["Secrets"])
+
+        cls._RCSAConfig = RCSAConfig(
+            Secrets=secretsConfig,
+            FRCEvents=frcEventsConfig,
+            ServerConfig=serverConfig
+        )
     
     @classmethod
     def getFirstConfig(cls, reset:bool = False) -> FirstEventsConfig:

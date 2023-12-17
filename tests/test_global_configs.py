@@ -5,7 +5,7 @@ from tomlkit import TOMLDocument
 from pathlib import Path
 import contextlib
 
-from robocompscoutingapp.GlobalItems import RCSA_Config
+from robocompscoutingapp.GlobalItems import RCSA_Config, RCSAConfig
 
 # @pytest.fixture
 def getTestConfig() -> TOMLDocument:
@@ -31,11 +31,15 @@ def test_missing_config():
                 config = RCSA_Config.getConfig(reset=True)
 
 def test_found_config():
-    config = getTestConfig()
+    with contextlib.chdir("src/robocompscoutingapp/initialize"):
+        config = RCSA_Config.getConfig()
+        assert isinstance(config,RCSAConfig)
+
 
 def test_singleton_config():
     # First load it once
-    config = getTestConfig()
+    with contextlib.chdir("src/robocompscoutingapp/initialize"):
+        config = RCSA_Config.getConfig()
     # Now change dir and try again
     with contextlib.chdir(tempfile.gettempdir()):
         config = RCSA_Config.getConfig()

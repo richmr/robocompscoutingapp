@@ -12,7 +12,7 @@ from robocompscoutingapp.GlobalItems import rcsa_config_filename
 
 class Initialize:
 
-    def __init__(self, target_directory:Path) -> None:
+    def __init__(self, target_directory:Path = Path(".")) -> None:
         self.dst_path = Path(target_directory)
 
         # set the src directory
@@ -40,7 +40,19 @@ class Initialize:
         Copies all the files in the package 'initialize' directory to the target directory
         Set overwrite to "True" to re-initialize a directory
         """
-        shutil.copytree(str(self.src_path), str(self.dst_path), dirs_exist_ok=overwrite)
+        shutil.copytree(str(self.src_path), 
+                        str(self.dst_path), 
+                        dirs_exist_ok=overwrite,
+                        # Don't copy this file now, it needs to for to user home
+                        ignore=shutil.ignore_patterns(".RCSA_SECRETS.toml")
+        )
+
+        #  Now copy over the sample secrets file
+        secrets_src_path = self.src_path/".RCSA_SECRETS.toml"
+        secrets_dst_path = Path("~").expanduser().absolute()/".RCSA_SECRETS.toml"
+        # Only copy if it doesn't already exist, so we don't overwrite saved auth info
+        if not secrets_dst_path.exists():
+            shutil.copy(str(secrets_src_path), str(secrets_dst_path))
 
     def setupTOML(self):
         """
@@ -48,9 +60,9 @@ class Initialize:
         """
         rcsa_config_file = TOMLFile(self.dst_path/rcsa_config_filename)
         rcsa_config = rcsa_config_file.read()
-        rcsa_config["Server_Config"]["user_static_folder"] = str(self.dst_path.absolute()/"static")
-        rcsa_config["Server_Config"]["scoring_database"] = str(self.dst_path.absolute()/"rcsa_scoring.db")
-        rcsa_config["Server_Config"]["log_filename"] = str(self.dst_path.absolute()/"logs/rcsa_logs.log")
+        rcsa_config["ServerConfig"]["user_static_folder"] = str(self.dst_path.absolute()/"static")
+        rcsa_config["ServerConfig"]["scoring_database"] = str(self.dst_path.absolute()/"rcsa_scoring.db")
+        rcsa_config["ServerConfig"]["log_filename"] = str(self.dst_path.absolute()/"logs/rcsa_logs.log")
         
         rcsa_config_file.write(rcsa_config)
    
@@ -79,8 +91,8 @@ class Initialize:
         Parameters
         ----------
         key_list:list
-            A list of nested keys like ["Server_Config", "user_static_folder"] to get to the key you are looking for.
-            The above is the same as TOMLDocument["Server_Config"]["user_static_folder"].  No key checking provided
+            A list of nested keys like ["", "user_static_folder"] to get to the key you are looking for.
+            The above is the same as TOMLDocument[""]["user_static_folder"].  No key checking provided
 
         value
             The value to set the key to.  No type checking, user must get it right for the TOML
