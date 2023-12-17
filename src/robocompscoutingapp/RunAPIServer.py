@@ -35,8 +35,8 @@ class RunAPIServer:
         if self.daemon:
             handlers = "[access]"
         file_edits = {
-            "log_filename":self.server_config["log_filename"],
-            "log_level":self.server_config["log_level"],
+            "log_filename":self.server_config.log_filename,
+            "log_level":self.server_config.log_level,
             "handlers":handlers
         }
         try:
@@ -54,8 +54,8 @@ class RunAPIServer:
         Runs the server
         """
         self.setupLoggingYAML()
-        host = self.server_config["IP_Address"]
-        port = self.server_config["port"]
+        host = self.server_config.IP_Address
+        port = self.server_config.port
         config = Config("robocompscoutingapp.web:rcsa_api_app", host=host, port=port, reload=False, log_config=str(self.logging_yaml_file))
         self.server = ThreadedUvicorn(config)
         self.server.start()
