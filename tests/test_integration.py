@@ -22,7 +22,7 @@ def gen_test_config(temp_dir_path:Path):
     server_config = table()
     server_config.add("scoring_database", f"{temp_dir_path}/rcsa_scoring.db")
     server_config.add("scoring_page", "tests/data/integration_test_data/integration_test.html")
-    new_doc["Server_Config"] = server_config
+    new_doc["ServerConfig"] = server_config
     return new_doc
 
 def setupTempDB(temp_path):

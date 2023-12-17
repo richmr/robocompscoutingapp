@@ -12,12 +12,12 @@ def test_create_database():
 
     # Now establish tempdir and modify the config
     with tempfile.TemporaryDirectory() as tempdir:
-        config["Server_Config"]["user_static_folder"] = tempdir
+        config["ServerConfig"]["user_static_folder"] = tempdir
         # Call RCSA_DB() to get it set up
         # RCSA_DB()
         #  Now open the session
         with RCSA_DB.getSQLSession(reset=True) as session:
-            db_file = Path(config["Server_Config"]["scoring_database"])
+            db_file = Path(config["ServerConfig"]["scoring_database"])
             assert db_file.exists()
 
             # check declared tables are made

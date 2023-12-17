@@ -44,7 +44,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
-    init.updateTOML(["Server_Config", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
+    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
     # Now enter the directory
     cwd = os.getcwd() 
     # Validate the page

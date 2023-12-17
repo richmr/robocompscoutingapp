@@ -36,7 +36,7 @@ def validate(html_file: Annotated[Path, typer.Argument(help="The finely crafted 
                 doit = Confirm.ask(f"Would you like me to update the scoring_page setting to {html_file.name}?")
                 if doit:
                     try:
-                        init.updateTOML(["Server_Config", "scoring_page"], html_file.name, tgt_dir=path_to_toml)
+                        init.updateTOML(["ServerConfig", "scoring_page"], html_file.name, tgt_dir=path_to_toml)
                     except Exception as badnews:
                         ft.error(f"Whoops.  I couldn't update because {badnews}.  You will need to do it manually")
     else:

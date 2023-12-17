@@ -39,7 +39,7 @@ def test_hash(broken_template_file):
     # Now establish tempdir and modify the config
     with tempfile.TemporaryDirectory() as tempdir:
         print(tempdir)
-        config["Server_Config"]["user_static_folder"] = tempdir
+        config["ServerConfig"]["user_static_folder"] = tempdir
         uhp = UserHTMLProcessing(broken_template_file)
         h = uhp.getFileHash()
         assert h == "c539b61e9838f032c89e2c22306346d35350a9e359c1be39a5560e0b660d84d4"
@@ -50,8 +50,8 @@ def test_with_database(getFullTemplateFile, broken_template_file):
 
     # Now establish tempdir and modify the config
     with tempfile.TemporaryDirectory() as tempdir:
-        config["Server_Config"]["scoring_database"] = f"{tempdir}/rcsa_scoring.db"
-        assert Path(config["Server_Config"]["scoring_database"]).exists() == False
+        config["ServerConfig"]["scoring_database"] = f"{tempdir}/rcsa_scoring.db"
+        assert Path(config["ServerConfig"]["scoring_database"]).exists() == False
         # Reset DB singleton
         RCSA_DB.getSQLSession(reset=True)        
 

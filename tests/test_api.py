@@ -71,7 +71,7 @@ class SingletonTestEnv:
             init = Initialize(cls._temp_dir_obj.name)
             init.initialize(overwrite=True)
             # Update the location of the scoring page
-            init.updateTOML(["Server_Config", "scoring_page"], f"{cls._temp_dir_obj.name}/static/scoring.html", tgt_dir = cls._temp_dir_obj.name)
+            init.updateTOML(["ServerConfig", "scoring_page"], f"{cls._temp_dir_obj.name}/static/scoring.html", tgt_dir = cls._temp_dir_obj.name)
             os.chdir(cls._temp_dir_obj.name)
             uhp = UserHTMLProcessing(f"{cls._temp_dir_obj.name}/static/scoring.html")
             uhp.validate()
@@ -109,7 +109,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
-    init.updateTOML(["Server_Config", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
+    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
     # Now enter the directory
     cwd = os.getcwd() 
     # Validate the page
@@ -136,7 +136,7 @@ def gen_test_environment(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
-    init.updateTOML(["Server_Config", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
+    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
     # Validate the page
     with temp_chdir(temp_dir_path):
         uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring.html")
