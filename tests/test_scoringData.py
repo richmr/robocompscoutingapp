@@ -135,7 +135,7 @@ def test_storeMatches(tmpdir):
 def test_getMatchesAndTeams(tmpdir):
      with gen_test_env_and_enter(tmpdir):
         # set event code
-        RCSA_Config.getFirstConfig().first_event_id = "CALA"
+        RCSA_Config.getConfig().FRCEvents.first_event_id = "CALA"
         # Store some results
         team = FirstTeam(
             eventCode="CALA",

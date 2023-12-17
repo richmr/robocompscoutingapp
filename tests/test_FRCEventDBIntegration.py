@@ -33,7 +33,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
         int = Integrate()
         int.integrate()
 
-        config = RCSA_Config.getFirstConfig()
+        config = RCSA_Config.getConfig().FRCEvents
         config.first_event_id = "CALA"
         fapi = FirstEventsAPI(config=config, season=2023)
 
@@ -42,7 +42,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     except Exception as badnews:
         print("Failed test detected")
         print(f"Temp dir: {temp_dir_path}")
-        print("API Config", RCSA_Config.getFirstConfig())
+        print("API Config", RCSA_Config.getConfig().FRCEvents)
         os.chdir(cwd)
         raise(badnews)
     finally:

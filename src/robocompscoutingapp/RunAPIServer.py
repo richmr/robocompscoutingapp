@@ -22,7 +22,7 @@ class RunAPIServer:
             Will this server run as daemon?
         """
         self.logging_yaml_file = Path(yamlFile)
-        self.server_config = RCSA_Config.getConfig()["Server_Config"]
+        self.server_config = RCSA_Config.getConfig().ServerConfig
         self.daemon = daemon
 
     def setupLoggingYAML(self):

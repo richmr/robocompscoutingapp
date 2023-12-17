@@ -23,7 +23,7 @@ def getCurrentScoringPageID():
     """
     global _scoring_page_id
     if _scoring_page_id is None:
-        sp = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
+        sp = RCSA_Config.getConfig().ServerConfig.scoring_page
         uhp = UserHTMLProcessing(sp)
         _scoring_page_id = uhp.checkForValidatedPageEntry().scoring_page_id
     return _scoring_page_id
@@ -122,7 +122,7 @@ def getMatchesAndTeams() -> MatchesAndTeams:
     """
     with RCSA_DB.getSQLSession() as db:
         # Get the event code
-        eventCode = RCSA_Config.getFirstConfig().first_event_id
+        eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
         # get all the matches
         matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)).all()
         matches = { m.matchNumber:FirstMatch.model_validate(m) for m in matches_db }

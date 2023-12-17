@@ -30,7 +30,7 @@ def setupTempDB(temp_path):
     RCSA_Config.getConfig(test_TOML=gen_test_config(temp_path))
     RCSA_DB.getSQLSession(reset=True)
     # Process working file
-    file = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
+    file = RCSA_Config.getConfig().ServerConfig.scoring_page
     uhp = UserHTMLProcessing(file)
     validated = uhp.validate()
     assert validated == True
@@ -40,8 +40,8 @@ def test_not_validated_error(tmp_path):
     # Check for validated file (giggle check)
     # Need a different file because the one in the config will now have been added to the database
     config = RCSA_Config.getConfig()
-    config["Server_Config"]["scoring_page"] = "tests/data/integration_test_data/not_validated.html"
-    uhp = UserHTMLProcessing(config["Server_Config"]["scoring_page"])
+    config.ServerConfig.scoring_page = "tests/data/integration_test_data/not_validated.html"
+    uhp = UserHTMLProcessing(config.ServerConfig.scoring_page)
     valid_found = uhp.checkForValidatedPageEntry()
     assert valid_found is None
 

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Union
 from typing_extensions import Annotated
 
-from robocompscoutingapp.FirstEventsAPI import FirstEventsConfig
+#from robocompscoutingapp.FirstEventsAPI import FirstEventsConfig
 
 class ExtendedEnum(Enum):
     """
@@ -171,28 +171,28 @@ class RCSA_Config:
             ServerConfig=serverConfig
         )
     
-    @classmethod
-    def getFirstConfig(cls, reset:bool = False) -> FirstEventsConfig:
-        """
-        Class method to access the singleton FIRST Config object.
+    # @classmethod
+    # def getFirstConfig(cls, reset:bool = False) -> FirstEventsConfig:
+    #     """
+    #     Class method to access the singleton FIRST Config object.
 
-        Parameters
-        ----------
-        reset:bool
-            Forces the stored _FirstConfig to reset to None.  This is mainly used in testing to ensure changes to configs don't leak into subsequent tests        
+    #     Parameters
+    #     ----------
+    #     reset:bool
+    #         Forces the stored _FirstConfig to reset to None.  This is mainly used in testing to ensure changes to configs don't leak into subsequent tests        
        
-        Returns
-        -------
-        FirstEventsConfig
-            A FirstEventsConfig object representing the configuration settings
-        """
-        if reset:
-            cls._FirstConfig = None
+    #     Returns
+    #     -------
+    #     FirstEventsConfig
+    #         A FirstEventsConfig object representing the configuration settings
+    #     """
+    #     if reset:
+    #         cls._FirstConfig = None
 
-        if cls._FirstConfig is None:
-            config = cls.getConfig(reset=reset)["FRC_events"]
-            cls._FirstConfig = FirstEventsConfig.model_validate(config)
-        return cls._FirstConfig
+    #     if cls._FirstConfig is None:
+    #         config = cls.getConfig(reset=reset)["FRC_events"]
+    #         cls._FirstConfig = FirstEventsConfig.model_validate(config)
+    #     return cls._FirstConfig
     
 from contextlib import contextmanager
 import os

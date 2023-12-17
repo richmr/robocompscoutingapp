@@ -21,7 +21,7 @@ _scoring_page_id = None
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     # Set up the static pages
-    rcsa_api_app.mount(f"/scoring", StaticFiles(directory=RCSA_Config.getConfig()["Server_Config"]["user_static_folder"]), name="scoring")
+    rcsa_api_app.mount(f"/scoring", StaticFiles(directory=RCSA_Config.getConfig().ServerConfig.user_static_folder), name="scoring")
     # analysis static pages
     analysis_dir = files('robocompscoutingapp.web').joinpath("pages")
     rcsa_api_app.mount(f"/analysis", StaticFiles(directory=analysis_dir), name="analysis")

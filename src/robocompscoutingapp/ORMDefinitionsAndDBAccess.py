@@ -148,7 +148,7 @@ class RCSA_DB:
             cls._sqlAConnectionStr = None
 
         if cls._sqlASessionMaker is None:
-            database_file = Path(RCSA_Config.getConfig()["Server_Config"]["scoring_database"])
+            database_file = Path(RCSA_Config.getConfig().ServerConfig.scoring_database)
             # Make sure dir exist
             database_file.parent.mkdir(parents=True, exist_ok=True)
             cls._sqlAConnectionStr = f"sqlite:///{database_file}"

@@ -19,7 +19,7 @@ from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
 class Integrate:
 
     def __init__(self) -> None:
-        self.scoring_page = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
+        self.scoring_page = RCSA_Config.getConfig().ServerConfig.scoring_page
         pass
 
     def verifyScoringPageValidated(self) -> ScoringPageStatus:

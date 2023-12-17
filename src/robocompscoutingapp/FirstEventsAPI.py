@@ -2,9 +2,10 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 from typing import Union, List
 import requests
+from requests.auth import HTTPBasicAuth
 import datetime
 
-# from robocompscoutingapp.GlobalItems import RCSA_Config
+from robocompscoutingapp.GlobalItems import RCSAConfig
 
 # Defining all these Pydantic models so I don't have to guess at key values later
 class FirstEventsConfig(BaseModel):
@@ -48,19 +49,15 @@ class FirstEventsAPI:
     Interface to the First Events API
     """
 
-    def __init__(self, config:FirstEventsConfig, season:int = None) -> None:
+    def __init__(self, config:RCSAConfig, season:int = None) -> None:
         """
         Set up session and common headers        
         """
-        self.config = config
+        self.config = config.FRCEvents
         self.api_session = requests.Session()
-        # Expand user used here because I encourage "~" as a location to store the key
-        with config.APIKey_File.expanduser().absolute().open() as f:
-            self.api_session.headers.update({
-                # API key added this way and not native auth() because I had users store the key as B64 encoded already
-                "Authorization":"Basic " + f.readline().strip(),
-                "Accept":"application/json"
-            })
+        # basic = HTTPBasicAuth(config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
+        self.api_session.auth = (config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
+        self.api_session.headers.update({"Accept":"application/json"})
         if season is None:
             season = datetime.date.today().year
         self.config.URL_Root += f"{season}/"

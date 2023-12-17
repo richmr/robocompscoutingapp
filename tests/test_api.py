@@ -25,23 +25,7 @@ from robocompscoutingapp.RunAPIServer import RunAPIServer
 # https://stackoverflow.com/questions/49753085/python-configure-logger-with-yaml-to-open-logfile-in-write-mode
 # https://docs.python.org/3/howto/logging.html#configuring-logging
 
-# class RCSAUvicornServer:
 
-#     _server_instance = None
-#     _checkouts = 0
-
-#     @classmethod
-#     def start(cls):
-#         if cls._server_instance is None:
-#             app_config = RCSA_Config.getConfig()
-#             uv_config = Config("robocompscoutingapp.web:rcsa_api_app", 
-#                                host=app_config["Server_Config"]["IP_Address"], 
-#                                port=app_config["Server_Config"]["port"], 
-#                                reload=False,
-#                                log_config= 
-#                                log_level=logging_level.value)
-#     server = ThreadedUvicorn(config)
-#     server.start()
 
 
 """
@@ -143,8 +127,8 @@ def gen_test_env_and_enter(temp_dir_path:Path):
         os.chdir(cwd)
 
 def serverBaseURL():
-    host = RCSA_Config.getConfig()["Server_Config"]["IP_Address"]
-    port = RCSA_Config.getConfig()["Server_Config"]["port"]
+    host = RCSA_Config.getConfig().ServerConfig.IP_Address
+    port = RCSA_Config.getConfig().ServerConfig.port
     baseurl = f"http://{host}:{port}"
     return baseurl
 
@@ -206,12 +190,4 @@ def test_shutdown():
 #     start_uvicorn_server
 
 
-# def setupTempDB(temp_path):
-#     # Ensures the target page is entered into the DB
-#     RCSA_Config.getConfig(test_TOML=gen_test_config(temp_path))
-#     RCSA_DB.getSQLSession(reset=True)
-#     # Process working file
-#     file = RCSA_Config.getConfig()["Server_Config"]["scoring_page"]
-#     uhp = UserHTMLProcessing(file)
-#     validated = uhp.validate()
-#     assert validated == True
+

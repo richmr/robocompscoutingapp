@@ -23,7 +23,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
-    init.updateTOML(["Server_Config", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
+    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
     # Now enter the directory
     cwd = os.getcwd() 
     # Validate the page
@@ -40,7 +40,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     except Exception as badnews:
         print("Failed test detected")
         print(f"Temp dir: {temp_dir_path}")
-        print("API Config", RCSA_Config.getFirstConfig())
+        print("API Config", RCSA_Config.getConfig().FRCEvents)
         os.chdir(cwd)
         raise(badnews)
     finally:
@@ -50,14 +50,14 @@ def gen_test_env_and_enter(temp_dir_path:Path):
 
 def test_getDistricts(tmpdir):
     with gen_test_env_and_enter(tmpdir):
-        config = RCSA_Config.getFirstConfig()
+        config = RCSA_Config.getConfig()
         fapi = FirstEventsAPI(config=config)
         districts = fapi.getDistricts()
         assert len(districts) > 0
 
 def test_getEvents(tmpdir):
     with gen_test_env_and_enter(tmpdir):
-        config = RCSA_Config.getFirstConfig(reset=True)
+        config = RCSA_Config.getConfig(reset=True)
         fapi = FirstEventsAPI(config=config)
         events = fapi.getEvents()
         assert len(events) > 0
@@ -68,7 +68,7 @@ def test_getEvents(tmpdir):
 
 def test_getTeams(tmpdir):
     with gen_test_env_and_enter(tmpdir):
-        config = RCSA_Config.getFirstConfig(reset=True)
+        config = RCSA_Config.getConfig(reset=True)
         fapi = FirstEventsAPI(config=config)
         # CALA is the Los Angeles Regional
         teams = fapi.getTeamsAtEvent(eventCode="CALA")
@@ -79,7 +79,7 @@ def test_getTeams(tmpdir):
 
 def test_getMatches(tmpdir):
     with gen_test_env_and_enter(tmpdir):
-        config = RCSA_Config.getFirstConfig(reset=True)
+        config = RCSA_Config.getConfig(reset=True)
         fapi = FirstEventsAPI(config=config, season=2023)
         # CALA is the Los Angeles Regional
         matches = fapi.getMatchesAtEvent(eventCode="CALA")
