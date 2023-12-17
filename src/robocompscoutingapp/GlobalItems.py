@@ -138,6 +138,7 @@ class RCSA_Config:
 
         if test_TOML is not None:
             cls._TOMLDocument = test_TOML
+            cls.resetRCSAConfig()
 
         if cls._TOMLDocument is None:
             toml_path = Path(rcsa_config_filename)

@@ -8,7 +8,7 @@ import contextlib
 from robocompscoutingapp.GlobalItems import RCSA_Config, RCSAConfig
 
 # @pytest.fixture
-def getTestConfig() -> TOMLDocument:
+def getTestConfig() -> RCSAConfig:
     # Tests normally run from repository root dir, need to change to "tests"
     # Where are we?
     # cwd = Path(os.getcwd())
@@ -21,7 +21,7 @@ def getTestConfig() -> TOMLDocument:
     #     # Could be any number of places, try the chdir to throw error
     #     print(cwd)
     #     os.chdir("tests")
-    with contextlib.chdir("tests"):
+    with contextlib.chdir("src/robocompscoutingapp/initialize"):
         return RCSA_Config.getConfig(reset=True)
 
 def test_missing_config():
