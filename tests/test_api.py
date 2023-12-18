@@ -115,6 +115,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     # Validate the page
     try:
         os.chdir(temp_dir_path)
+        RCSA_Config.getConfig(reset=True)
         uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring.html")
         uhp.validate()
         # Integrate it to set the data
@@ -123,6 +124,9 @@ def gen_test_env_and_enter(temp_dir_path:Path):
 
         # Go do what the test needs
         yield
+    except Exception as badnews:
+        print("Failed test detected")
+        raise(badnews)
     finally:
         os.chdir(cwd)
 
@@ -146,12 +150,13 @@ def gen_test_environment(temp_dir_path:Path):
         int.integrate()
 
 
-def test_yaml_overwrite():
-    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+def test_yaml_overwrite(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        RunAPIServer().setupLoggingYAML()
         with open("logs/rcsa_log_config.yaml") as f:
             y = yaml.safe_load(f)
-            assert y["handlers"]["default"]["filename"] == f"{temp_dir}/logs/rcsa_logs.log"
-            assert y["handlers"]["file"]["filename"] == f"{temp_dir}/logs/rcsa_logs.log"
+            assert y["handlers"]["default"]["filename"] == f"{tmpdir}/logs/rcsa_logs.log"
+            assert y["handlers"]["file"]["filename"] == f"{tmpdir}/logs/rcsa_logs.log"
             assert y["loggers"]["uvicorn.error"]["level"] == f"INFO"
             assert y["loggers"]["uvicorn.access"]["level"] == f"INFO"
 

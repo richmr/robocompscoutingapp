@@ -50,7 +50,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
 
 def test_getDistricts(tmpdir):
     with gen_test_env_and_enter(tmpdir):
-        config = RCSA_Config.getConfig()
+        config = RCSA_Config.getConfig(reset=True)
         fapi = FirstEventsAPI(config=config)
         districts = fapi.getDistricts()
         assert len(districts) > 0
