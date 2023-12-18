@@ -25,26 +25,14 @@ from robocompscoutingapp.RunAPIServer import RunAPIServer
 # https://stackoverflow.com/questions/49753085/python-configure-logger-with-yaml-to-open-logfile-in-write-mode
 # https://docs.python.org/3/howto/logging.html#configuring-logging
 
+# This is running tests as the other API endpoints, but testing with auth
 
-
-
-"""
-Expected data
-sqlite> select * from ModesForScoringPage ;
-mode_id     scoring_page_id  mode_name 
-----------  ---------------  ----------
-1           1                Auton     
-2           1                Teleop    
-sqlite> select * from ScoringItemsForScoringPage ;
-scoring_item_id  scoring_page_id  name        type       
----------------  ---------------  ----------  -----------
-1                1                cone        score_tally
-2                1                cube        score_tally
-3                1                Attempted   score_flag 
-4                1                Succeeded   score_flag 
-5                1                Auton Mobi  score_flag 
-6                1                Broke       score_flag 
-sqlite> 
+fake_secrets_toml = """
+[Secrets]
+basic_auth_username = "test"
+basic_auth_password = "test"
+FRC_Events_API_Username = "sample"
+FRC_Events_API_Auth_Token = "notakey"
 """
 
 class SingletonTestEnv:
@@ -73,11 +61,16 @@ class SingletonTestEnv:
             # Update the location of the scoring page
             init.updateTOML(["ServerConfig", "scoring_page"], f"{cls._temp_dir_obj.name}/static/scoring.html", tgt_dir = cls._temp_dir_obj.name)
             os.chdir(cls._temp_dir_obj.name)
+            # Set up some fake credentials
+            with open("fake_secrets.toml", "w") as f:
+                f.write(fake_secrets_toml)
+            init.updateTOML(["Secrets", "secrets_file"], f"{cls._temp_dir_obj.name}/fake_secrets.toml", tgt_dir = cls._temp_dir_obj.name)
             uhp = UserHTMLProcessing(f"{cls._temp_dir_obj.name}/static/scoring.html")
             uhp.validate()
             # Integrate it to set the data
             int = Integrate()
             int.integrate()
+            
             cls._server = RunAPIServer()
             cls._server.run()
         try:
@@ -150,51 +143,23 @@ def gen_test_environment(temp_dir_path:Path):
         int.integrate()
 
 
-def test_yaml_overwrite(tmpdir):
-    with gen_test_env_and_enter(tmpdir):
-        RunAPIServer().setupLoggingYAML()
-        with open("logs/rcsa_log_config.yaml") as f:
-            y = yaml.safe_load(f)
-            assert y["handlers"]["default"]["filename"] == f"{tmpdir}/logs/rcsa_logs.log"
-            assert y["handlers"]["file"]["filename"] == f"{tmpdir}/logs/rcsa_logs.log"
-            assert y["loggers"]["uvicorn.error"]["level"] == f"INFO"
-            assert y["loggers"]["uvicorn.access"]["level"] == f"INFO"
 
-def test_server_alive():
+def test_server_alive_unauth():
     with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
         url = baseurl+"/lifecheck"
-        life = requests.get(url) # , auth=("no","no"))
-        print(life.text)
+        life = requests.get(url)
+        assert life.status_code == 401 
+
+def test_server_alive_wrongauth():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+        url = baseurl+"/lifecheck"
+        life = requests.get(url, auth=("wrong","wrong"))
+        assert life.status_code == 401         
+
+def test_server_alive_authed():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+        url = baseurl+"/lifecheck"
+        life = requests.get(url, auth=("test","test"))
         life = life.json()
         assert life["alive"] == True
-
-def test_scoring_page():
-    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
-        r = requests.get(f"{baseurl}/scoring/scoring.html")
-        assert "<!-- EXISTS -->" in r.text
-
-def test_analysis_page():
-    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
-        r = requests.get(f"{baseurl}/analysis/foldercheck.html")
-        assert "exists" in r.text
-
-def test_gameModeandScoringElements():
-    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
-        r = requests.get(f"{baseurl}/api/gameModesAndScoringElements")
-        result = r.json()
-        assert len(result["modes"]) == 2
-        assert len(result["scoring_items"]) == 6
-
-#### Keep this test last!
-
-def test_shutdown():
-    # Not really a test
-    with SingletonTestEnv.activateTestEnv():
-        SingletonTestEnv.shutdown()
-
-# def test_modes_and_scoring_items_api(tmpdir):
-#     gen_test_environment(tmpdir)
-#     start_uvicorn_server
-
-
 

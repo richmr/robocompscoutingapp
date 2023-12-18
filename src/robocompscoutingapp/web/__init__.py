@@ -1,6 +1,8 @@
-from fastapi import FastAPI, Query, HTTPException, Response
+from fastapi import FastAPI, Query, HTTPException, Response, Depends, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
 from pydantic import BaseModel, Field 
 import platform
 from time import sleep
@@ -15,6 +17,46 @@ from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageID
 )
 
+# auto_error = False allows no auth requests to go through to next stage
+# see source code at https://fastapi.tiangolo.com/reference/security/#fastapi.security.HTTPBasic
+security = HTTPBasic(auto_error=False)
+# modified from https://fastapi.tiangolo.com/advanced/security/http-basic-auth/
+def authorized_user(
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)]
+) -> bool:
+    # Do we even want authorization
+    app_secrets = RCSA_Config.getConfig().Secrets
+    if app_secrets.basic_auth_username == False:
+        # No we don't want to check, so just return
+        return True
+    
+    if credentials is None:
+        # Then no credentials were provided so we fail automatically
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    
+    # Some data there, so lets process
+    current_username_bytes = credentials.username.encode("utf8")
+    correct_username_bytes = app_secrets.basic_auth_username.encode("utf8")
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, correct_username_bytes
+    )
+    current_password_bytes = credentials.password.encode("utf8")
+    correct_password_bytes = app_secrets.basic_auth_password.encode("utf8")
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes, correct_password_bytes
+    )
+
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return True
 
 _scoring_page_id = None
 
@@ -31,7 +73,10 @@ async def lifespan(app:FastAPI):
     yield
     
 
-rcsa_api_app = FastAPI(title="RoboCompScoutingApp", lifespan=lifespan)
+rcsa_api_app = FastAPI(title="RoboCompScoutingApp", 
+                       lifespan=lifespan,
+                       dependencies=[Depends(authorized_user)]
+)
 
 @rcsa_api_app.get("/lifecheck")
 def lifecheck():
