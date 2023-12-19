@@ -19,6 +19,7 @@ from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageID, 
     storeTeams,
     storeMatches,
+    MatchesAndTeams,
     getMatchesAndTeams,
     addScoresToDB,
     Score,
@@ -148,7 +149,7 @@ def test_getMatchesAndTeams(tmpdir):
             eventCode = "CALA",
             description = "Test 1",
             matchNumber = 1,
-            Red1 = 1,
+            Red1 = 2584,
             Red2 = 2,
             Red3 = 3,
             Blue1 = 4,
@@ -163,6 +164,30 @@ def test_getMatchesAndTeams(tmpdir):
 
 def test_addScores(tmpdir):
     with gen_test_env_and_enter(tmpdir):
+        match1 = FirstMatch(
+            eventCode = "CALA",
+            description = "Test 1",
+            matchNumber = 1,
+            Red1 = 2584,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 4,
+            Blue2 = 5,
+            Blue3 = 6
+        )
+        match2 = FirstMatch(
+            eventCode = "CALA",
+            description = "Test 2",
+            matchNumber = 2,
+            Red1 = 2584,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 4,
+            Blue2 = 5,
+            Blue3 = 6
+        )
+        storeMatches([match1, match2])
+
         scores = [
             Score(scoring_item_id=1, value=1),
             Score(scoring_item_id=2, value=True),
@@ -186,5 +211,15 @@ def test_addScores(tmpdir):
 
         # Also verify this works
         assert teamAlreadyScoredForThisMatch(2584, 1, "CALA") == True
+
+        # Now check that match was marked as scored
+        data = getMatchesAndTeams(eventCode="CALA", unscored_only=False)
+        print(data.matches)
+        assert data.matches[1].scored == True
+
+        # Now check only unscored matches
+        data2 = getMatchesAndTeams(eventCode="CALA")
+        assert len(data2.matches) == 1
+        assert data2.matches[2].matchNumber == 2
 
     

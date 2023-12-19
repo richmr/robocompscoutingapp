@@ -1,5 +1,5 @@
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Union, List
 import requests
 from requests.auth import HTTPBasicAuth
@@ -43,6 +43,7 @@ class FirstMatch(BaseModel):
     Blue1:int
     Blue2:int
     Blue3:int
+    scored:bool = Field(default=False)
 
 class FirstEventsAPI:
     """

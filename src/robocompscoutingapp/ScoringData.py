@@ -116,15 +116,29 @@ class MatchesAndTeams(BaseModel):
     matches:Dict[int, FirstMatch]   # int is the matchNumber
     teams:Dict[int, FirstTeam]      # int is the teamNumber
 
-def getMatchesAndTeams() -> MatchesAndTeams:
+def getMatchesAndTeams(eventCode:str, unscored_only:bool = True) -> MatchesAndTeams:
     """
-    Returns matches and teams for the event (event code is part of configuration)
+    Returns matches (ordered by ascending match number) and teams for the event
+
+    Parameters
+    ----------
+    eventCode:str
+        Official eventCode for this event
+    unscored_only:bool
+        Only report matches that have yet to be scored.
+
+    Returns
+    -------
+    MatchesAndTeams
+        MatchesAndTeams object
     """
     with RCSA_DB.getSQLSession() as db:
-        # Get the event code
-        eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
         # get all the matches
-        matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)).all()
+        if unscored_only:
+            matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode, scored=False).order_by(MatchesForEvent.matchNumber)).all()
+        else:
+            matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode).order_by(MatchesForEvent.matchNumber)).all()
+        # matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)).all()
         matches = { m.matchNumber:FirstMatch.model_validate(m) for m in matches_db }
         # get all the teams
         teams_db = db.scalars(select(TeamsForEvent)).all()
@@ -194,6 +208,26 @@ def addScoresToDB(eventCode:str, match_score:ScoredMatchForTeam):
             raise Exception(f"Your submitted scoring had multiple score entries for the same scoring item, please check.  No scoring data saved.")
         except Exception as badnews:
             raise Exception(f"Unable to add scores to DB because {badnews}")
+
+    setMatchToScored(eventCode=eventCode, matchNumber=match_score.matchNumber) 
+
+def setMatchToScored(eventCode:str, matchNumber:int):
+    """
+    Sets a given match to scored after a logic check is satisfied.  Right now set to after a single team is scored, but here to allow more complicated logic
+
+    Parameters
+    ----------
+    eventCode:str
+        Event code for the scored event
+    matchNumber:int
+        Match number for the event
+    """    
+    with RCSA_DB.getSQLSession() as db:
+        m = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode, matchNumber=matchNumber)).one()
+        m.scored = True
+        db.commit()
+    
+
         
 
 

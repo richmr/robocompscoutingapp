@@ -26,7 +26,7 @@ def authorized_user(
 ) -> bool:
     # Do we even want authorization
     app_secrets = RCSA_Config.getConfig().Secrets
-    if app_secrets.basic_auth_username == False:
+    if bool(app_secrets.basic_auth_username) == False:
         # No we don't want to check, so just return
         return True
     
