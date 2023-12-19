@@ -158,7 +158,7 @@ def test_getMatchesAndTeams(tmpdir):
         )
         storeMatches([match])
      
-        result = getMatchesAndTeams()
+        result = getMatchesAndTeams(eventCode="CALA")
         assert len(result.matches) == 1
         assert len(result.teams) == 1
 
@@ -189,8 +189,8 @@ def test_addScores(tmpdir):
         storeMatches([match1, match2])
 
         scores = [
-            Score(scoring_item_id=1, value=1),
-            Score(scoring_item_id=2, value=True),
+            Score(scoring_item_id=1, value=1, mode_id=1),
+            Score(scoring_item_id=2, value=True, mode_id=1),
         ]
         score_obj = ScoredMatchForTeam(
             matchNumber=1,

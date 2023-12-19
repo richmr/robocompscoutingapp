@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Dict, List, Union
 
 from robocompscoutingapp.GlobalItems import RCSA_Config
@@ -177,6 +177,7 @@ def teamAlreadyScoredForThisMatch(teamNumber:int, matchNumber:int, eventCode:str
 
 class Score(BaseModel):
     scoring_item_id:int
+    mode_id:int
     value:Union[str, int, bool, float]
 
 class ScoredMatchForTeam(BaseModel):
@@ -227,7 +228,63 @@ def setMatchToScored(eventCode:str, matchNumber:int):
         m.scored = True
         db.commit()
     
+class ScoredItemAggregateResult(BaseModel):
+    mode_name:str
+    name:str
+    count_of_scored_events:int
+    total:Union[int, float] = Field(default=0)
+    average:float = Field(default=0)
+    # These are here for future expansion, and are meant to to be interepreted by mode_name
+    agg_result1:Union[int, str, float] = Field(default=None)
+    agg_result2:Union[int, str, float] = Field(default=None)
 
-        
+class ScoresForMode(BaseModel):
+    mode_name:str
+    # str is the name of the scored item
+    scores:Dict[str, ScoredItemAggregateResult]
+
+class ResultsForTeam(BaseModel):
+    teamNumber:int
+    # str is the mode
+    by_mode_results:Dict[str, ScoresForMode]
+    # str is the scored item name
+    totals:Dict[str, ScoredItemAggregateResult]
+
+class AllTeamResults(BaseModel):
+    # int is teamNumber
+    data:Dict[int, ResultsForTeam]
+
+def generateAggregateTallyResult(eventCode:str, teamNumber:int, scoring_item_id:int, mode_id:int) -> ScoredItemAggregateResult:
+    """
+    Generate an aggregrate result for a tally type scoring item
+
+    Parameters
+    ----------
+    eventCode:str
+        Event code for the scored event
+    teamNumber:int
+        Match number for the event
+    scoring_item_id:int
+        The scoring_item_id to tally
+
+    Returns
+    -------
+    ScoredItemAggregateResult
+        The agregate 
+    """
+
+def getAggregrateResultsForTeam(eventCode:str, teamNumber:int) -> ResultsForTeam:
+    """
+    Generate 
+    """
+    # First intialize empty objects for all scoring per modes, scoring_item and total scoring per score_item
+    # Get all scores in DB for an event and team number
+    # idk, I can maybe use built in functions in the DB to prevent needless iteration
+    # But only for some types.
+    # This implies we fill the objects based on score type as a whole and not on individual records?
+
+
+def getAggregrateResultsForAllTeams(eventCode:str) -> AllTeamResults:
+    pass        
 
 

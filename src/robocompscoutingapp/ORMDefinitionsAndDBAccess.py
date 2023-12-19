@@ -110,6 +110,7 @@ class ScoresForEvent(rcsa_scoring_tables):
     )
 
     score_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    mode_id: Mapped[int]
     matchNumber: Mapped[int]
     eventCode:Mapped[str]
     teamNumber:Mapped[int]
