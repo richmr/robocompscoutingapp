@@ -231,7 +231,7 @@ def setMatchToScored(eventCode:str, matchNumber:int):
 class ScoredItemAggregateResult(BaseModel):
     mode_name:str
     name:str
-    count_of_scored_events:int
+    count_of_scored_events:int = Field(default=0)
     total:Union[int, float] = Field(default=0)
     average:float = Field(default=0)
     # These are here for future expansion, and are meant to to be interepreted by mode_name
@@ -273,9 +273,57 @@ def generateAggregateTallyResult(eventCode:str, teamNumber:int, scoring_item_id:
         The agregate 
     """
 
+class GenerateResultsForTeam:
+
+    def __init__(self, eventCode:str, teamNumber:int, scoring_page_id:int) -> None:
+        self.eventCode = eventCode
+        self.teamNumber = teamNumber
+        self.scoring_page_id = scoring_page_id
+        self.modes_by_mode_id = {}
+        self.scoring_items_by_id = {}
+        self.by_mode_results = {}
+        self.totals = {}
+        pass
+
+    def initializeDataStructures(self):
+        """
+        Sets up empty ScoredItemAggregateResult objects for all score types
+        """
+        modes_and_items = getGameModeAndScoringElements(self.scoring_page_id)
+        for a_mode in modes_and_items.modes.values():
+            self.by_mode_results[a_mode.mode_name] = {i.name:ScoredItemAggregateResult(
+                mode_name=a_mode.mode_name,
+                name=i.name
+            ) for i in modes_and_items.scoring_items.values()}
+        self.totals = {i.name:ScoredItemAggregateResult(
+            mode_name="Total",
+            name=i.name
+        ) for i in modes_and_items.scoring_items.values()}
+
+        # Also repackage modes and items into id indexed dictionaries for easier reference later
+        self.modes_by_mode_id = {m.mode_id:m for m in modes_and_items.modes.values()}
+        self.scoring_items_by_id = {i.scoring_item_id for i in modes_and_items.scoring_items.values()}
+
+    
+        
+
+
+
 def getAggregrateResultsForTeam(eventCode:str, teamNumber:int) -> ResultsForTeam:
     """
-    Generate 
+    Generate the full ResultsForTeam
+
+    Parameters
+    ----------
+    eventCode:str
+        Event code for the scored event
+    teamNumber:int
+        Match number for the event
+
+    Returns
+    -------
+    ResultsForTeam
+
     """
     # First intialize empty objects for all scoring per modes, scoring_item and total scoring per score_item
     # Get all scores in DB for an event and team number
