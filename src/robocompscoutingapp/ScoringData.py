@@ -302,37 +302,104 @@ class GenerateResultsForTeam:
 
         # Also repackage modes and items into id indexed dictionaries for easier reference later
         self.modes_by_mode_id = {m.mode_id:m for m in modes_and_items.modes.values()}
-        self.scoring_items_by_id = {i.scoring_item_id for i in modes_and_items.scoring_items.values()}
+        self.scoring_items_by_id = {i.scoring_item_id:i for i in modes_and_items.scoring_items.values()}
 
-    
+    def processTallyScore(self, score:ScoresForEvent):
+        """
+        Process a tally score type.
+        
+        Parameters
+        ----------
+        score:ScoresForEvent
+            The specific score to add to the team's data
+        """
+        # Score this mode and score item name
+        mode_name = self.modes_by_mode_id[score.mode_id].mode_name
+        score_item_name = self.scoring_items_by_id[score.scoring_item_id].name
+        # Get the "reference" to the current object.  Changes to this will propagate to the actual object
+        current = self.by_mode_results[mode_name][score_item_name]
+        current.count_of_scored_events += 1
+        # Values are stored as strings in db for flexibility.  Convert here
+        current.total += int(score.value)
+        if current.count_of_scored_events > 0:
+            current.average = current.total/current.count_of_scored_events
+
+        # Score the totals
+        total_current = self.totals[score_item_name]
+        total_current.count_of_scored_events += 1
+        total_current.total += int(score.value)
+        if total_current.count_of_scored_events > 0:
+            total_current.average = total_current.total/total_current.count_of_scored_events
+
+    def processFlagScore(self, score:ScoresForEvent):
+        """
+        Process a flag score.  Flag scores are either 0 or 1 so we make those changes to the provided score.
+        The actual mechanics behind the scoring are the same as Tally so we forward it on.
+
+        Parameters
+        ----------
+        score:ScoresForEvent
+            The specific score to add to the team's data
+        """
+        if int(Score.value) > 0:
+            Score.value = "1"
+        else:
+            Score.value = "0"
+
+        self.processTallyScore(ScoresForEvent)
+        
+    def getAggregrateResults(self) -> ResultsForTeam:
+        # Get all scores for this team number and event
+        with RCSA_DB.getSQLSession() as db:
+            all_scores_for_team = db.scalars(select(ScoresForEvent).filter_by(teamNumber=self.teamNumber, eventCode=self.eventCode)).all()
+            # Route the math per the scoring item type
+            for score in all_scores_for_team:
+                scoring_type = self.scoring_items_by_id[score.scoring_item_id].type
+                match scoring_type:
+                    case "score_tally":
+                        self.processTallyScore(score)
+                    case "score_flag":
+                        self.processFlagScore(score)
+                    case _:
+                        # Really need a logging capability here
+                        raise ValueError(f"Score ID {score.score_id} has type {scoring_type} and I do not know how to process it")
+                    
+
+        toreturn = ResultsForTeam(
+            teamNumber=self.teamNumber,
+            by_mode_results=self.by_mode_results,
+            totals=self.totals
+        )
+        return toreturn
         
 
-
-
-def getAggregrateResultsForTeam(eventCode:str, teamNumber:int) -> ResultsForTeam:
+def getAggregrateResultsForAllTeams(eventCode:str, scoring_page_id:int) -> AllTeamResults:
     """
-    Generate the full ResultsForTeam
+    Produces the results for all teams
 
     Parameters
     ----------
     eventCode:str
-        Event code for the scored event
-    teamNumber:int
-        Match number for the event
+        The event we are gathering data for
+    scoring_page_id:int
+        The ID for the scoring page
 
     Returns
     -------
-    ResultsForTeam
-
+    AllTeamResults
+        All Team Results object
     """
-    # First intialize empty objects for all scoring per modes, scoring_item and total scoring per score_item
-    # Get all scores in DB for an event and team number
-    # idk, I can maybe use built in functions in the DB to prevent needless iteration
-    # But only for some types.
-    # This implies we fill the objects based on score type as a whole and not on individual records?
+    data = {}
+    with RCSA_DB.getSQLSession() as db:
+        all_teams = db.scalars(select(TeamsForEvent).filter_by(eventCode=eventCode)).all()
+        for team in all_teams:
+            score_gen = GenerateResultsForTeam(
+                eventCode=eventCode,
+                teamNumber=team.teamNumber,
+                scoring_page_id=scoring_page_id
+            )
+            data[team.teamNumber] = score_gen.getAggregrateResults()
 
-
-def getAggregrateResultsForAllTeams(eventCode:str) -> AllTeamResults:
-    pass        
+    return AllTeamResults(data=data)
 
 
