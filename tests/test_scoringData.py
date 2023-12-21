@@ -222,4 +222,6 @@ def test_addScores(tmpdir):
         assert len(data2.matches) == 1
         assert data2.matches[2].matchNumber == 2
 
-    
+def test_scoreAggregation(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        pass
