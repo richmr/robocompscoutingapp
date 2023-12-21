@@ -157,3 +157,4 @@ tests/data/test_init/rcsa_scoring.db
 robocompscoutingapp.code-workspace
 data/test_init/rcsa_scoring.db
 src/robocompscoutingapp/web/sample.py
+src/robocompscoutingapp/data_convert/
