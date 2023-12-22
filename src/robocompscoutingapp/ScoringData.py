@@ -148,7 +148,36 @@ def getMatchesAndTeams(eventCode:str, unscored_only:bool = True) -> MatchesAndTe
             teams=teams
         )
 
+def getMatches(eventCode:str, unscored_only:bool = True) -> MatchesAndTeams:
+    """
+    Returns matches (ordered by ascending match number) only
 
+    Parameters
+    ----------
+    eventCode:str
+        Official eventCode for this event
+    unscored_only:bool
+        Only report matches that have yet to be scored.
+
+    Returns
+    -------
+    MatchesAndTeams
+        MatchesAndTeams object (but teams will be empty {})
+    """
+    with RCSA_DB.getSQLSession() as db:
+        # get all the matches
+        if unscored_only:
+            matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode, scored=False).order_by(MatchesForEvent.matchNumber)).all()
+        else:
+            matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode).order_by(MatchesForEvent.matchNumber)).all()
+        # matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)).all()
+        matches = { m.matchNumber:FirstMatch.model_validate(m) for m in matches_db }
+        # get all the teams
+        teams = {}
+        return MatchesAndTeams(
+            matches=matches,
+            teams=teams
+        )
 
 def teamAlreadyScoredForThisMatch(teamNumber:int, matchNumber:int, eventCode:str) -> bool:
     """
@@ -253,25 +282,6 @@ class ResultsForTeam(BaseModel):
 class AllTeamResults(BaseModel):
     # int is teamNumber
     data:Dict[int, ResultsForTeam]
-
-def generateAggregateTallyResult(eventCode:str, teamNumber:int, scoring_item_id:int, mode_id:int) -> ScoredItemAggregateResult:
-    """
-    Generate an aggregrate result for a tally type scoring item
-
-    Parameters
-    ----------
-    eventCode:str
-        Event code for the scored event
-    teamNumber:int
-        Match number for the event
-    scoring_item_id:int
-        The scoring_item_id to tally
-
-    Returns
-    -------
-    ScoredItemAggregateResult
-        The agregate 
-    """
 
 class GenerateResultsForTeam:
 

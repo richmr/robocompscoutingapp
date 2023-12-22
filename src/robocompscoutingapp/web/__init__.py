@@ -59,6 +59,7 @@ def authorized_user(
     return True
 
 _scoring_page_id = None
+_eventCode = None
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -70,6 +71,7 @@ async def lifespan(app:FastAPI):
     # establish scoring page ID
     global _scoring_page_id
     _scoring_page_id = getCurrentScoringPageID()
+    _eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
     yield
     
 
@@ -82,6 +84,8 @@ rcsa_api_app = FastAPI(title="RoboCompScoutingApp",
 def lifecheck():
     return {"alive":True}
 
+########################
+
 from robocompscoutingapp.ScoringData import (
     getGameModeAndScoringElements,
     ModesAndItems
@@ -91,3 +95,18 @@ from robocompscoutingapp.ScoringData import (
 def gameModeAndScoringElements() -> ModesAndItems:
     return getGameModeAndScoringElements(_scoring_page_id)
 
+########################
+
+from robocompscoutingapp.ScoringData import (
+    getMatchesAndTeams,
+    getMatches,
+    MatchesAndTeams
+)
+
+@rcsa_api_app.get("/api/getMatchesAndTeams")
+def matchesAndTeams() -> MatchesAndTeams:
+    return getMatchesAndTeams(_eventCode, unscored_only=True)
+
+@rcsa_api_app.get("/api/getMatches")
+def justMatches() -> MatchesAndTeams:
+    return getMatches(_eventCode, unscored_only=True)
