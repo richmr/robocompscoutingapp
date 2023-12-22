@@ -62,7 +62,7 @@ def getFullTemplateFile() -> Path:
     return working_template
 
 # Name of critical scripts that power scoring engine
-rcsa_fixed_script_prefix = "/rcsa"
+rcsa_fixed_script_prefix = "js"
 rcsa_js_loader = f"{rcsa_fixed_script_prefix}/rcsa_loader.js"
 
 # name for rcsa database
