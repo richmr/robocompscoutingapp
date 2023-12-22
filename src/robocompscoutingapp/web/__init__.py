@@ -64,10 +64,7 @@ _eventCode = None
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     # Set up the static pages
-    rcsa_api_app.mount(f"/scoring", StaticFiles(directory=RCSA_Config.getConfig().ServerConfig.user_static_folder), name="scoring")
-    # analysis static pages
-    analysis_dir = files('robocompscoutingapp.web').joinpath("pages")
-    rcsa_api_app.mount(f"/analysis", StaticFiles(directory=analysis_dir), name="analysis")
+    rcsa_api_app.mount(f"/app", StaticFiles(directory=RCSA_Config.getConfig().ServerConfig.user_static_folder), name="scoring")
     # establish scoring page ID
     global _scoring_page_id
     global _eventCode

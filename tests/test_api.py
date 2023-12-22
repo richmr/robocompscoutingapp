@@ -161,12 +161,12 @@ def test_server_alive():
 
 def test_scoring_page():
     with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
-        r = requests.get(f"{baseurl}/scoring/scoring.html")
+        r = requests.get(f"{baseurl}/app/scoring.html")
         assert "<!-- EXISTS -->" in r.text
 
 def test_analysis_page():
     with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
-        r = requests.get(f"{baseurl}/analysis/foldercheck.html")
+        r = requests.get(f"{baseurl}/app/analysis.html")
         assert "exists" in r.text
 
 def test_gameModeandScoringElements():
