@@ -70,6 +70,7 @@ async def lifespan(app:FastAPI):
     rcsa_api_app.mount(f"/analysis", StaticFiles(directory=analysis_dir), name="analysis")
     # establish scoring page ID
     global _scoring_page_id
+    global _eventCode
     _scoring_page_id = getCurrentScoringPageID()
     _eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
     yield
@@ -104,9 +105,99 @@ from robocompscoutingapp.ScoringData import (
 )
 
 @rcsa_api_app.get("/api/getMatchesAndTeams")
-def matchesAndTeams() -> MatchesAndTeams:
-    return getMatchesAndTeams(_eventCode, unscored_only=True)
+def matchesAndTeams(unscored_only:bool = True) -> MatchesAndTeams:
+    """
+    Retrieve all the matches and teams for this event.  By default only returns the remaining unscored matches.
+    This is in place to allow for faster match selection during the event.
+
+    Parameters
+    ----------
+    unscored_only:bool
+        Set to False to get ALL matches, regardless if they have been scored already
+
+    Returns
+    -------
+    MatchesAndTeams
+        Filled matches and team JSON object
+    """
+    try:
+        data = getMatchesAndTeams(_eventCode, unscored_only=unscored_only)
+        return data
+    except Exception as badnews:
+        raise HTTPException(status_code=500, detail=f"Unable to get matches and teams because {badnews}")
 
 @rcsa_api_app.get("/api/getMatches")
-def justMatches() -> MatchesAndTeams:
-    return getMatches(_eventCode, unscored_only=True)
+def justMatches(unscored_only:bool = True) -> MatchesAndTeams:
+    """
+    Retrieve the matches for this event.  By default only returns the remaining unscored matches.
+    This is in place to allow for faster match selection during the event.
+
+    Parameters
+    ----------
+    unscored_only:bool
+        Set to False to get ALL matches, regardless if they have been scored already
+
+    Returns
+    -------
+    MatchesAndTeams
+        Filled matches and team JSON object.  The "teams" element will be an empty dictionary.
+    """
+    try:
+        return getMatches(_eventCode, unscored_only=unscored_only)
+    except Exception as badnews:
+        raise HTTPException(status_code=500, detail=f"Unable to get matches because {badnews}")
+
+from robocompscoutingapp.ScoringData import (
+    addScoresToDB,
+    teamAlreadyScoredForThisMatch,
+    ScoredMatchForTeam,
+)
+
+@rcsa_api_app.post("/api/addScores")
+def addScores(team_score_for_match:ScoredMatchForTeam):
+    """
+    Add recorded scores for a team for a given match.  Will return an error if this team already scored for this match.
+
+    Parameters
+    ----------
+    team_score_for_match:ScoredMatchForTeam
+        Filled out ScoredMatchForTeam object
+    """
+    # Check to see if already scored
+    if teamAlreadyScoredForThisMatch(
+        teamNumber=team_score_for_match.teamNumber,
+        matchNumber=team_score_for_match.matchNumber,
+        eventCode=_eventCode
+    ):
+        raise HTTPException(status_code=400, detail=f"Match #{team_score_for_match.matchNumber} data for team {team_score_for_match.teamNumber} already submitted for this match")
+    
+    # Store it
+    try:
+        addScoresToDB(eventCode=_eventCode, match_score=team_score_for_match)
+        return 
+    except Exception as badnews:
+        raise HTTPException(status_code=500, detail=f"Unable to save score because {badnews}")
+
+from robocompscoutingapp.ScoringData import (
+    getAggregrateResultsForAllTeams,
+    AllTeamResults,
+)
+
+@rcsa_api_app.get("/api/getAllScores")
+def getAllScores() -> AllTeamResults:
+    """
+    Get aggregrate results for this event
+
+    Returns
+    -------
+    AllTeamResults
+        Layered data object with all results for all teams, organized by mode and total
+    """
+    try:
+        return getAggregrateResultsForAllTeams(eventCode=_eventCode, scoring_page_id=_scoring_page_id)
+    except Exception as badnews:
+        raise HTTPException(status_code=500, detail=f"Unable to get scores {badnews}")
+    
+
+        
+

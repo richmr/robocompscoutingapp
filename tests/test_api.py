@@ -8,8 +8,10 @@ import yaml
 import requests
 
 from uvicorn import Config
+from robocompscoutingapp.FirstEventsAPI import FirstMatch, FirstTeam
 
 from robocompscoutingapp.GlobalItems import RCSA_Config, temp_chdir
+from robocompscoutingapp.ScoringData import Score, ScoredMatchForTeam, storeMatches, storeTeams
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.Initialize import Initialize
 from robocompscoutingapp.Integrate import Integrate
@@ -78,6 +80,8 @@ class SingletonTestEnv:
             # Integrate it to set the data
             int = Integrate()
             int.integrate()
+            # set the event code
+            RCSA_Config.getConfig().FRCEvents.first_event_id="CALA"
             cls._server = RunAPIServer()
             cls._server.run()
         try:
@@ -136,19 +140,6 @@ def serverBaseURL():
     baseurl = f"http://{host}:{port}"
     return baseurl
 
-def gen_test_environment(temp_dir_path:Path):
-    init = Initialize(temp_dir_path)
-    init.initialize(overwrite=True)
-    # Update the location of the scoring page
-    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
-    # Validate the page
-    with temp_chdir(temp_dir_path):
-        uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring.html")
-        uhp.validate()
-        # Integrate it to set the data
-        int = Integrate()
-        int.integrate()
-
 
 def test_yaml_overwrite(tmpdir):
     with gen_test_env_and_enter(tmpdir):
@@ -185,6 +176,106 @@ def test_gameModeandScoringElements():
         assert len(result["modes"]) == 2
         assert len(result["scoring_items"]) == 6
 
+def fake_game_data():
+    # Assumes already in a proper test environ
+    # Teams
+    team_list = [
+        FirstTeam(eventCode="CALA", nameShort="Team 1", teamNumber=1),
+        FirstTeam(eventCode="CALA", nameShort="Team 2", teamNumber=2),
+        FirstTeam(eventCode="CALA", nameShort="Team 3", teamNumber=3),
+    ]
+    storeTeams(team_list)
+    # Real matches don't have teams competing against themselves, but not relevant for testing purposes
+    match_list = [
+        FirstMatch(
+            eventCode = "CALA",
+            description = "Match 1",
+            matchNumber = 1,
+            Red1 = 1,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 1,
+            Blue2 = 2,
+            Blue3 = 3
+        ),
+        FirstMatch(
+            eventCode = "CALA",
+            description = "Match 2",
+            matchNumber = 2,
+            Red1 = 1,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 1,
+            Blue2 = 2,
+            Blue3 = 3
+        )
+    ]
+    storeMatches(match_list=match_list)
+    
+
+def test_scoring_and_retrieval():
+    with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+        fake_game_data()
+        # Test matches and teams
+        mat = requests.get(baseurl+"/api/getMatchesAndTeams").json()
+        # Converting to json is making int dictionary keys into strings
+        assert mat["matches"]['1']["description"] == "Match 1"
+        assert mat["teams"]["3"]["nameShort"] == "Team 3"
+
+        # Test matches
+        omatch = requests.get(baseurl+"/api/getMatches").json()
+        assert omatch["matches"]['1']["description"] == "Match 1"
+        assert omatch["teams"] == {}
+
+        # Add scores
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=1, mode_id=2, value=2),
+            # Setting this to True did work, but please see notes in ScoringData.py:353
+            Score(scoring_item_id=5, mode_id=1, value=True)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=1,
+            teamNumber=1,
+            scores=scores
+        )
+        r = requests.post(baseurl+"/api/addScores", json=score_obj.model_dump())
+        assert r.status_code == 200
+
+        # Add another score
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=5, mode_id=1, value=0)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=2,
+            teamNumber=1,
+            scores=scores
+        )
+        r = requests.post(baseurl+"/api/addScores", json=score_obj.model_dump())
+        assert r.status_code == 200
+
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=5, mode_id=1, value=1)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=2,
+            teamNumber=3,
+            scores=scores
+        )
+        r = requests.post(baseurl+"/api/addScores", json=score_obj.model_dump())
+        # Retrieve scores
+        sc = requests.get(baseurl+"/api/getAllScores").json()
+        print(sc)
+        assert sc["data"]["1"]["by_mode_results"]["Auton"]["scores"]["cone"]["count_of_scored_events"] == 2
+        assert sc["data"]["2"]["totals"]["cone"]["count_of_scored_events"] == 0
+        assert sc["data"]["3"]["totals"]["cone"]["total"] == 1
+
+
+        pass
+
+
 #### Keep this test last!
 
 def test_shutdown():
@@ -192,9 +283,6 @@ def test_shutdown():
     with SingletonTestEnv.activateTestEnv():
         SingletonTestEnv.shutdown()
 
-# def test_modes_and_scoring_items_api(tmpdir):
-#     gen_test_environment(tmpdir)
-#     start_uvicorn_server
 
 
 

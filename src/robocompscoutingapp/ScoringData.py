@@ -139,10 +139,10 @@ def getMatchesAndTeams(eventCode:str, unscored_only:bool = True) -> MatchesAndTe
         else:
             matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode).order_by(MatchesForEvent.matchNumber)).all()
         # matches_db = db.scalars(select(MatchesForEvent).filter_by(eventCode=eventCode)).all()
-        matches = { m.matchNumber:FirstMatch.model_validate(m) for m in matches_db }
+        matches = { int(m.matchNumber):FirstMatch.model_validate(m) for m in matches_db }
         # get all the teams
-        teams_db = db.scalars(select(TeamsForEvent)).all()
-        teams = { t.teamNumber: FirstTeam.model_validate(t) for t in teams_db }
+        teams_db = db.scalars(select(TeamsForEvent).filter_by(eventCode=eventCode)).all()
+        teams = { int(t.teamNumber): FirstTeam.model_validate(t) for t in teams_db }
         return MatchesAndTeams(
             matches=matches,
             teams=teams
@@ -235,9 +235,9 @@ def addScoresToDB(eventCode:str, match_score:ScoredMatchForTeam):
             db.add_all(to_add)
             db.commit()
         except IntegrityError:
-            raise Exception(f"Your submitted scoring had multiple score entries for the same scoring item, please check.  No scoring data saved.")
-        except Exception as badnews:
-            raise Exception(f"Unable to add scores to DB because {badnews}")
+            raise IntegrityError(f"Your submitted scoring had multiple score entries for the same scoring item, please check.  No scoring data saved.")
+        # except Exception as badnews:
+        #     raise Exception(f"Unable to add scores to DB because {badnews}")
 
     setMatchToScored(eventCode=eventCode, matchNumber=match_score.matchNumber) 
 
