@@ -105,7 +105,7 @@ class MatchesForEvent(rcsa_scoring_tables):
 class ScoresForEvent(rcsa_scoring_tables):
     __tablename__ = "ScoresForEvent"
     __table_args__ = (
-        UniqueConstraint("eventCode", "teamNumber", "scoring_item_id", "matchNumber", 
+        UniqueConstraint("eventCode", "teamNumber", "scoring_item_id", "matchNumber", "mode_id",
                          name="ScoresForEvent_uniq_score_item_per_team_per_event"),
     )
 

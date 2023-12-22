@@ -15,6 +15,7 @@ from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.Initialize import Initialize
 from robocompscoutingapp.Integrate import Integrate
 from robocompscoutingapp.ScoringData import (
+    GenerateResultsForTeam,
     getGameModeAndScoringElements,
     getCurrentScoringPageID, 
     storeTeams,
@@ -24,7 +25,8 @@ from robocompscoutingapp.ScoringData import (
     addScoresToDB,
     Score,
     ScoredMatchForTeam,
-    teamAlreadyScoredForThisMatch
+    teamAlreadyScoredForThisMatch,
+    getAggregrateResultsForAllTeams
 )
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
@@ -222,6 +224,119 @@ def test_addScores(tmpdir):
         assert len(data2.matches) == 1
         assert data2.matches[2].matchNumber == 2
 
+def fake_game_data():
+    # Assumes already in a proper test environ
+    # Teams
+    team_list = [
+        FirstTeam(eventCode="CALA", nameShort="Team 1", teamNumber=1),
+        FirstTeam(eventCode="CALA", nameShort="Team 2", teamNumber=2),
+        FirstTeam(eventCode="CALA", nameShort="Team 3", teamNumber=3),
+    ]
+    storeTeams(team_list)
+    # Real matches don't have teams competing against themselves, but not relevant for testing purposes
+    match_list = [
+        FirstMatch(
+            eventCode = "CALA",
+            description = "Match 1",
+            matchNumber = 1,
+            Red1 = 1,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 1,
+            Blue2 = 2,
+            Blue3 = 3
+        ),
+        FirstMatch(
+            eventCode = "CALA",
+            description = "Match 2",
+            matchNumber = 2,
+            Red1 = 1,
+            Red2 = 2,
+            Red3 = 3,
+            Blue1 = 1,
+            Blue2 = 2,
+            Blue3 = 3
+        )
+    ]
+    storeMatches(match_list=match_list)
+
 def test_scoreAggregation(tmpdir):
     with gen_test_env_and_enter(tmpdir):
-        pass
+        fake_game_data()
+        # Now some scoring
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=1, mode_id=2, value=2),
+            # Setting this to True did work, but please see notes in ScoringData.py:353
+            Score(scoring_item_id=5, mode_id=1, value=True)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=1,
+            teamNumber=1,
+            scores=scores
+        )
+        addScoresToDB(eventCode="CALA", match_score=score_obj)
+
+        # retrieve
+        agg_object = GenerateResultsForTeam("CALA", 1, 1)
+        results = agg_object.getAggregrateResults()
+        assert results.by_mode_results["Auton"].scores["cone"].count_of_scored_events == 1
+        assert results.totals["cone"].total == 3 # 1 in auton, 2 in teleop
+        assert results.totals["cone"].average == 3 # Only 1 event so far
+        assert results.by_mode_results["Auton"].scores["Auton Mobility"].total == 1
+
+        # Add another score
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=5, mode_id=1, value=0)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=2,
+            teamNumber=1,
+            scores=scores
+        )
+        addScoresToDB(eventCode="CALA", match_score=score_obj)
+
+        # retrieve
+        agg_object = GenerateResultsForTeam("CALA", 1, 1)
+        results = agg_object.getAggregrateResults()
+        assert results.by_mode_results["Auton"].scores["cone"].count_of_scored_events == 2
+        assert results.totals["cone"].count_of_scored_events == 2
+        assert results.by_mode_results["Auton"].scores["cone"].average == 1
+        assert results.totals["cone"].total == 4 
+        assert results.totals["cone"].average == 2 
+        assert results.by_mode_results["Auton"].scores["Auton Mobility"].total == 1
+
+        # Check zero scores
+        zero_obj = GenerateResultsForTeam("CALA", 2, 1)
+        results = zero_obj.getAggregrateResults()
+        assert results.by_mode_results["Auton"].scores["cone"].count_of_scored_events == 0
+        assert results.totals["cone"].count_of_scored_events == 0
+        assert results.by_mode_results["Auton"].scores["cone"].average == 0
+        assert results.totals["cone"].total == 0
+
+        # Add another team scores
+        # Add another score
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=5, mode_id=1, value=1)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=2,
+            teamNumber=3,
+            scores=scores
+        )
+        addScoresToDB(eventCode="CALA", match_score=score_obj)
+
+        # Test all teams
+        all_team_results = getAggregrateResultsForAllTeams("CALA", 1)
+        assert all_team_results.data[1].by_mode_results["Auton"].scores["cone"].count_of_scored_events == 2
+        assert all_team_results.data[2].totals["cone"].count_of_scored_events == 0
+        assert all_team_results.data[3].totals["cone"].total == 1
+
+
+
+
+
+
+

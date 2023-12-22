@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, distinct, func
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Dict, List, Union
@@ -283,6 +283,7 @@ class GenerateResultsForTeam:
         self.scoring_items_by_id = {}
         self.by_mode_results = {}
         self.totals = {}
+        self.list_of_totalled_match_numbers = []
         pass
 
     def initializeDataStructures(self):
@@ -291,13 +292,19 @@ class GenerateResultsForTeam:
         """
         modes_and_items = getGameModeAndScoringElements(self.scoring_page_id)
         for a_mode in modes_and_items.modes.values():
-            self.by_mode_results[a_mode.mode_name] = {i.name:ScoredItemAggregateResult(
+            this_mode_scores = {i.name:ScoredItemAggregateResult(
                 mode_name=a_mode.mode_name,
-                name=i.name
+                name=i.name, 
+                count_of_scored_events=self.count_of_scored_events
             ) for i in modes_and_items.scoring_items.values()}
+            self.by_mode_results[a_mode.mode_name] = ScoresForMode(
+                mode_name=a_mode.mode_name,
+                scores = this_mode_scores
+            )
         self.totals = {i.name:ScoredItemAggregateResult(
             mode_name="Total",
-            name=i.name
+            name=i.name,
+            count_of_scored_events=self.count_of_scored_events
         ) for i in modes_and_items.scoring_items.values()}
 
         # Also repackage modes and items into id indexed dictionaries for easier reference later
@@ -317,8 +324,7 @@ class GenerateResultsForTeam:
         mode_name = self.modes_by_mode_id[score.mode_id].mode_name
         score_item_name = self.scoring_items_by_id[score.scoring_item_id].name
         # Get the "reference" to the current object.  Changes to this will propagate to the actual object
-        current = self.by_mode_results[mode_name][score_item_name]
-        current.count_of_scored_events += 1
+        current = self.by_mode_results[mode_name].scores[score_item_name]
         # Values are stored as strings in db for flexibility.  Convert here
         current.total += int(score.value)
         if current.count_of_scored_events > 0:
@@ -326,7 +332,11 @@ class GenerateResultsForTeam:
 
         # Score the totals
         total_current = self.totals[score_item_name]
-        total_current.count_of_scored_events += 1
+        # Since there are different entries for different modes for the same match number, we need to see if we already counted this match
+        # if score.matchNumber not in self.list_of_totalled_match_numbers:
+        #     total_current.count_of_scored_events += 1
+        #     self.list_of_totalled_match_numbers.append(score.matchNumber)
+
         total_current.total += int(score.value)
         if total_current.count_of_scored_events > 0:
             total_current.average = total_current.total/total_current.count_of_scored_events
@@ -341,16 +351,18 @@ class GenerateResultsForTeam:
         score:ScoresForEvent
             The specific score to add to the team's data
         """
-        if int(Score.value) > 0:
-            Score.value = "1"
-        else:
-            Score.value = "0"
+        # SqlAlchemy (maybe?) converts "True" to 1 in the database, which means no extra translation needs
+        # to be done. I suspect this may be brittle.
+        # Safest solution is to ensure the scoring code sends a "1" for a true, and a "0" for a false
+        # Either way, we can just pass this through
 
-        self.processTallyScore(ScoresForEvent)
+        self.processTallyScore(score)
         
     def getAggregrateResults(self) -> ResultsForTeam:
         # Get all scores for this team number and event
         with RCSA_DB.getSQLSession() as db:
+            self.count_of_scored_events = db.scalars(select(func.count(distinct(ScoresForEvent.matchNumber))).filter_by(teamNumber=self.teamNumber, eventCode=self.eventCode)).one()
+            self.initializeDataStructures()
             all_scores_for_team = db.scalars(select(ScoresForEvent).filter_by(teamNumber=self.teamNumber, eventCode=self.eventCode)).all()
             # Route the math per the scoring item type
             for score in all_scores_for_team:
