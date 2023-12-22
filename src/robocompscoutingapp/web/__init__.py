@@ -85,6 +85,10 @@ rcsa_api_app = FastAPI(title="RoboCompScoutingApp",
 def lifecheck():
     return {"alive":True}
 
+@rcsa_api_app.get("/errorcheck")
+def errorcheck():
+    raise HTTPException(status_code=418, detail="Error check")
+
 ########################
 
 from robocompscoutingapp.ScoringData import (

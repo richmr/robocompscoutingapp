@@ -272,9 +272,10 @@ def test_scoring_and_retrieval():
         assert sc["data"]["2"]["totals"]["cone"]["count_of_scored_events"] == 0
         assert sc["data"]["3"]["totals"]["cone"]["total"] == 1
 
-
-        pass
-
+def test_error():
+     with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
+         r = requests.get(baseurl+"/errorcheck")
+         assert r.status_code == 418
 
 #### Keep this test last!
 
