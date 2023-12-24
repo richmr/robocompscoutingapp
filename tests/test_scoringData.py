@@ -20,6 +20,8 @@ from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageID, 
     storeTeams,
     storeMatches,
+    deleteMatchesFromEvent,
+    loadEventData,
     MatchesAndTeams,
     getMatchesAndTeams,
     addScoresToDB,
@@ -59,6 +61,9 @@ def gen_test_env_and_enter(temp_dir_path:Path):
         # Integrate it to set the data
         int = Integrate()
         int.integrate()
+
+        config = RCSA_Config.getConfig()
+        config.FRCEvents.first_event_id = "CALA"
 
         # Go do what the test needs
         yield
@@ -384,6 +389,51 @@ def test_datamanagement(tmpdir):
             results = db.scalars(select(ScoresForEvent).filter_by(eventCode="BOBO")).all()
             assert len(results) == 3
             
+def test_match_data_reset(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        loadEventData(eventCode="CALA", season=2023)
+        # Retrieve and verify 
+        matches_and_teams = getMatchesAndTeams("CALA")
+        assert matches_and_teams.teams[2584].nameShort == "Flame of The West"
+        assert matches_and_teams.matches[5].Blue3 == 2584
+
+        # Add a score to match 5 to make it scored
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=1, mode_id=2, value=2),
+            # Setting this to True did work, but please see notes in ScoringData.py:353
+            Score(scoring_item_id=5, mode_id=1, value=True)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=5,
+            teamNumber=2584,
+            scores=scores
+        )
+        addScoresToDB(eventCode="CALA", match_score=score_obj)
+        # Make sure they are there
+        agg_object = GenerateResultsForTeam("CALA", 2584, 1)
+        results = agg_object.getAggregrateResults()
+        assert results.by_mode_results["Auton"].scores["cone"].count_of_scored_events == 1
+        assert results.totals["cone"].total == 3 # 1 in auton, 2 in teleop
+        assert results.totals["cone"].average == 3 # Only 1 event so far
+        assert results.by_mode_results["Auton"].scores["Auton Mobility"].total == 1
+
+        # "refresh" the data
+        loadEventData("CALA", refresh_match_data=True, season=2023)
+        # Make sure the scores are still there
+        agg_object = GenerateResultsForTeam("CALA", 2584, 1)
+        results = agg_object.getAggregrateResults()
+        assert results.by_mode_results["Auton"].scores["cone"].count_of_scored_events == 1
+        assert results.totals["cone"].total == 3 # 1 in auton, 2 in teleop
+        assert results.totals["cone"].average == 3 # Only 1 event so far
+        assert results.by_mode_results["Auton"].scores["Auton Mobility"].total == 1
+
+        # Make sure the match data shows 5 as scored
+        mat = getMatchesAndTeams("CALA", unscored_only=True)
+        assert 5 not in mat.matches.keys()        
+
+
+
 
 
 

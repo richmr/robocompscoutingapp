@@ -70,6 +70,25 @@ def getGameModeAndScoringElements(scoring_page_id:int) -> ModesAndItems:
 
 from robocompscoutingapp.FirstEventsAPI import FirstEventsAPI, FirstMatch, FirstTeam
 
+def deleteMatchesFromEvent(eventCode:str, delete_only_unscored:bool = False):
+    """
+    Will delete all matches from the given event
+
+    Parameters
+    ----------
+    eventCode:str
+        The FRC Event Code
+    delete_only_unscored:bool
+        Will only delete unscored matches for this event.  Intended for possibility an event has its matches re-organized for some reason
+    """
+    with RCSA_DB.getSQLSession() as db:
+        if delete_only_unscored:
+            db.execute(delete(MatchesForEvent).filter_by(eventCode=eventCode, scored=False))
+        else:
+            db.execute(delete(MatchesForEvent).filter_by(eventCode=eventCode))
+        db.commit()
+
+    
 def storeTeams(team_list:List[FirstTeam]):
     """
     Saves the list of teams to the database
@@ -203,11 +222,12 @@ def isEventAlreadyLoaded(eventCode:str) -> MatchesAndTeamsLoaded:
         matches_are_loaded = len(mat.matches) > 0,
         teams_are_loaded = len(mat.teams) > 0
     )
+    return toreturn
 
 def loadEventData(
         eventCode:str,
-        reset_all_data:bool,
-        refresh_match_data:bool,
+        reset_all_data:bool = False,
+        refresh_match_data:bool = False,
         season:int = None
     ):
     """
@@ -241,9 +261,25 @@ def loadEventData(
     # If we are here, there is data already
     # Process the remaining flags.  I count on the CLI to ensure mutually exclusive flags are not set
     # In any rate only a single flag will be processed before returning
+    if reset_all_data:
+        deleteMatchesFromEvent(eventCode)
+        deleteScoresFromDB(eventCode)
+        allTeams = fapi.getTeamsAtEvent(eventCode=eventCode)
+        storeTeams(allTeams)
+        allMatches = fapi.getMatchesAtEvent(eventCode=eventCode)
+        storeMatches(allMatches)
+        return
     
-    pass
-
+    if refresh_match_data:
+        deleteMatchesFromEvent(eventCode=eventCode, delete_only_unscored=True)
+        # There may have been new teams added?
+        # storeTeams prevents attempts to add same team to same event multiple times
+        allTeams = fapi.getTeamsAtEvent(eventCode=eventCode)
+        storeTeams(allTeams)
+        # storeMatches will prevent overwriting already scored events
+        allMatches = fapi.getMatchesAtEvent(eventCode=eventCode)
+        storeMatches(allMatches)
+        return
 
 def resetEventData(eventCode:str):
     """
