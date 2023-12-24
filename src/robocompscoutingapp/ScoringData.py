@@ -1,4 +1,4 @@
-from sqlalchemy import select, distinct, func
+from sqlalchemy import select, distinct, func, delete
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Dict, List, Union
@@ -66,8 +66,9 @@ def getGameModeAndScoringElements(scoring_page_id:int) -> ModesAndItems:
         item_dict = {i.name:ScoringItem.model_validate(i) for i in items}
         return ModesAndItems(modes=mode_dict, scoring_items=item_dict)
 
-from robocompscoutingapp.FirstEventsAPI import FirstMatch, FirstTeam
+################ Match and Team Data ###################
 
+from robocompscoutingapp.FirstEventsAPI import FirstEventsAPI, FirstMatch, FirstTeam
 
 def storeTeams(team_list:List[FirstTeam]):
     """
@@ -179,6 +180,88 @@ def getMatches(eventCode:str, unscored_only:bool = True) -> MatchesAndTeams:
             teams=teams
         )
 
+class MatchesAndTeamsLoaded(BaseModel):
+    matches_are_loaded:bool
+    teams_are_loaded:bool
+
+def isEventAlreadyLoaded(eventCode:str) -> MatchesAndTeamsLoaded:
+    """
+    Returns the MatchesAndTeamsLoaded with correct boolean values sent
+
+    Parameters
+    ----------
+    eventCode:str
+        The FRC Event code
+    
+    Returns
+    -------
+    MatchesAndTeamsLoaded
+        Matches and team loaded object
+    """
+    mat = getMatchesAndTeams(eventCode=eventCode, unscored_only=False)
+    toreturn = MatchesAndTeamsLoaded(
+        matches_are_loaded = len(mat.matches) > 0,
+        teams_are_loaded = len(mat.teams) > 0
+    )
+
+def loadEventData(
+        eventCode:str,
+        reset_all_data:bool,
+        refresh_match_data:bool,
+        season:int = None
+    ):
+    """
+    Will load all matches and teams for the configured event.
+
+    Parameters
+    ----------
+    eventCode:str
+        The FRC Event Code
+    reset_all_data:bool
+        Will delete and reset all match, team, and scoring data, generally used if you tested on the real match and team data and want to prepare for the actual event.
+    refresh_match_data:bool
+        Will delete all UNSCORED matches and scoring data.  Used if FRC re-structures the remaining matches in an event.
+    season:int
+        If provided, will override the default season in the FRC API (used for testing against previous seasons)
+    """
+    # Set up First API
+    config = RCSA_Config.getConfig()
+    fapi = FirstEventsAPI(config=config, season=season)
+    already_loaded = isEventAlreadyLoaded(eventCode)
+    if not (already_loaded.matches_are_loaded and already_loaded.teams_are_loaded):
+        # There's no data load all of it
+        allTeams = fapi.getTeamsAtEvent(eventCode=eventCode)
+        storeTeams(allTeams)
+        allMatches = fapi.getMatchesAtEvent(eventCode=eventCode)
+        storeMatches(allMatches)
+        # Just make sure the scoring data is empty for this event
+        deleteScoresFromDB(eventCode)
+        return
+    
+    # If we are here, there is data already
+    # Process the remaining flags.  I count on the CLI to ensure mutually exclusive flags are not set
+    # In any rate only a single flag will be processed before returning
+    
+    pass
+
+
+def resetEventData(eventCode:str):
+    """
+    Returns the MatchesAndTeamsLoaded with correct boolean values sent
+
+    Parameters
+    ----------
+    eventCode:str
+        The FRC Event code
+    
+    Returns
+    -------
+    MatchesAndTeamsLoaded
+        Matches and team loaded object
+    """
+
+################## Scoring Functions #################
+
 def teamAlreadyScoredForThisMatch(teamNumber:int, matchNumber:int, eventCode:str) -> bool:
     """
     Returns true if this team has already had its scores for this event filed
@@ -213,6 +296,22 @@ class ScoredMatchForTeam(BaseModel):
     matchNumber:int
     teamNumber:int
     scores:List[Score]
+
+def deleteScoresFromDB(eventCode:str):
+    """
+    Delete all scores from the DB for this event and scoring page
+
+    Parameters
+    ----------
+    eventCode:str
+        Event code for the scored event
+    scoring_page_id:int
+        Scoring page ID
+    """
+    with RCSA_DB.getSQLSession() as db:
+        db.execute(delete(ScoresForEvent).filter_by(eventCode=eventCode))
+        db.commit()
+
 
 def addScoresToDB(eventCode:str, match_score:ScoredMatchForTeam):
     """

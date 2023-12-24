@@ -174,3 +174,6 @@ Need test data load
 - Get the mode and item ids 
 - Send scoring
 - 
+
+## Assumptions
+- A scoring server assumes an event is scored with a single scoring page design, resetting the data for an event will delete all existing scores.

@@ -23,6 +23,7 @@ from robocompscoutingapp.ScoringData import (
     MatchesAndTeams,
     getMatchesAndTeams,
     addScoresToDB,
+    deleteScoresFromDB,
     Score,
     ScoredMatchForTeam,
     teamAlreadyScoredForThisMatch,
@@ -333,6 +334,60 @@ def test_scoreAggregation(tmpdir):
         assert all_team_results.data[1].by_mode_results["Auton"].scores["cone"].count_of_scored_events == 2
         assert all_team_results.data[2].totals["cone"].count_of_scored_events == 0
         assert all_team_results.data[3].totals["cone"].total == 1
+
+        # Test delete function
+        deleteScoresFromDB("CALA")
+
+        # Verify in DB
+
+def test_datamanagement(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        fake_game_data()
+        # Now some scoring
+        scores = [
+            Score(scoring_item_id=1, mode_id=1, value=1),
+            Score(scoring_item_id=1, mode_id=2, value=2),
+            # Setting this to True did work, but please see notes in ScoringData.py:353
+            Score(scoring_item_id=5, mode_id=1, value=True)
+        ]
+        score_obj = ScoredMatchForTeam(
+            matchNumber=1,
+            teamNumber=1,
+            scores=scores
+        )
+        addScoresToDB(eventCode="CALA", match_score=score_obj)
+        # Add matches for another event
+        match_list = [
+            FirstMatch(
+                eventCode = "BOBO",
+                description = "Match 1",
+                matchNumber = 1,
+                Red1 = 1,
+                Red2 = 2,
+                Red3 = 3,
+                Blue1 = 1,
+                Blue2 = 2,
+                Blue3 = 3
+            ),
+        ]
+        storeMatches(match_list=match_list)
+        # Add some scores to it
+        addScoresToDB(eventCode="BOBO", match_score=score_obj)
+        # Test delete function
+        deleteScoresFromDB("CALA")
+
+        # Check in DB
+        with RCSA_DB.getSQLSession() as db:
+            results = db.scalars(select(ScoresForEvent).filter_by(eventCode="CALA")).all()
+            assert len(results) == 0
+            # Make sure it only deleted what we wanted.
+            results = db.scalars(select(ScoresForEvent).filter_by(eventCode="BOBO")).all()
+            assert len(results) == 3
+            
+
+
+
+         
 
 
 

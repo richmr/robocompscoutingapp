@@ -69,7 +69,32 @@ def initialize(destination_path: Annotated[Path, typer.Argument(help="The destin
         ft.error(f"Unable to initialize the target directory because {badnews}")
 
     ft.success(f"File structure built at {destination_path.absolute()}.  Please see the readme.txt for more information")
-    
+
+@cli_app.command()
+def prepare_event(
+    reset_event_data: Annotated[bool, typer.Option(help="Overwrite the existing match and team data for the selected event", default=False)],
+    erase_scoring_data: Annotated[bool, typer.Option(help="Erase all exisiting scoring data", default=False)],
+    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info", default=False)], 
+):
+    pass
+
+@cli_app.command()
+def run(
+    reset_event_data: Annotated[bool, typer.Option(help="Overwrite the existing match and team data for the selected event", default=False)],
+    erase_scoring_data: Annotated[bool, typer.Option(help="Erase all exisiting scoring data", default=False)],
+    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info", default=False)], 
+    daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop", default=False)]
+):
+    """
+    Run the app server.
+    """
+    if reset_all_data:
+        reset_event_data = True
+        erase_scoring_data = True
+
+
+
+
 
 def robocompscoutingapp():
     cli_app()
