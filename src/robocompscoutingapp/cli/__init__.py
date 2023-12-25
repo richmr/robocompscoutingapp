@@ -10,11 +10,16 @@ import re
 
 
 from robocompscoutingapp.FirstEventsAPI import FirstEventsAPI
+from robocompscoutingapp.Integrate import Integrate
+from robocompscoutingapp.RunAPIServer import RunAPIServer
 from robocompscoutingapp.__about__ import __version__
 from robocompscoutingapp.GlobalItems import FancyText as ft
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.Initialize import Initialize
-from robocompscoutingapp.GlobalItems import RCSA_Config
+from robocompscoutingapp.GlobalItems import RCSA_Config, GracefulInterruptHandler
+from robocompscoutingapp.ScoringData import (
+    getCurrentScoringPageData
+)
 
 
 cli_app = typer.Typer()
@@ -41,7 +46,7 @@ def validate(html_file: Annotated[Path, typer.Argument(help="The finely crafted 
                 doit = Confirm.ask(f"Would you like me to update the scoring_page setting to {html_file.name}?")
                 if doit:
                     try:
-                        init.updateTOML(["ServerConfig", "scoring_page"], html_file.name, tgt_dir=path_to_toml)
+                        init.updateTOML(["ServerConfig", "scoring_page"], str(html_file.absolute()), tgt_dir=path_to_toml)
                     except Exception as badnews:
                         ft.error(f"Whoops.  I couldn't update because {badnews}.  You will need to do it manually")
     else:
@@ -118,8 +123,6 @@ def set_event():
         
     except Exception as badnews:
         ft.error(f"I can't set the district and event code for your event because {badnews}")
-            
-
 
 @cli_app.command()
 def prepare_event(
@@ -163,19 +166,48 @@ def prepare_event(
     except Exception as badnews:
         ft.error(f"Unable to load event data because {badnews}")
 
-# @cli_app.command()
-# def run(
-#     reset_event_data: Annotated[bool, typer.Option(help="Overwrite the existing match and team data for the selected event", default=False)],
-#     erase_scoring_data: Annotated[bool, typer.Option(help="Erase all exisiting scoring data", default=False)],
-#     reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info", default=False)], 
-#     daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop", default=False)]
-# ):
-#     """
-#     Run the app server.
-#     """
-#     if reset_all_data:
-#         reset_event_data = True
-#         erase_scoring_data = True
+@cli_app.command()
+def run(
+    daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop")] = False,
+):
+    """
+    Run the app server.
+    """
+    try:
+        # Are conditions set
+        spr = getCurrentScoringPageData()
+        if (spr is None) or (not spr.validated):
+            ft.error("Your scoring page has not been validated, please use the validate command!")
+            return
+        if not spr.integrated:
+            ft.print("Your scoring page is not integrated into the database yet, attempting to integrate")
+            try:
+                integrate = Integrate()
+                integrate.integrate()
+                ft.success("Your scoring page was successfully integrated!")
+            except Exception as badnews:
+                ft.error("Unable to integrate your scoring page for the following reason")
+                ft.error(str(badnews))
+                return
+        if not spr.tested:
+            ft.warning("You have not tested the chosen scoring page.  This may have unexpected results")
+            ft.warning("I HIGHLY recommend running the 'test --automate' command before using this page to score your event")
+
+        # We make it here, time to run the app
+        server = RunAPIServer(daemon=daemon)
+        if not daemon:
+            with GracefulInterruptHandler() as pause:
+                print(dir(pause))
+                server.run()
+                pause.wait()
+            server.stop()
+        else:
+            ft.error("--daemon not implemented")            
+        
+    except Exception as badnews:
+        ft.error("The server has failed because of the following reason")
+        ft.error(f"{badnews}")
+
 
 
 

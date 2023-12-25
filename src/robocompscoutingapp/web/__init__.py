@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager, contextmanager
 
 from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.ScoringData import (
-    getCurrentScoringPageID
+    getCurrentScoringPageData
 )
 
 # auto_error = False allows no auth requests to go through to next stage
@@ -68,7 +68,7 @@ async def lifespan(app:FastAPI):
     # establish scoring page ID
     global _scoring_page_id
     global _eventCode
-    _scoring_page_id = getCurrentScoringPageID()
+    _scoring_page_id = getCurrentScoringPageData().scoring_page_id
     _eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
     yield
     

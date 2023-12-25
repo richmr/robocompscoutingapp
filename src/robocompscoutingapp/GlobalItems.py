@@ -3,6 +3,7 @@ Collection of configuration items that are used across many parts of application
 """
 #from rich import print
 from enum import Enum
+from time import sleep
 import rich
 import pytest
 from pathlib import Path
@@ -215,3 +216,43 @@ def temp_chdir(tgt_dir):
         yield
     finally:
         os.chdir(cwd)
+
+
+# From: https://gist.github.com/nonZero/2907502
+import signal
+
+class GracefulInterruptHandler:
+    
+    def __init__(self, sig=signal.SIGINT):
+        self.sig = sig
+        
+    def __enter__(self):
+        
+        self.interrupted = False
+        self.released = False
+        self.original_handler = signal.getsignal(self.sig)
+        
+        def handler(signum, frame):
+            self.release()
+            self.interrupted = True
+            
+        signal.signal(self.sig, handler)
+        
+        return self
+        
+    def __exit__(self, type, value, tb):
+        self.release()
+        
+    def release(self):
+        
+        if self.released:
+            return False
+
+        signal.signal(self.sig, self.original_handler)
+        self.released = True
+        
+        return True
+    
+    def wait(self):
+        while True:
+            sleep(0.05)

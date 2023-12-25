@@ -17,7 +17,7 @@ from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
 
 _scoring_page_id = None
 
-def getCurrentScoringPageID():
+def getCurrentScoringPageData():
     """
     Uses current scoring page hash to get the scoring page ID
     """
@@ -25,8 +25,8 @@ def getCurrentScoringPageID():
     if _scoring_page_id is None:
         sp = RCSA_Config.getConfig().ServerConfig.scoring_page
         uhp = UserHTMLProcessing(sp)
-        _scoring_page_id = uhp.checkForValidatedPageEntry().scoring_page_id
-    return _scoring_page_id
+        sps = uhp.checkForValidatedPageEntry()
+    return sps
 
 class GameMode(BaseModel):
     model_config = ConfigDict(from_attributes=True)

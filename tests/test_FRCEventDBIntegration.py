@@ -10,7 +10,6 @@ from robocompscoutingapp.Integrate import Integrate
 from robocompscoutingapp.FirstEventsAPI import FirstEventsAPI
 from robocompscoutingapp.ScoringData import (
     getGameModeAndScoringElements,
-    getCurrentScoringPageID, 
     storeTeams,
     storeMatches,
     getMatchesAndTeams
@@ -62,7 +61,7 @@ def test_CALAFullLoad(tmpdir):
         storeMatches(allMatches)
 
         # Retrieve and verify select
-        matches_and_teams = getMatchesAndTeams()
+        matches_and_teams = getMatchesAndTeams("CALA")
         assert matches_and_teams.teams[2584].nameShort == "Flame of The West"
         assert matches_and_teams.matches[5].Blue3 == 2584
 

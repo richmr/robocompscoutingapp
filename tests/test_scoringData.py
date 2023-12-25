@@ -17,7 +17,7 @@ from robocompscoutingapp.Integrate import Integrate
 from robocompscoutingapp.ScoringData import (
     GenerateResultsForTeam,
     getGameModeAndScoringElements,
-    getCurrentScoringPageID, 
+    getCurrentScoringPageData, 
     storeTeams,
     storeMatches,
     deleteMatchesFromEvent,
@@ -98,7 +98,7 @@ def test_getGameModeAndScoringElements(tmpdir):
 
 def test_scoring_page_id(tmpdir):
     with gen_test_env_and_enter(tmpdir):
-        assert getCurrentScoringPageID() == 1
+        assert getCurrentScoringPageData().scoring_page_id == 1
 
 def test_storeTeams(tmpdir):
     with gen_test_env_and_enter(tmpdir):

@@ -33,7 +33,7 @@ class RunAPIServer:
         handlers = "[console, file]"
         # But not to console if daemon
         if self.daemon:
-            handlers = "[access]"
+            handlers = "[file]"
         file_edits = {
             "log_filename":self.server_config.log_filename,
             "log_level":self.server_config.log_level,
