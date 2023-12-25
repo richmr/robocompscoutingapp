@@ -430,7 +430,16 @@ def test_match_data_reset(tmpdir):
 
         # Make sure the match data shows 5 as scored
         mat = getMatchesAndTeams("CALA", unscored_only=True)
-        assert 5 not in mat.matches.keys()        
+        assert 5 not in mat.matches.keys()
+
+        # Make sure data clears out as planned
+        loadEventData("CALA", reset_all_data=True, season=2023)
+        mat = getMatchesAndTeams("CALA", unscored_only=True)
+        assert 5 in mat.matches.keys()
+        agg_object = GenerateResultsForTeam("CALA", 2584, 1)
+        results = agg_object.getAggregrateResults()
+        assert results.by_mode_results["Auton"].scores["cone"].count_of_scored_events == 0
+
 
 
 

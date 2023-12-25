@@ -281,21 +281,6 @@ def loadEventData(
         storeMatches(allMatches)
         return
 
-def resetEventData(eventCode:str):
-    """
-    Returns the MatchesAndTeamsLoaded with correct boolean values sent
-
-    Parameters
-    ----------
-    eventCode:str
-        The FRC Event code
-    
-    Returns
-    -------
-    MatchesAndTeamsLoaded
-        Matches and team loaded object
-    """
-
 ################## Scoring Functions #################
 
 def teamAlreadyScoredForThisMatch(teamNumber:int, matchNumber:int, eventCode:str) -> bool:
