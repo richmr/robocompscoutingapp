@@ -62,7 +62,9 @@ class FirstEventsAPI:
         # basic = HTTPBasicAuth(config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
         # Check the API key values
         if config.Secrets.FRC_Events_API_Username == "sampleuser":
-            raise(NoAPIKeyProvided("You did not update the the default API key username in "))
+            raise(NoAPIKeyProvided(f"You did not update the the default API key username in {config.Secrets.secrets_file}"))
+        if config.Secrets.FRC_Events_API_Auth_Token == "7eaa6338-a097-4221-ac04-b6120fcc4d49":
+            raise(NoAPIKeyProvided(f"You did not update the the default API auth token in {config.Secrets.secrets_file}"))
         self.api_session.auth = (config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
         self.api_session.headers.update({"Accept":"application/json"})
         if season is None:

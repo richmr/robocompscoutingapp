@@ -78,6 +78,8 @@ class SecretsConfig(BaseModel):
     basic_auth_password:Union[str, bool] 
     FRC_Events_API_Username:str
     FRC_Events_API_Auth_Token:str
+    secrets_file:Path
+
 
 class FRCEventsConfig(BaseModel):
     first_event_id:Union[str,bool] 
@@ -164,7 +166,7 @@ class RCSA_Config:
         if not secrets_toml.expanduser().absolute().exists():
             raise FileNotFoundError(f"Secrets file not found at {secrets_toml}.  Please set this to the correct location for the secrets file.")
         secrets_doc = TOMLFile(secrets_toml.expanduser().absolute()).read()
-        secretsConfig = SecretsConfig.model_validate(secrets_doc["Secrets"])
+        secretsConfig = SecretsConfig.model_validate(secrets_doc["Secrets"] | {"secrets_file":secrets_toml})
 
         cls._RCSAConfig = RCSAConfig(
             Secrets=secretsConfig,
