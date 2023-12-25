@@ -61,10 +61,10 @@ class FirstEventsAPI:
         self.api_session.headers.update({"Accept":"application/json"})
         if season is None:
             season = datetime.date.today().year
-        self.config.URL_Root += f"{season}/"
+        self.URL_Root = self.config.URL_Root + f"{season}/"
 
     def getDistricts(self) -> List[FirstDistrict]:
-        url = self.config.URL_Root + "districts"
+        url = self.URL_Root + "districts"
         r = self.api_session.get(url).json()
         toreturn = [FirstDistrict.model_validate(d) for d in r["districts"]]
         return toreturn
@@ -88,7 +88,7 @@ class FirstEventsAPI:
             params = {
                 "districtCode":districtCode
             }
-        url = self.config.URL_Root + "events"
+        url = self.URL_Root + "events"
         r = self.api_session.get(url, params=params).json()
         toreturn = [FirstEvent.model_validate(e) for e in r["Events"]]
         return toreturn
@@ -110,7 +110,7 @@ class FirstEventsAPI:
         params = {
             "eventCode":eventCode
         }
-        url = self.config.URL_Root + "teams"
+        url = self.URL_Root + "teams"
         r = self.api_session.get(url, params=params).json()
         # t | {"eventCode":eventCode} adds the eventCode to the t dict and returns a dict
         toreturn = [FirstTeam.model_validate(t | {"eventCode":eventCode}) for t in r["teams"]]
@@ -134,7 +134,7 @@ class FirstEventsAPI:
         params = {
             "tournamentLevel":"qual"
         }
-        url = self.config.URL_Root + f"schedule/{eventCode}"
+        url = self.URL_Root + f"schedule/{eventCode}"
         r = self.api_session.get(url, params=params).json()
         toreturn = []
         for event in r["Schedule"]:
