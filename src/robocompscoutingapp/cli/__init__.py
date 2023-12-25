@@ -4,8 +4,12 @@
 import typer
 from typing_extensions import Annotated
 from pathlib import Path
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
+import re
 
+
+from robocompscoutingapp.FirstEventsAPI import FirstEventsAPI
 from robocompscoutingapp.__about__ import __version__
 from robocompscoutingapp.GlobalItems import FancyText as ft
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
@@ -76,9 +80,46 @@ from robocompscoutingapp.ScoringData import loadEventData
 @cli_app.command()
 def set_event():
     """
-    Helps choose the event you are scoring
+    Helps choose the event you are scoring and update your configuration file
     """
-    
+    try:
+        ft.print("Collecting all FIRST Events for this season")
+        fapi = FirstEventsAPI(RCSA_Config.getConfig())
+        events = fapi.getEvents()
+        name_filter = Prompt.ask(f"There are {len(events)} events this season.  Please enter a search term to narrow results or just hit Enter to see them all", default=None, show_default=False)
+        table_title = "FIRST Events"
+        if name_filter is not None:
+            events = [e for e in events if bool(re.search(name_filter, e.name, re.IGNORECASE))]
+            table_title = f"FIRST Events matching search term {name_filter}"
+        #  Sort by earliest to latest
+        events.sort(key=lambda e:e.dateStart)
+        table = Table(title=table_title)
+        table.add_column("Code", justify="left", style="green")
+        table.add_column("Name", justify="center")
+        table.add_column("Start Date", justify="center")
+        for event in events:
+            table.add_row(event.code, event.name, str(event.dateStart.strftime("%m-%d-%Y")))
+        ft.print(table)
+        choices = [e.code for e in events]
+        choices.append(None)
+        event_choice = Prompt.ask(
+            prompt="Please enter the code (first column shown above) for the FIRST event you are scoring or just hit enter to exit",
+            choices=choices,
+            default=None,
+            show_choices=False
+        )
+        if event_choice is not None:
+            ft.print(f"Setting first_event_id in config file to {event_choice}")
+            Initialize.updateTOML(["FRCEvents", "first_event_id"], event_choice)
+            ft.success(f"first_event_id set successfully!")
+
+        else:
+            ft.print("No event choice set.  You will need to set the event code before the scoring app will work.")
+        
+    except Exception as badnews:
+        ft.error(f"I can't set the district and event code for your event because {badnews}")
+            
+
 
 @cli_app.command()
 def prepare_event(

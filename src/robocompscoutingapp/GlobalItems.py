@@ -80,10 +80,8 @@ class SecretsConfig(BaseModel):
     FRC_Events_API_Auth_Token:str
     secrets_file:Path
 
-
 class FRCEventsConfig(BaseModel):
     first_event_id:Union[str,bool] 
-    district_id:Union[str,bool] 
     URL_Root:str 
 
 class ServerConfig(BaseModel):

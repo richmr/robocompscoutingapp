@@ -84,7 +84,8 @@ class Initialize:
         file = tgt_dir/rcsa_config_filename
         return file.exists()
     
-    def updateTOML(self, key_list:list, value, tgt_dir:Path = Path('.')):
+    @classmethod
+    def updateTOML(cls, key_list:list, value, tgt_dir:Path = Path('.')):
         """
         Updates a single TOML value to the value provided.
         

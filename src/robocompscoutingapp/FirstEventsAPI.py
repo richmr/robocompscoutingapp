@@ -9,9 +9,7 @@ from robocompscoutingapp.GlobalItems import RCSAConfig
 
 # Defining all these Pydantic models so I don't have to guess at key values later
 class FirstEventsConfig(BaseModel):
-    APIKey_File:Path
     first_event_id: Union[bool, str]
-    district_id: Union[bool, str]
     URL_Root:str
 
 class FirstDistrict(BaseModel):
@@ -21,6 +19,7 @@ class FirstDistrict(BaseModel):
 class FirstEvent(BaseModel):
     code:str
     name:str
+    # districtCode:str  # Most events do not have district code
     dateStart:datetime.datetime
     dateEnd:datetime.datetime
 
@@ -62,9 +61,9 @@ class FirstEventsAPI:
         # basic = HTTPBasicAuth(config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
         # Check the API key values
         if config.Secrets.FRC_Events_API_Username == "sampleuser":
-            raise(NoAPIKeyProvided(f"You did not update the the default API key username in {config.Secrets.secrets_file}"))
+            raise(NoAPIKeyProvided(f"you did not update the default FRC Events API key username in {config.Secrets.secrets_file}"))
         if config.Secrets.FRC_Events_API_Auth_Token == "7eaa6338-a097-4221-ac04-b6120fcc4d49":
-            raise(NoAPIKeyProvided(f"You did not update the the default API auth token in {config.Secrets.secrets_file}"))
+            raise(NoAPIKeyProvided(f"you did not update the default FRC Events API auth token in {config.Secrets.secrets_file}"))
         self.api_session.auth = (config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
         self.api_session.headers.update({"Accept":"application/json"})
         if season is None:

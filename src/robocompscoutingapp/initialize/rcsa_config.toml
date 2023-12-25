@@ -10,16 +10,8 @@
 secrets_file = "~/.RCSA_SECRETS.toml"
 
 [FRCEvents]
-# Provide path to the file holding your FRC Events API Key here
-# This file should only contain the API key in Base64 encoding as shown at: https://frc-api-docs.firstinspires.org/?version=216cd832-1976-40b0-855b-3a4d92166c08#authorization
-# Example: echo -n "sampleuser:7eaa6338-a097-4221-ac04-b6120fcc4d49" | base64 > ~/.FRCEVENTSAPI
-# DO NOT include this file in your repository!!
-APIKey_File = "~/.FRCEVENTSAPI"
-
-# Place the event ID you are scoring here.
+# Place the event code you are scoring here.  Use the robocompscoutingapp set-event command to help
 first_event_id = false
-# If you know your district code, place it here to get faster results from First Events
-district_id = false
 URL_Root = "https://frc-api.firstinspires.org/v3.0/"
 
 # By default the server is only configured to run locally for testing
