@@ -45,6 +45,9 @@ class FirstMatch(BaseModel):
     Blue3:int
     scored:bool = Field(default=False)
 
+class NoAPIKeyProvided(Exception):
+    pass
+
 class FirstEventsAPI:
     """
     Interface to the First Events API
@@ -57,6 +60,9 @@ class FirstEventsAPI:
         self.config = config.FRCEvents
         self.api_session = requests.Session()
         # basic = HTTPBasicAuth(config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
+        # Check the API key values
+        if config.Secrets.FRC_Events_API_Username == "sampleuser":
+            raise(NoAPIKeyProvided("You did not update the the default API key username in "))
         self.api_session.auth = (config.Secrets.FRC_Events_API_Username, config.Secrets.FRC_Events_API_Auth_Token)
         self.api_session.headers.update({"Accept":"application/json"})
         if season is None:
@@ -111,7 +117,10 @@ class FirstEventsAPI:
             "eventCode":eventCode
         }
         url = self.URL_Root + "teams"
-        r = self.api_session.get(url, params=params).json()
+        r = self.api_session.get(url, params=params)
+        if "Invalid Event Requested" in r.text:
+            raise ValueError(f"{eventCode} is not valid")
+        r = r.json()
         # t | {"eventCode":eventCode} adds the eventCode to the t dict and returns a dict
         toreturn = [FirstTeam.model_validate(t | {"eventCode":eventCode}) for t in r["teams"]]
         return toreturn
@@ -135,7 +144,10 @@ class FirstEventsAPI:
             "tournamentLevel":"qual"
         }
         url = self.URL_Root + f"schedule/{eventCode}"
-        r = self.api_session.get(url, params=params).json()
+        r = self.api_session.get(url, params=params)
+        if "Invalid Event Requested" in r.text:
+            raise ValueError(f"{eventCode} is not valid")
+        r = r.json()
         toreturn = []
         for event in r["Schedule"]:
             event_dict = {

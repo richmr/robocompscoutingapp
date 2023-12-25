@@ -84,3 +84,10 @@ def test_getMatches(tmpdir):
         # CALA is the Los Angeles Regional
         matches = fapi.getMatchesAtEvent(eventCode="CALA")
         assert len(matches) > 0
+
+def test_badEventCode(tmpdir):
+     with gen_test_env_and_enter(tmpdir):
+        config = RCSA_Config.getConfig(reset=True)
+        fapi = FirstEventsAPI(config=config, season=2023)
+        with pytest.raises(ValueError):
+            matches = fapi.getMatchesAtEvent(eventCode="NOTEVENT")

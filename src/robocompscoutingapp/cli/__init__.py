@@ -10,6 +10,7 @@ from robocompscoutingapp.__about__ import __version__
 from robocompscoutingapp.GlobalItems import FancyText as ft
 from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.Initialize import Initialize
+from robocompscoutingapp.GlobalItems import RCSA_Config
 
 
 cli_app = typer.Typer()
@@ -70,27 +71,70 @@ def initialize(destination_path: Annotated[Path, typer.Argument(help="The destin
 
     ft.success(f"File structure built at {destination_path.absolute()}.  Please see the readme.txt for more information")
 
-@cli_app.command()
-def prepare_event(
-    reset_event_data: Annotated[bool, typer.Option(help="Overwrite the existing match and team data for the selected event", default=False)],
-    erase_scoring_data: Annotated[bool, typer.Option(help="Erase all exisiting scoring data", default=False)],
-    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info", default=False)], 
-):
-    pass
+from robocompscoutingapp.ScoringData import loadEventData
 
 @cli_app.command()
-def run(
-    reset_event_data: Annotated[bool, typer.Option(help="Overwrite the existing match and team data for the selected event", default=False)],
-    erase_scoring_data: Annotated[bool, typer.Option(help="Erase all exisiting scoring data", default=False)],
-    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info", default=False)], 
-    daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop", default=False)]
+def set_event():
+    """
+    Helps choose the event you are scoring
+    """
+    
+
+@cli_app.command()
+def prepare_event(
+    refresh_match_data: Annotated[bool, typer.Option(help="Updates all unscored matches for the event.  Retains all scoring data")] = False,
+    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info")] = False, 
 ):
     """
-    Run the app server.
+    Loads or refreshes the match and team data for the chosen event
     """
-    if reset_all_data:
-        reset_event_data = True
-        erase_scoring_data = True
+    eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
+    if eventCode == False:
+        ft.error("Please specify a valid FRC Event code in the configuration file.  Use the 'set-event' command if you need guided assistance.")
+        return
+    
+    if (refresh_match_data and reset_all_data):
+        ft.error("Please choose either 'refresh-match-data' or 'reset-all-data' not both")
+        return
+    
+    if refresh_match_data:
+        ft.print("Removing all unscored matches and updating with fresh FRC Event data")
+    elif reset_all_data:
+        doit = Confirm.ask(f"Are you sure you want to delete all match, team, and scoring data for the {eventCode} event")
+        if not doit:
+            ft.warning("No changes made. If you aren't certain, backup the database just in case")
+            return
+        else:
+            ft.print(f"Deleting all match, team, and scoring data for the {eventCode} event")
+    else:
+        ft.print(f"Loading matches and team data for the {eventCode} event")
+
+    try:
+        loadEventData(
+            eventCode=eventCode,
+            reset_all_data=reset_all_data,
+            refresh_match_data=refresh_match_data
+        )
+        ft.success(f"{eventCode} event data loaded!")
+    except ValueError:
+        ft.error(f"{eventCode} is not a valid FRC event code.  Please use the set_event command if you need assistance.")
+        return
+    except Exception as badnews:
+        ft.error(f"Unable to load event data because {badnews}")
+
+# @cli_app.command()
+# def run(
+#     reset_event_data: Annotated[bool, typer.Option(help="Overwrite the existing match and team data for the selected event", default=False)],
+#     erase_scoring_data: Annotated[bool, typer.Option(help="Erase all exisiting scoring data", default=False)],
+#     reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info", default=False)], 
+#     daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop", default=False)]
+# ):
+#     """
+#     Run the app server.
+#     """
+#     if reset_all_data:
+#         reset_event_data = True
+#         erase_scoring_data = True
 
 
 
