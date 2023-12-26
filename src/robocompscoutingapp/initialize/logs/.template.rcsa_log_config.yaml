@@ -2,6 +2,7 @@
 # https://stackoverflow.com/questions/49753085/python-configure-logger-with-yaml-to-open-logfile-in-write-mode
 # https://gist.github.com/liviaerxin/d320e33cbcddcc5df76dd92948e5be3b
 # File cannot be used as-is, templated parameters ($$...) below need to be filled in.
+# Modifying this template file may break logging on the app and cause the app to fail to run
 version: 1
 disable_existing_loggers: False
 formatters:

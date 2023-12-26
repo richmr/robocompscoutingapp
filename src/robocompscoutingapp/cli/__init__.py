@@ -175,6 +175,13 @@ def run(
     """
     try:
         # Are conditions set
+        eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
+        if eventCode == False:
+            ft.error("Please specify a valid FRC Event code in the configuration file.  Use the 'set-event' command if you need guided assistance.")
+            return
+        else:
+            prepare_event()
+        
         spr = getCurrentScoringPageData()
         if (spr is None) or (not spr.validated):
             ft.error("Your scoring page has not been validated, please use the validate command!")
@@ -197,10 +204,10 @@ def run(
         server = RunAPIServer(daemon=daemon)
         if not daemon:
             with GracefulInterruptHandler() as pause:
-                print(dir(pause))
                 server.run()
                 pause.wait()
             server.stop()
+            ft.print("Server stopped")
         else:
             ft.error("--daemon not implemented")            
         

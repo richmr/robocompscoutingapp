@@ -254,5 +254,5 @@ class GracefulInterruptHandler:
         return True
     
     def wait(self):
-        while True:
+        while not self.interrupted:
             sleep(0.05)

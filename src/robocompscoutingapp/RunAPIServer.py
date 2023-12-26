@@ -7,7 +7,8 @@ from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.web.ThreadedUvicorn import ThreadedUvicorn
 class RunAPIServer:
 
-    def __init__(self, yamlFile:Path = Path("logs/rcsa_log_config.yaml"),
+    def __init__(self, yaml_file_template:Path = Path("logs/.template.rcsa_log_config.yaml"),
+                 destination_yaml_file:Path = Path("logs/rcsa_log_config.yaml"),
                  daemon:bool = False
                  ) -> None:
         """
@@ -21,7 +22,8 @@ class RunAPIServer:
         daemon:bool
             Will this server run as daemon?
         """
-        self.logging_yaml_file = Path(yamlFile)
+        self.yaml_file_template = Path(yaml_file_template)
+        self.destination_yaml_file = Path(destination_yaml_file)
         self.server_config = RCSA_Config.getConfig().ServerConfig
         self.daemon = daemon
 
@@ -40,14 +42,14 @@ class RunAPIServer:
             "handlers":handlers
         }
         try:
-            with open(self.logging_yaml_file) as f:
+            with open(self.yaml_file_template) as f:
                 original = Template(f.read())
                 fixed = original.substitute(file_edits)
 
-            with open(self.logging_yaml_file, "w") as fix:
+            with open(self.destination_yaml_file, "w") as fix:
                 fix.write(fixed)
         except Exception as badnews:
-            raise(Exception(f"Unable to edit logging YAML file {self.logging_yaml_file} because {badnews}"))
+            raise(Exception(f"Unable to edit logging YAML file {self.destination_yaml_file} because {badnews}"))
         
     def run(self):
         """
@@ -56,7 +58,7 @@ class RunAPIServer:
         self.setupLoggingYAML()
         host = self.server_config.IP_Address
         port = self.server_config.port
-        config = Config("robocompscoutingapp.web:rcsa_api_app", host=host, port=port, reload=False, log_config=str(self.logging_yaml_file))
+        config = Config("robocompscoutingapp.web:rcsa_api_app", host=host, port=port, reload=False, log_config=str(self.destination_yaml_file))
         self.server = ThreadedUvicorn(config)
         self.server.start()
 
