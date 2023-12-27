@@ -200,6 +200,12 @@ def run(
             ft.warning("You have not tested the chosen scoring page.  This may have unexpected results")
             ft.warning("I HIGHLY recommend running the 'test --automate' command before using this page to score your event")
 
+        if RCSA_Config.getConfig().ServerConfig.IP_Address == "127.0.0.1":
+            ft.warning("Your configuration file is set to host the app server on the localhost interface.  This will prevent anyone from connecting to the server.")
+            ft.warning("I am setting it to 0.0.0.0 so that the app will be accessible on the network")
+            ft.warning("Use the 'test' command to keep running on the localhost interface only")
+            RCSA_Config.getConfig().ServerConfig.IP_Address = "0.0.0.0"
+        
         # We make it here, time to run the app
         server = RunAPIServer(daemon=daemon)
         if not daemon:

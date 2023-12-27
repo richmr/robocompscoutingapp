@@ -88,6 +88,7 @@ class FRCEventsConfig(BaseModel):
 class ServerConfig(BaseModel):
     IP_Address:str  
     port:int 
+    test_mode:bool = False
     user_static_folder:Union[bool, Path] 
     scoring_database:Union[bool, Path] 
     log_filename:Union[bool, Path] 

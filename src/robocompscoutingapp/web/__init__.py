@@ -64,7 +64,7 @@ _eventCode = None
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     # Set up the static pages
-    rcsa_api_app.mount(f"/app", StaticFiles(directory=RCSA_Config.getConfig().ServerConfig.user_static_folder), name="scoring")
+    rcsa_api_app.mount(f"/app", StaticFiles(directory=RCSA_Config.getConfig().ServerConfig.user_static_folder), name="app")
     # establish scoring page ID
     global _scoring_page_id
     global _eventCode
@@ -104,6 +104,25 @@ from robocompscoutingapp.ScoringData import (
     getMatches,
     MatchesAndTeams
 )
+
+
+@rcsa_api_app.get("/")
+def home():
+    """
+    Redirect to the main page
+    """
+    tosend = """
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <meta http-equiv="refresh" content="1; url='app/index.html'" />
+            </head>
+            <body>
+                <p>Redirecting to main menu</p>
+            </body>
+        </html>
+    """
+    return HTMLResponse(tosend)
 
 @rcsa_api_app.get("/api/getMatchesAndTeams")
 def matchesAndTeams(unscored_only:bool = True) -> MatchesAndTeams:
