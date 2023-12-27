@@ -177,6 +177,30 @@ def prepare_event(
         ft.error(f"Unable to load event data because {badnews}")
 
 @cli_app.command()
+def test(
+    automate: Annotated[bool, typer.Option(help="Will automatically test your scoring page and verify the application scored correctly.")] = False,
+    cleanup: Annotated[bool, typer.Option(help="Use --no-cleanup if you want to save the temporary database")] = True,
+    use_config_ip: Annotated[bool, typer.Option(help="Set --use-config-ip to attach the server to the IP_Address in the TOML.  This can allow for network access.  Otherwise, the server is only attached to localhost")] = False
+):
+    """
+    Start the application server in test mode.
+
+    Test mode application server:\n
+        - Uses a temporary database and removes it when complete (unless --no-cleanup is set)\n
+        - Uses team and match data from the CALA event from the 2023 season (for consistency)\n
+        - Will only attach to localhost unless --use-config-ip is set\n
+    \n
+    If you set --automate it will provide a link to click that will let you watch your scoring page be automatically tested.
+    """
+    # Set the global test flag
+    RCSA_Config.getConfig().ServerConfig.test_mode = True
+
+    if not use_config_ip:
+        RCSA_Config.getConfig().ServerConfig.IP_Address = "127.0.0.1"
+
+    
+
+@cli_app.command()
 def run(
     daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop")] = False,
 ):
