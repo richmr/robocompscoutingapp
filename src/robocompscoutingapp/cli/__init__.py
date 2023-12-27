@@ -95,7 +95,7 @@ from robocompscoutingapp.ScoringData import loadEventData
 @cli_app.command()
 def set_event():
     """
-    Helps choose the event you are scoring and update your configuration file
+    Helps choose the event you are scoring and updates your configuration file
     """
     try:
         ft.print("Collecting all FIRST Events for this season")
