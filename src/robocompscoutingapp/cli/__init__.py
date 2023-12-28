@@ -176,6 +176,9 @@ def prepare_event(
     except Exception as badnews:
         ft.error(f"Unable to load event data because {badnews}")
 
+
+from robocompscoutingapp.SetupForTest import configure_for_testing
+
 @cli_app.command()
 def test(
     automate: Annotated[bool, typer.Option(help="Will automatically test your scoring page and verify the application scored correctly.")] = False,
@@ -198,6 +201,30 @@ def test(
     if not use_config_ip:
         RCSA_Config.getConfig().ServerConfig.IP_Address = "127.0.0.1"
 
+    with configure_for_testing(cleanup=cleanup):
+        ft.print(f"Loading match and team data for the {RCSA_Config.getConfig().FRCEvents.first_event_id} from 2023")
+        loadEventData(RCSA_Config.getConfig().FRCEvents.first_event_id, season=2023)
+        ft.success("Match and team data loaded")
+        spr = getCurrentScoringPageData()
+        if (spr is None) or (not spr.validated):
+            ft.error("Your scoring page has not been validated, please use the validate command!")
+            return
+        if not spr.integrated:
+            ft.print("Your scoring page is not integrated into the database yet, attempting to integrate")
+            try:
+                integrate = Integrate()
+                integrate.integrate()
+                ft.success("Your scoring page was successfully integrated!")
+            except Exception as badnews:
+                ft.error("Unable to integrate your scoring page for the following reason")
+                ft.error(str(badnews))
+                return
+
+        server = RunAPIServer()
+        with GracefulInterruptHandler() as pause:
+            server.run()
+            pause.wait()
+        server.stop()
     
 
 @cli_app.command()
