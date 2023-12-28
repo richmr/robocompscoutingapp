@@ -1,0 +1,48 @@
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.button-red {
+    color: #FFF;
+    background-color: #f90202;
+    border-color: #f90202; 
+}
+
+.button-green {
+    color: #FFF;
+    background-color: #1ff902;
+    border-color: #1ff902; 
+}
+
+.button-orange {
+    color: #060606;
+    background-color: #f97102;
+    border-color: #f97102;
+}
+
+.lgreen-background {
+    background-color: lightgreen;
+}
+
+button.btn-big {
+    padding: 0 10px; /* Control your width and height here! */
+    opacity: 1.0;
+    border-radius: 0.2em;
+    font-size: 2em;
+    vertical-align: middle;
+}
+
+.qr_code_padding {
+    padding-top: 15px;
+    padding-right: 20px;
+    padding-bottom: 15px;
+    padding-left: 20px;
+}
