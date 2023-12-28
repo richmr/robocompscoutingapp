@@ -218,6 +218,29 @@ def getAllScores() -> AllTeamResults:
     except Exception as badnews:
         raise HTTPException(status_code=500, detail=f"Unable to get scores {badnews}")
     
+#####################
+
+class TestMode(BaseModel):
+    in_test_mode:bool
+
+@rcsa_api_app.get("/test/checkTestMode")
+def checkTestMode() -> TestMode:
+    """
+    Intended to be checked by the test mode script before executing tests.  Here to prevent contaminating data by accidently running the test sequence on a live server.
+    """
+    return TestMode(in_test_mode=RCSA_Config.getConfig().ServerConfig.test_mode)
+
+@rcsa_api_app.get("/test/testingComplete")
+def testingComplete():
+    """
+    Sets the global testing complete variable.  Intended to allow automated testing to shut down the server when complete
+    """
+    # Only works if the server was started in test mode to begin with
+    if RCSA_Config.getConfig().ServerConfig.test_mode:
+        RCSA_Config.getConfig().ServerConfig.testing_complete = True
+
+    return {}
+
 
         
 

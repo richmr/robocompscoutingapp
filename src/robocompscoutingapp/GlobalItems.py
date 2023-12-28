@@ -89,6 +89,7 @@ class ServerConfig(BaseModel):
     IP_Address:str  
     port:int 
     test_mode:bool = False
+    testing_complete:bool = False
     user_static_folder:Union[bool, Path] 
     scoring_database:Union[bool, Path] 
     log_filename:Union[bool, Path] 
@@ -255,5 +256,5 @@ class GracefulInterruptHandler:
         return True
     
     def wait(self):
-        while not self.interrupted:
+        while not (self.interrupted or RCSA_Config.getConfig().ServerConfig.testing_complete):
             sleep(0.05)
