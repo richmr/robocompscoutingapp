@@ -17,7 +17,8 @@ def configure_for_testing(cleanup:bool = True):
         RCSA_Config.getConfig().FRCEvents.first_event_id = "CALA"
         src_db = RCSA_Config.getConfig().ServerConfig.scoring_database
         dst_db = Path(f"testing_database_{int(time.time())}.db").absolute()
-        shutil.copy(str(src_db), str(dst_db))
+        if src_db.exists():
+            shutil.copy(str(src_db), str(dst_db))
         RCSA_Config.getConfig().ServerConfig.scoring_database = dst_db
         RCSA_Config.getConfig().ServerConfig.log_level = "INFO"
         yield
@@ -25,8 +26,9 @@ def configure_for_testing(cleanup:bool = True):
         ft.error(f"Test server failed because {badnews}")
     finally:
         if cleanup:
-            RCSA_Config.getConfig().ServerConfig.scoring_database.unlink()
-            ft.print("Temporary database deleted")
+            if RCSA_Config.getConfig().ServerConfig.scoring_database.exists():
+                RCSA_Config.getConfig().ServerConfig.scoring_database.unlink()
+                ft.print("Temporary database deleted")
         else:
             ft.print(f"Data from this test can be found in {RCSA_Config.getConfig().ServerConfig.scoring_database}")
         ft.success("Test complete!")

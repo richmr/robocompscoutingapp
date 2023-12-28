@@ -158,3 +158,5 @@ robocompscoutingapp.code-workspace
 data/test_init/rcsa_scoring.db
 src/robocompscoutingapp/web/sample.py
 src/robocompscoutingapp/data_convert/
+src/robocompscoutingapp/initialize/logs/rcsa_log_config.yaml
+src/robocompscoutingapp/initialize/coretesting.db

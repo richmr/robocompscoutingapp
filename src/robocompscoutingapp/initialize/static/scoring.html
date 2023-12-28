@@ -1,7 +1,51 @@
 <!DOCTYPE html>
+<!--
+    This is a complete working example of a FRC competition scoring tabulation page
+    The activities are from the 2023 season and is here to demonstrate how to build a scoring page.
+
+    The Robocomp Scouting App handles the recording, tabulation, and display of the results of scoring
+    but the animation, layout, items you wish to score, and artwork are all up to you.
+-->
 <html lang="en">
 <head>
     <!-- EXISTS -->
+    <!-- Basic Page Needs
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <title>RCSA Scoring Example</title>
+
+    <!-- Mobile Specific Metas
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/jquery.toast.min.css">
+
+    <!-- Scripts (Animation and DOM management)
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/9a97c74805.js" crossorigin="anonymous"></script>
+    <script src="js/jquery.toast.min.js"></script>
+
+    <!-- Favicon
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="shortcut icon" type="image/png" href="images/robot.png">
+
+    <!-- jQuery Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+
+
 </head>
 <body>
 
@@ -62,10 +106,10 @@
             </div>
             <div class="row">
                 <div id="score_cone_background" class="six columns text-center click_feedback">  
-                    <img id="score_cone" data-scorename="cone" class="score_tally" src="../images/cone.png" alt="Cone" width="75" height="75">
+                    <img id="score_cone" data-scorename="cone" class="score_tally" src="images/cone.png" alt="Cone" width="75" height="75">
                 </div>
                 <div id="score_cube_background" class="six columns text-center click_feedback">
-                    <img id="score_cube" data-scorename="cube" class="score_tally" src="../images/cube.png" alt="Cube" width="75" height="75">
+                    <img id="score_cube" data-scorename="cube" class="score_tally" src="images/cube.png" alt="Cube" width="75" height="75">
                 </div>
             </div>
             <div class="row">

@@ -183,7 +183,8 @@ from robocompscoutingapp.SetupForTest import configure_for_testing
 def test(
     automate: Annotated[bool, typer.Option(help="Will automatically test your scoring page and verify the application scored correctly.")] = False,
     cleanup: Annotated[bool, typer.Option(help="Use --no-cleanup if you want to save the temporary database")] = True,
-    use_config_ip: Annotated[bool, typer.Option(help="Set --use-config-ip to attach the server to the IP_Address in the TOML.  This can allow for network access.  Otherwise, the server is only attached to localhost")] = False
+    use_config_ip: Annotated[bool, typer.Option(help="Set --use-config-ip to attach the server to the IP_Address in the TOML.  This can allow for network access.  Otherwise, the server is only attached to localhost")] = False,
+    app_dev: Annotated[bool, typer.Option(help="This is for the very specific purpose of developing the sample files copied when 'initialize' is called.  You probably don't need to use this.")] = False
 ):
     """
     Start the application server in test mode.
@@ -200,6 +201,13 @@ def test(
 
     if not use_config_ip:
         RCSA_Config.getConfig().ServerConfig.IP_Address = "127.0.0.1"
+
+    if app_dev:
+        RCSA_Config.getConfig().ServerConfig.user_static_folder = Path("static").absolute()
+        RCSA_Config.getConfig().ServerConfig.log_filename = Path("logs/testlogs.log").absolute()
+        RCSA_Config.getConfig().ServerConfig.scoring_database = Path("coretesting.db").absolute()
+        user_html_processing = UserHTMLProcessing(Path("static/scoring.html"))
+        successful_validation = user_html_processing.validate()
 
     with configure_for_testing(cleanup=cleanup):
         ft.print(f"Loading match and team data for the {RCSA_Config.getConfig().FRCEvents.first_event_id} from 2023")
