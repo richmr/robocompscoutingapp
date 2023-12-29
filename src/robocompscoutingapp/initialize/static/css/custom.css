@@ -22,6 +22,10 @@
     border-color: #1ff902; 
 }
 
+.border-green {
+    border:4px solid greenyellow;
+}
+
 .button-orange {
     color: #060606;
     background-color: #f97102;
