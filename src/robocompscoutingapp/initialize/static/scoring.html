@@ -49,9 +49,17 @@
 </head>
 <body>
 
-  <!-- Primary Page Layout
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <div class="container match_and_team_selection">
+    <!-- Primary Page Layout
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <div class="container">
+        <div class="row">
+            <div class="twelve columns">
+                <a class="text-left" href="/app/index.html"><i class="fa-solid fa-angles-left"></i> Return to Main Menu</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container match_and_team_selection">
     <div class="row">
         <div class="twelve columns">
             <h3 class="text-center">Match Scoring</h3>
@@ -82,7 +90,7 @@
             <button class="button btn-big begin_scoring">Begin Scoring</button>
         </div>
     </div>
-  </div>
+    </div>
         
     <div class="section scoring" id="scoring_controls" hidden>
         <div class="container">
@@ -145,11 +153,16 @@
             </div>
         </div>
     </div>
- 
 
-    <div id="error-modal" class="error_modal">Error Modal</div>
+    <div id="sending_data_modal" class="modal">
+        <h3 id="sending_data_modal_title">Submitting data..</h3>
+        <p id="submit_message">Sending data, please wait..</p>
+        <div id="data_modal_buttons" hidden>
+            <a id="close_modal_next_match" class="button button-orange" href="#" >Reset Data and Score Next Match</a>
+        </div>
+    </div>
 
-    <div id="sending_data_modal" class="sending_data_modal">Sending Data</div>
+
 
     <script src="js/rcsa_loader.js"></script>
     <script src="js/rcsa_default_ui_animation.js"></script>

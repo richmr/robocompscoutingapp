@@ -1,9 +1,10 @@
+from enum import Enum
 from fastapi import FastAPI, Query, HTTPException, Response, Depends, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import secrets
-from pydantic import BaseModel, Field 
+from pydantic import BaseModel, Field, field_validator 
 import platform
 from time import sleep
 from typing import Annotated, List
@@ -16,6 +17,7 @@ from robocompscoutingapp.GlobalItems import RCSA_Config
 from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageData
 )
+from robocompscoutingapp.GlobalItems import FancyText as ft
 
 # auto_error = False allows no auth requests to go through to next stage
 # see source code at https://fastapi.tiangolo.com/reference/security/#fastapi.security.HTTPBasic
@@ -229,6 +231,30 @@ def checkTestMode() -> TestMode:
     Intended to be checked by the test mode script before executing tests.  Here to prevent contaminating data by accidently running the test sequence on a live server.
     """
     return TestMode(in_test_mode=RCSA_Config.getConfig().ServerConfig.test_mode)
+
+class ValidTestMessageTypes(str, Enum):
+    error = "error"
+    warning = "warning"
+    info = "info"
+
+class AutomatedTestMessage(BaseModel):
+    type:ValidTestMessageTypes
+    message:str
+
+@rcsa_api_app.post("/test/testMessage")
+def testMessage(message:AutomatedTestMessage):
+    # Only works if in test mode
+    if RCSA_Config.getConfig().ServerConfig.test_mode:
+        match message.type:
+            case "error":
+                ft.error(message.message)
+            case "warning":
+                ft.warning(message.message)
+            case "info":
+                ft.print(message.message)
+            case _:
+                ft.print(message.message)
+    return {}
 
 @rcsa_api_app.get("/test/testingComplete")
 def testingComplete():
