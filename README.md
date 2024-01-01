@@ -179,3 +179,5 @@ Need test data load
 - A scoring server assumes an event is scored with a single scoring page design, resetting the data for an event will delete all existing scores.
 
 - test mode setting on server with API for remote check
+
+- I don't think I need BEGIN_SCORING class and button.  Flow works fine after match and team selection

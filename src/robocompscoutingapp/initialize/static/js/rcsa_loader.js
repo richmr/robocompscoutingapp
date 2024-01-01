@@ -80,8 +80,28 @@ let rcsa = {
         // Click the first one to get us started
         $(".game_mode")[0].click();
         // get matches and teams
+        this.loadMatches();
         // check if testing
         this.activateTesting();
+    },
+
+    loadMatches: function () {
+        $.ajax({
+            type: "GET",
+            url: "/api/getMatchesAndTeams",
+            dataType: "json",
+            contentType: 'application/json',
+            success: function (server_data, text_status, jqXHR) {
+                // Give the data to the display code
+                console.log("Match data recieved");
+                rcsa.match_callback(server_data);
+            },
+            error: function( jqXHR, textStatus, errorThrown ) {
+                msg = `Unable to get match data because:\n${errorThrown}`
+                console.error(msg);
+                rcsa.error_callback(msg);
+            }
+        })
     },
     
     activateTesting: function () {

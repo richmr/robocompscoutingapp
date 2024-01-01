@@ -1,4 +1,7 @@
 
+var global_match_and_team_data;
+
+
 function greenFlash(e) {
     $(e).addClass("lgreen-background");
         setTimeout(() => {
@@ -81,7 +84,47 @@ function setupDataModalCloseButton(errMsg) {
 function matchAndTeamData(match_and_team_data) {
     // Receives a match and team data object from rcsa_loader
     console.log("matchAndTeamData called");
+    global_match_and_team_data = match_and_team_data
+    $(".match_selector").empty();
+    $(".match_selector").append(`<option value=-1>Please choose your match</option>`);
+    for (const [matchNumber, match_info] of Object.entries(match_and_team_data.matches)) {
+        $(".match_selector").append(`<option value=${matchNumber}>${match_info.description}</option>`); 
+        console.log(matchNumber, match_info);
+    }            
 }
+
+function setUpMatchSelector(){
+    // Watch for the change
+    $(".match_selector").change(function (e) { 
+        // e.preventDefault();
+        chosen_match = $(".match_selector").val();
+        if (chosen_match != -1) {
+            // Set the options for pick team
+            $(".team_selector").empty();
+            $(".team_selector").append(`<option value=-1>Please chose your team</option>`);
+            let match_data = global_match_and_team_data.matches[chosen_match];
+            $(".team_selector").append(`<option value=${match_data["Red1"]}>Red 1: ${match_data["Red1"]}</option>`);
+            $(".team_selector").append(`<option value=${match_data["Red2"]}>Red 2: ${match_data["Red2"]}</option>`);
+            $(".team_selector").append(`<option value=${match_data["Red3"]}>Red 3: ${match_data["Red3"]}</option>`);
+            $(".team_selector").append(`<option value=${match_data["Blue1"]}>Blue 1: ${match_data["Blue1"]}</option>`);
+            $(".team_selector").append(`<option value=${match_data["Blue2"]}>Blue 2: ${match_data["Blue2"]}</option>`);
+            $(".team_selector").append(`<option value=${match_data["Blue3"]}>Blue 3: ${match_data["Blue3"]}</option>`);
+            
+            $("#pick_team_row").show();
+        }
+    });
+}
+
+function setupTeamSelector() {
+    // Watch for the change
+    $(".team_selector").change(function (e) { 
+        chosen_team = $(".team_selector").val();
+        if (chosen_team != -1) {
+            $("#scoring_controls").show();
+        }
+    });
+}
+
 
 function rcsaErrorHandler(err_msg) {
     // Called by rcsa_loader when there are errors in the application mechanics
@@ -95,6 +138,8 @@ $(document).ready(function() {
     scoreFeedbackUISetup();
     gameModeSelectionUISetup();
     setupSubmitReport();
+    setUpMatchSelector();
+    setupTeamSelector();
 
     // CRITICAL INTEGRATION TO THE APP SERVER HERE::  REQUIRED!!
     // Call this before other setup tasks as the RCSA mechanics will tie into the rest of the DOM
