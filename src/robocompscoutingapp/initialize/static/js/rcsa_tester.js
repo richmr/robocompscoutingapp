@@ -31,11 +31,17 @@ let rcsa_tester = {
             processData: false,
             success: function (server_data, text_status, jqXHR) {
                 if (server_data.in_test_mode) {
-                    user_wants_to_test = confirm("I am prepared to run a series of automated tests on this scoring page to ensure server integration is working.\nPress 'Ok' when the page is ready to be tested.");
-                    if (user_wants_to_test) {
-                        console.log("Automated testing beginning.");
-                        runAutomatedTests();
-                    }
+                    // Placed in a short time out to ensure the page renders before the alert stops the rendering.  Really just cosmetic
+                    // Hint from: https://stackoverflow.com/questions/40086680/how-to-make-the-html-renders-before-the-alert-is-triggered
+                    setTimeout(function() {
+                        var user_wants_to_test = confirm("I am prepared to run a series of automated tests on this scoring page to ensure server integration is working.\nPress 'Ok' when the page is ready to be tested.");
+                        if (user_wants_to_test) {
+                            console.log("Automated testing beginning.");
+                            runAutomatedTests();
+                        } else {
+                            console.log("Automated testing cancelled by user request");
+                        }
+                    },250);
                 } else {
                     alert("The server is not in test mode.  Please tell your admin to run the server with the test command.");
                 }

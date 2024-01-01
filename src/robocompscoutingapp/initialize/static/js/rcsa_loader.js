@@ -77,6 +77,8 @@ let rcsa = {
         $(".game_mode").click(function (e) {
             rcsa.handleModeClick(this);
         });
+        // Click the first one to get us started
+        $(".game_mode")[0].click();
         // get matches and teams
         // check if testing
         this.activateTesting();

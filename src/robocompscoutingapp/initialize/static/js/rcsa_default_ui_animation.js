@@ -44,8 +44,7 @@ function gameModeSelectionUISetup() {
         $("[data-onlyForMode]").filter(`[data-onlyForMode!=${selected_mode_name}]`).css("pointer-events","none");
     });
 
-    // Click the first one to get us started
-    $(".game_mode")[0].click();
+    
 }
 
 function setupSubmitReport() {
@@ -90,10 +89,6 @@ function rcsaErrorHandler(err_msg) {
 }
 
 $(document).ready(function() {
-    // CRITICAL INTEGRATION TO THE APP SERVER HERE::  REQUIRED!!
-    // Call this before other setup tasks as the RCSA mechanics will tie into the rest of the DOM
-    rcsa.startup(matchAndTeamData, rcsaErrorHandler);
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     
     // Setups
     beginButtonUISetup();
@@ -101,5 +96,9 @@ $(document).ready(function() {
     gameModeSelectionUISetup();
     setupSubmitReport();
 
+    // CRITICAL INTEGRATION TO THE APP SERVER HERE::  REQUIRED!!
+    // Call this before other setup tasks as the RCSA mechanics will tie into the rest of the DOM
+    rcsa.startup(matchAndTeamData, rcsaErrorHandler);
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     
 })
