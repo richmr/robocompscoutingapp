@@ -89,7 +89,7 @@ function matchAndTeamData(match_and_team_data) {
     $(".match_selector").append(`<option value=-1>Please choose your match</option>`);
     for (const [matchNumber, match_info] of Object.entries(match_and_team_data.matches)) {
         $(".match_selector").append(`<option value=${matchNumber}>${match_info.description}</option>`); 
-        console.log(matchNumber, match_info);
+        // console.log(matchNumber, match_info);
     }            
 }
 
@@ -128,6 +128,17 @@ function setupTeamSelector() {
 
 function rcsaErrorHandler(err_msg) {
     // Called by rcsa_loader when there are errors in the application mechanics
+    $.toast({ 
+        text : err_msg, 
+        showHideTransition : 'slide',  // It can be plain, fade or slide
+        bgColor : 'red',              // Background color for toast
+        textColor : '#eee',            // text color
+        allowToastClose : true,       // Show the close button or not
+        hideAfter : false,              // `false` to make it sticky or time in miliseconds to hide after
+        stack : 5,                     // `fakse` to show one stack at a time count showing the number of toasts that can be shown at once
+        textAlign : 'left',            // Alignment of text i.e. left, right, center
+        position : 'top-left'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+      });
     console.error(err_msg);
 }
 

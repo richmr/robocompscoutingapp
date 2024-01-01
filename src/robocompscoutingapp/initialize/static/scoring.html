@@ -60,36 +60,32 @@
     </div>
 
     <div class="container match_and_team_selection">
-    <div class="row">
-        <div class="twelve columns">
-            <h3 class="text-center">Match Scoring</h3>
+        <div class="row">
+            <div class="twelve columns">
+                <h3 class="text-center">Match Scoring</h3>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="six columns">
-            <h5 class="text-right">Which match:</h5>
+        <div class="row">
+            <div class="six columns">
+                <h5 class="text-right">Which match:</h5>
+            </div>
+            <div class="six columns">
+                <select class="u-full-width match_selector">
+                    <option id="match_placeholder" value=-1>Loading matches...</option>
+                </select>
+            </div>
         </div>
-        <div class="six columns">
-            <select class="u-full-width match_selector">
-                <option id="match_placeholder" value=-1>Loading matches...</option>
-            </select>
+        <div class="row" id="pick_team_row" hidden>
+            <div class="six columns">
+                <h5 class="text-right">Team you are scoring:</h5>
+            </div>
+            <div class="six columns">
+                <select class="u-full-width team_selector">
+                    <option value=-1>Loading Teams for this match...</option>
+                </select>
+            </div>
         </div>
-    </div>
-    <div class="row" id="pick_team_row" hidden>
-        <div class="six columns">
-            <h5 class="text-right">Team you are scoring:</h5>
-        </div>
-        <div class="six columns">
-            <select class="u-full-width team_selector">
-                <option value=-1>Loading Teams for this match...</option>
-            </select>
-        </div>
-    </div>
-    <div class="row">
-        <div class="twelve columns text-center">
-            <button class="button btn-big begin_scoring">Begin Scoring</button>
-        </div>
-    </div>
+        
     </div>
         
     <div class="section scoring" id="scoring_controls" hidden>

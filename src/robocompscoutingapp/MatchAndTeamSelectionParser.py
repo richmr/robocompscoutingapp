@@ -78,7 +78,7 @@ class MatchAndTeamSelectionParser:
                 ParsingFunctionToCall(method_to_call=self.matchDivPresent),
                 ParsingFunctionToCall(method_to_call=self.matchSelectorParse),
                 ParsingFunctionToCall(method_to_call=self.teamSelectorParse),
-                ParsingFunctionToCall(method_to_call=self.beginScoringButtonParse)
+                # ParsingFunctionToCall(method_to_call=self.beginScoringButtonParse)
             ]
             for a_parser in parsers:
                 try:
