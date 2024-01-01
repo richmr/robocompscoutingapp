@@ -13,11 +13,15 @@ from importlib_resources import files
 import logging
 from contextlib import asynccontextmanager, contextmanager
 
-from robocompscoutingapp.GlobalItems import RCSA_Config
-from robocompscoutingapp.ScoringData import (
-    getCurrentScoringPageData
+from robocompscoutingapp.GlobalItems import (
+    RCSA_Config,
+    AutomatedTestMessage
 )
-from robocompscoutingapp.GlobalItems import FancyText as ft
+
+from robocompscoutingapp.ScoringData import (
+    getCurrentScoringPageData,
+    setScoringPageTestResult
+)
 
 # auto_error = False allows no auth requests to go through to next stage
 # see source code at https://fastapi.tiangolo.com/reference/security/#fastapi.security.HTTPBasic
@@ -232,37 +236,28 @@ def checkTestMode() -> TestMode:
     """
     return TestMode(in_test_mode=RCSA_Config.getConfig().ServerConfig.test_mode)
 
-class ValidTestMessageTypes(str, Enum):
-    error = "error"
-    warning = "warning"
-    info = "info"
-
-class AutomatedTestMessage(BaseModel):
-    type:ValidTestMessageTypes
-    message:str
-
 @rcsa_api_app.post("/test/testMessage")
 def testMessage(message:AutomatedTestMessage):
     # Only works if in test mode
     if RCSA_Config.getConfig().ServerConfig.test_mode:
-        match message.type:
-            case "error":
-                ft.error(message.message)
-            case "warning":
-                ft.warning(message.message)
-            case "info":
-                ft.print(message.message)
-            case _:
-                ft.print(message.message)
+        RCSA_Config.storeTestMessage(message)
     return {}
 
 @rcsa_api_app.get("/test/testingComplete")
-def testingComplete():
+def testingComplete(success:bool):
     """
     Sets the global testing complete variable.  Intended to allow automated testing to shut down the server when complete
+
+    Parameters
+    ----------
+    success:bool
+        Set to true if the automated testing was a success (warnings count as success); false if otherwise
+
     """
     # Only works if the server was started in test mode to begin with
     if RCSA_Config.getConfig().ServerConfig.test_mode:
+        RCSA_Config.getConfig().ServerConfig.test_success = success
+        setScoringPageTestResult(success, _scoring_page_id)
         RCSA_Config.getConfig().ServerConfig.testing_complete = True
 
     return {}

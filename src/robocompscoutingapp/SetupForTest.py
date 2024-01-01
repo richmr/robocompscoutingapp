@@ -31,6 +31,6 @@ def configure_for_testing(cleanup:bool = True):
                 ft.print("Temporary database deleted")
         else:
             ft.print(f"Data from this test can be found in {RCSA_Config.getConfig().ServerConfig.scoring_database}")
-        ft.success("Test complete!")
+        # ft.success("Test complete!")
 
 

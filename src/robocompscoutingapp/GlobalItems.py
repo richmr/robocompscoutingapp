@@ -10,10 +10,9 @@ from pathlib import Path
 from tomlkit import TOMLDocument, table, comment
 from tomlkit.toml_file import TOMLFile
 from pydantic import BaseModel, Field, field_validator
-from typing import Union
+from typing import List, Union
 from typing_extensions import Annotated
 
-#from robocompscoutingapp.FirstEventsAPI import FirstEventsConfig
 
 class ExtendedEnum(Enum):
     """
@@ -90,6 +89,7 @@ class ServerConfig(BaseModel):
     port:int 
     test_mode:bool = False
     testing_complete:bool = False
+    test_success:bool = False
     user_static_folder:Union[bool, Path] 
     scoring_database:Union[bool, Path] 
     log_filename:Union[bool, Path] 
@@ -109,6 +109,29 @@ class RCSAConfig(BaseModel):
     FRCEvents:FRCEventsConfig
     ServerConfig:ServerConfig    
 
+class ValidTestMessageTypes(str, Enum):
+    error = "error"
+    warning = "warning"
+    info = "info"
+    success = "success"
+
+class AutomatedTestMessage(BaseModel):
+    type:ValidTestMessageTypes
+    message:str
+
+    def display(self):
+        match self.type:
+            case "error":
+                FancyText.error(self.message)
+            case "warning":
+                FancyText.warning(self.message)
+            case "info":
+                FancyText.print(self.message)
+            case "success":
+                FancyText.success(self.message)
+            case _:
+                FancyText.print(self.message)
+
 class RCSA_Config:
     """
     Class that connects to the toml file and returns TOML object to use
@@ -117,6 +140,7 @@ class RCSA_Config:
     _TOMLDocument = None
     _FirstConfig = None
     _RCSAConfig = None
+    _test_messages = []
 
     @classmethod
     def getConfig(cls, reset:bool = False, test_TOML:TOMLDocument = None) -> RCSAConfig:
@@ -175,28 +199,22 @@ class RCSA_Config:
             ServerConfig=serverConfig
         )
     
-    # @classmethod
-    # def getFirstConfig(cls, reset:bool = False) -> FirstEventsConfig:
-    #     """
-    #     Class method to access the singleton FIRST Config object.
+    @classmethod
+    def storeTestMessage(cls, msg:AutomatedTestMessage):
+        """
+        Stores a test message for later printing
+        
+        Parameters
+        ----------
+        msg:AutomatedTestMessage
+            The message to print later
+        """
+        cls._test_messages.append(msg)
 
-    #     Parameters
-    #     ----------
-    #     reset:bool
-    #         Forces the stored _FirstConfig to reset to None.  This is mainly used in testing to ensure changes to configs don't leak into subsequent tests        
-       
-    #     Returns
-    #     -------
-    #     FirstEventsConfig
-    #         A FirstEventsConfig object representing the configuration settings
-    #     """
-    #     if reset:
-    #         cls._FirstConfig = None
-
-    #     if cls._FirstConfig is None:
-    #         config = cls.getConfig(reset=reset)["FRC_events"]
-    #         cls._FirstConfig = FirstEventsConfig.model_validate(config)
-    #     return cls._FirstConfig
+    @classmethod
+    def getTestMessages(cls) -> List[AutomatedTestMessage]:
+        return cls._test_messages
+    
     
 from contextlib import contextmanager
 import os

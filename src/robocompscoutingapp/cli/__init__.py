@@ -21,7 +21,8 @@ from robocompscoutingapp.UserHTMLProcessing import UserHTMLProcessing
 from robocompscoutingapp.Initialize import Initialize
 from robocompscoutingapp.GlobalItems import RCSA_Config, GracefulInterruptHandler
 from robocompscoutingapp.ScoringData import (
-    getCurrentScoringPageData
+    getCurrentScoringPageData,
+    setScoringPageTestResult,
 )
 
 # From: https://github.com/tiangolo/typer/issues/428
@@ -233,6 +234,18 @@ def test(
             server.run()
             pause.wait()
         server.stop()
+
+    if automate:
+        test_messages = RCSA_Config.getTestMessages()
+        if len(test_messages) > 0:
+            ft.print("[orange] ************* TEST MESSAGES *************")
+            for tm in test_messages:
+                tm.display()
+        if RCSA_Config.getConfig().ServerConfig.test_success:
+            ft.success("Automated testing passed!")
+        else:
+            ft.error("Automated testing failed.  Please address issues described above")
+                
     
 
 @cli_app.command()
@@ -266,7 +279,7 @@ def run(
                 ft.error(str(badnews))
                 return
         if not spr.tested:
-            ft.warning("You have not tested the chosen scoring page.  This may have unexpected results")
+            ft.warning("You have not passed automated testing for the chosen scoring page.  This may have unexpected results")
             ft.warning("I HIGHLY recommend running the 'test --automate' command before using this page to score your event")
 
         if RCSA_Config.getConfig().ServerConfig.IP_Address == "127.0.0.1":
