@@ -229,7 +229,7 @@ let rcsa = {
             success: function (modes_and_items, text_status, jqXHR) {
                 // Give the data to the display code
                 console.log("Game Modes and scoring item data recieved");
-                // Build the database.  The clickable DIV are linked to click in the scoring_item code
+                // Build the database.  
                 rcsa.scoringDB = new ScoringDatabase(modes_and_items);
                 rcsa.modes_and_items = modes_and_items;
             },

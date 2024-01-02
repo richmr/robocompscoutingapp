@@ -21,7 +21,7 @@ let rcsa_tester = {
             });
         }
         alert("All tests are complete!  Please check output on the server for any issues to resolve.");
-        // rcsa_tester.endTesting(rcsa_tester.overall_test_success);
+        rcsa_tester.endTesting(rcsa_tester.overall_test_success);
     },
 
     checkForTestMode: function () {
