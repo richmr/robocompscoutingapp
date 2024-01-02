@@ -77,7 +77,8 @@ function scoreSubmitFailure(errMsg) {
 
 function setupDataModalCloseButton(errMsg) {
     $("#close_modal_next_match").click(function (e) {
-
+        // Data wrangling handled by rcsa_loader.
+        
     })
 }
 

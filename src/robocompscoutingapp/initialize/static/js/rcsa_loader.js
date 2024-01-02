@@ -2,6 +2,8 @@
     This handles all of the actual communication with the robocompscoutingapp server.
 */
 
+/* ################### Core RCSA mechanics (modify at your own risk!) ##################### */
+
 ///  Scoring Item classes
 class rcsa_scoring_item {
     constructor(scoring_item_id, name) {
@@ -11,6 +13,7 @@ class rcsa_scoring_item {
 
         // Get this items possible specific mode
         this.only_for_mode = $(`[data-scorename='${name}']`).data("onlyformode");
+        // Connect the object to this scoring item
     }
 
     reset() {
@@ -31,11 +34,15 @@ class rcsa_scoring_item {
         this.current_value += 1;
     }
 
-    getJSONobject(mode_id) {
-        return {
-            scoring_item_id:this.scoring_item_id,
-            mode_id:mode_id,
-            value:this.value
+    getJSONobject(mode_id, mode_name) {
+        if ((this.only_for_mode === undefined) || (mode_name === this.only_for_mode) )
+            return {
+                scoring_item_id:this.scoring_item_id,
+                mode_id:mode_id,
+                value:this.current_value
+            }
+        else {
+            return null;
         }
     }
 }
@@ -47,24 +54,96 @@ class rcsa_score_tally extends rcsa_scoring_item {
 
 class rcsa_score_flag extends rcsa_scoring_item {
     #successfulClick() {
-        if (this.value == 0) {
+        if (this.current_value == 0) {
             // Flag set!
-            this.value = 1;
+            this.current_value = 1;
         } else {
             // Remove flag
-            this.value = 0;
+            this.current_value = 0;
         }
     }
 }
 
-/* ################### Core RCSA mechanics (modify at your own risk!) ##################### */
+// Internal Score Database class
+class ScoringDatabase {
+    // modes_and_items the JSON object delivered by the API
+    constructor(modes_and_items) {
+        // modes is Dict[str, GameMode object] (see ScoringData.py)
+        this.game_modes = modes_and_items.modes;
+        /* 
+            Build the 'database'
+            {
+                modename1: {
+                    scoring_item_name_1:scoring item object,
+                    etc..
+                },
+                modename2: {
+                    scoring_item_name_1:scoring item object,
+                    etc..
+                },
+
+            }
+        */
+        this.scoringDB = {};
+        for (const [mode_name, mode_obj] of Object.entries(modes_and_items.modes)) {
+            this.scoringDB[mode_name] = {};
+            for (const [item_name, item] of Object.entries(modes_and_items.scoring_items)) {
+                switch(item.type) {
+                    case "score_tally":
+                        this.scoringDB[mode_name][item_name] = new rcsa_score_tally(item.scoring_item_id, item_name);
+                        break;
+                    case "score_flag":
+                        this.scoringDB[mode_name][item_name] = new rcsa_score_flag(item.scoring_item_id, item_name);
+                        break;
+                    default:
+                        console.error(`I do not know how to handle scoring item type: ${item_object.type}`);
+                  }
+            }
+        }
+    }
+
+    itemClicked(mode_name, item_name) {
+        this.scoringDB[mode_name][item_name].clicked()
+    }
+
+    generateScoreResult(matchNumber, teamNumber) {
+        let to_return = {
+            matchNumber:matchNumber,
+            teamNumber:teamNumber,
+            scores:[]
+        }
+        for (const [mode_name, item_dict] of Object.entries(this.scoringDB)) {
+            let mode_id = this.game_modes[mode_name].mode_id;
+            for (const [item_name, item_obj] of Object.entries(item_dict)) {
+                let score_obj = item_obj.getJSONobject(mode_id, mode_name);
+                if (score_obj !== null) {
+                    // items return null if it is not valid for this mode.
+                    // This here to prevent odd 0 results
+                    to_return.scores.push(score_obj);
+                }
+            }
+        }
+        return to_return
+    }
+
+    resetDB() {
+        for (const [mode_name, item_dict] of Object.entries(this.scoringDB)) {
+            mode_id = this.game_modes[mode_name]
+            for (const [item_name, item_obj] of Object.entries(item_dict)) {
+                item_obj.reset();
+            }
+        }
+    }
+}
+
 
 let rcsa = {
     match_callback: undefined,
     error_callback: undefined,
     current_game_mode: undefined,
-    scoring_items: {},
-
+    matches_and_teams: undefined,
+    modes_and_items: undefined,     // Raw data used for testing, but not for managing scoring
+    scoringDB: {},
 
     startup: function (match_callback, error_callback) {
         console.info("rcsa startup called");
@@ -80,9 +159,16 @@ let rcsa = {
         // Click the first one to get us started
         $(".game_mode")[0].click();
         // get matches and teams
-        this.loadMatches();
+        rcsa.loadMatches();
+        // Get the scoring items
+        rcsa.getScoringItems();
+        // Connect to scoring item clicks
+        $("[class*='score_'").click( function(e) {
+            let item_name = $(this).data("scorename");
+            rcsa.scoringDB.itemClicked(rcsa.current_game_mode, item_name);
+        })
         // check if testing
-        this.activateTesting();
+        rcsa.activateTesting();
     },
 
     loadMatches: function () {
@@ -94,6 +180,7 @@ let rcsa = {
             success: function (server_data, text_status, jqXHR) {
                 // Give the data to the display code
                 console.log("Match data recieved");
+                rcsa.matches_and_teams = server_data;
                 rcsa.match_callback(server_data);
             },
             error: function( jqXHR, textStatus, errorThrown ) {
@@ -123,16 +210,35 @@ let rcsa = {
     },
 
     nextMatch: function () {
-        // Resets data but does not reload matches, instead just 
+        // Resets data but does not reload matches, instead just
+
     },
 
     initalizeScoringData: function () {
         // Clear important scoring data
+        rcsa.scoringDB.resetDB();
     },
 
     getScoringItems: function () {
         // Call for DB answer
-
+        $.ajax({
+            type: "GET",
+            url: "/api/gameModesAndScoringElements",
+            dataType: "json",
+            contentType: 'application/json',
+            success: function (modes_and_items, text_status, jqXHR) {
+                // Give the data to the display code
+                console.log("Game Modes and scoring item data recieved");
+                // Build the database.  The clickable DIV are linked to click in the scoring_item code
+                rcsa.scoringDB = new ScoringDatabase(modes_and_items);
+                rcsa.modes_and_items = modes_and_items;
+            },
+            error: function( jqXHR, textStatus, errorThrown ) {
+                msg = `Unable to get game modes and scoring data because:\n${errorThrown}`
+                console.error(msg);
+                rcsa.error_callback(msg);
+            }
+        })
     },
 
     registerMatchCallback:function (match_callback) {

@@ -16,9 +16,12 @@ let rcsa_tester = {
                 });
             }).catch((error) => {
                 console.error(error.message);
+                rcsa_tester.overall_test_success = false;
                 return; // Stop executing further functions if one fails
             });
         }
+        alert("All tests are complete!  Please check output on the server for any issues to resolve.");
+        // rcsa_tester.endTesting(rcsa_tester.overall_test_success);
     },
 
     checkForTestMode: function () {
@@ -96,18 +99,24 @@ let rcsa_tester = {
 
     sendError: function (message) {
         this.sendServerMessage("error", message);
+        console.log(message);
     },
 
     sendWarning: function (message) {
         this.sendServerMessage("warning", message);
+        console.log(message);
     },
 
     sendInfo: function (message) {
         this.sendServerMessage("info", message);
+        console.log(message);
+
     },
 
     sendSuccess: function (message) {
         this.sendServerMessage("success", message);
+        console.log(message);
+
     },
 
     
@@ -143,10 +152,124 @@ function testInfo(callback) {
     callback(true);
 }
 
+function testBigFail(callback) {
+    // Just throws an error to make sure things work as planned
+    throw new Error("Testing");
+}
+
 function testsComplete(callback) {
     alert("All tests are complete!  Please check output on the server for any issues to resolve.");
     rcsa_tester.endTesting(rcsa_tester.overall_test_success);
     callback(true);
+}
+
+function testMatchSelection(callback) {
+    // Pick the first match on the list.
+    console.log("Testing match selection");
+    // Check for a placeholder match number 
+    var value_to_set = -1;
+    var child_index = 1;
+    while (!(value_to_set in rcsa.matches_and_teams.matches)) {
+        value_to_set = $(`.match_selector option:nth-child(${child_index})`).attr("value");
+        if (value_to_set === undefined) {
+            rcsa_tester.sendError("Your match_selector is not putting match numbers as the option values.  Please correct.  See the sample scoring.html provided.");
+            throw new Error("Match selection test has to pass for testing to continue.  Please see server output.");
+        }
+        child_index += 1;
+    }
+
+    // Now set the match selection value
+    $(`.match_selector`).val(value_to_set).change();
+    rcsa_tester.sendSuccess("match_selection test passed");
+    callback(true);
+}
+
+function testTeamSelection(callback) {
+    // Pick the first team on the match
+    console.log("Testing team selection");
+    var value_to_set = -1;
+    var child_index = 1;
+    while (!(value_to_set in rcsa.matches_and_teams.teams)) {
+        value_to_set = $(`.team_selector option:nth-child(${child_index})`).attr("value");
+        if (value_to_set === undefined) {
+            rcsa_tester.sendError("Your team_selector is not putting team numbers as the option values.  Please correct.  See the sample scoring.html provided.");
+            throw new Error("Team selection test has to pass for testing to continue.  Please see server output.");
+        }
+        child_index += 1;
+    }
+
+    // Now set the team selection value
+    $(`.team_selector`).val(value_to_set).change();
+    rcsa_tester.sendSuccess("team_selection test passed");
+    callback(true);
+}
+
+function testModeSelection(callback) {
+    console.log("Testing mode clicking/selection");
+    var passed = true;
+    for (const [mode_name, mode_obj] of Object.entries(rcsa.modes_and_items.modes)) {
+        var found_it = $(`[data-modename='${mode_name}']`);
+        if (found_it.length == 0) {
+            msg = `There is no element with data-modename=${mode_name}.  You will not be able to score for this modename`;
+            rcsa_tester.sendError(msg);
+            passed = false;
+            continue;
+        }
+        found_it.click();
+        if (rcsa.current_game_mode !== mode_name) {
+            msg = `The element for setting the ${mode_name} mode is not responding to clicks.  You will not be able to select this mode for scoring`;
+            rcsa_tester.sendError(msg);
+            passed = false;
+        }
+    }
+    if (passed) {
+        rcsa_tester.sendSuccess("Mode selection passed");
+    } else {
+        rcsa_tester.sendError("Mode selection did not pass");
+    }
+    callback(passed);
+}
+
+function testScoring(callback) {
+    console.log("Testing scoring");
+    var passed = true;
+    for (const [mode_name, mode_obj] of Object.entries(rcsa.modes_and_items.modes)) {
+        // Select this mode
+        $(`[data-modename='${mode_name}']`).click();
+        for (const [item_name, item] of Object.entries(rcsa.modes_and_items.scoring_items)) {
+            var found_it = $(`[data-scorename='${item_name}']`);
+            if (found_it.length == 0) {
+                msg = `There is no element with data-scorename=${item_name}.  You will not be able to score this item`;
+                rcsa_tester.sendWarning(msg);
+                passed = false;
+                continue;
+            }
+            var only_for_mode = found_it.data("onlyformode");
+            if ((only_for_mode === undefined) || (only_for_mode === mode_name)) {
+                found_it.click();
+                scored_value = rcsa.scoringDB.scoringDB[mode_name][item_name].current_value;
+                if (scored_value != 1) {
+                    msg = `The ${item_name} scoring element did not respond to a click`;
+                    rcsa_tester.sendError(msg);
+                    passed = false;
+                }
+            } else {
+                // This thing should not accumulate points under this mode.
+                found_it.click();
+                scored_value = rcsa.scoringDB.scoringDB[mode_name][item_name].current_value;
+                if (scored_value != 0) {
+                    msg = `The ${item_name} scoring element is not supposed to accumulate scoring for ${mode_name} but it did.  This may have unexpected results.`;
+                    rcsa_tester.sendWarning(msg);
+                }
+            }
+        }
+    }
+    if (passed) {
+        rcsa_tester.sendSuccess("Scoring items passed");
+    } else {
+        rcsa_tester.sendError("Scoring items did not pass");
+    }
+    callback(passed);
 }
 
 function runAutomatedTests () {
@@ -155,9 +278,11 @@ function runAutomatedTests () {
         testWarning,
         testSuccess,
         testInfo,
-
-        // Always call this one last
-        testsComplete
+        // testBigFail,  // Allowing this to run will break testing
+        testMatchSelection,
+        testTeamSelection,
+        testModeSelection,
+        testScoring,
     ]
 
     rcsa_tester.executeTestsWithDelay(tests)
