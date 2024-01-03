@@ -152,6 +152,7 @@ class MatchesAndTeams(BaseModel):
     # using dicts here to help with finding info from the scoring page later
     matches:Dict[int, FirstMatch]   # int is the matchNumber
     teams:Dict[int, FirstTeam]      # int is the teamNumber
+    eventCode:str
 
 def getMatchesAndTeams(eventCode:str, unscored_only:bool = True) -> MatchesAndTeams:
     """
@@ -182,7 +183,8 @@ def getMatchesAndTeams(eventCode:str, unscored_only:bool = True) -> MatchesAndTe
         teams = { int(t.teamNumber): FirstTeam.model_validate(t) for t in teams_db }
         return MatchesAndTeams(
             matches=matches,
-            teams=teams
+            teams=teams, 
+            eventCode=eventCode
         )
 
 def getMatches(eventCode:str, unscored_only:bool = True) -> MatchesAndTeams:
@@ -213,7 +215,8 @@ def getMatches(eventCode:str, unscored_only:bool = True) -> MatchesAndTeams:
         teams = {}
         return MatchesAndTeams(
             matches=matches,
-            teams=teams
+            teams=teams,
+            eventCode=eventCode
         )
 
 class MatchesAndTeamsLoaded(BaseModel):

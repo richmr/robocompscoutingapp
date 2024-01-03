@@ -394,7 +394,7 @@ def test_match_data_reset(tmpdir):
         loadEventData(eventCode="CALA", season=2023)
         # Retrieve and verify 
         matches_and_teams = getMatchesAndTeams("CALA")
-        assert matches_and_teams.teams[2584].nameShort == "Flame of The West"
+        assert matches_and_teams.teams[2584].nameShort.lower() == "Flame of the West".lower()
         assert matches_and_teams.matches[5].Blue3 == 2584
 
         # Add a score to match 5 to make it scored

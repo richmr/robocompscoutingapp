@@ -181,3 +181,5 @@ Need test data load
 - test mode setting on server with API for remote check
 
 - I don't think I need BEGIN_SCORING class and button.  Flow works fine after match and team selection
+- Add event to initial data delivered
+- stored events are keyed to event

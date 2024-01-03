@@ -321,6 +321,10 @@ let rcsa = {
         var saved_scores = rcsa.getSavedScores();
         saved_scores.push(scored_match_for_team);
         localStorage.setItem("rcsa_saved_scores", JSON.stringify(saved_scores));
+    },
+
+    clearSavedScores: function () {
+        localStorage.setItem("rcsa_saved_scores", JSON.stringify([]));
     }
 }
 
