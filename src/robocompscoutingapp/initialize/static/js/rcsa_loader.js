@@ -128,7 +128,6 @@ class ScoringDatabase {
 
     resetDB() {
         for (const [mode_name, item_dict] of Object.entries(this.scoringDB)) {
-            mode_id = this.game_modes[mode_name]
             for (const [item_name, item_obj] of Object.entries(item_dict)) {
                 item_obj.reset();
             }
@@ -222,17 +221,28 @@ let rcsa = {
             contentType: 'application/json',
             processData: false,
             success: function (response) {
+                console.log("Score successfully sent");
                 rcsa.nextMatch();
                 success_callback();
             },
             error: function( jqXHR, textStatus, errorThrown ) {
-                // Add to local storage
-                rcsa.addSavedScore(data_to_post);
-                err_msg = `Unable to save score because ${errorThrown}. The score has been saved to localStorage.  Use the 'Send Saved Scores' option from the main menu to try again later.`;
-                error_callback(err_msg);
-            }
+                console.log("Score send failed with " + errorThrown);
+                if (jqXHR.status === 409) {
+                    // This team aleady scored for this match
+                    msg = "This team was already scored for this match";
+                    rcsa.nextMatch();
+                    score_error_callback(msg);
+                } else {
+                    // Add to local storage
+                    rcsa.addSavedScore(data_to_post);
+                    rcsa.nextMatch();
+                    err_msg = `Score not saved to central database because ${errorThrown}. The score has been saved to localStorage.  Use the 'Send Saved Scores' option from the main menu to try again later.`;
+                    score_error_callback(err_msg);
+                }
+            },
+            
         });
-        // On success or failure: reset important data elements
+        
         // On failure, store scoring information in local storage for later sending
     },
 
@@ -311,21 +321,25 @@ let rcsa = {
     getSavedScores: function () {
         var saved_scores = JSON.parse(localStorage.getItem("rcsa_saved_scores"));
         if (saved_scores === null) {
-            saved_scores = [];
+            saved_scores = {};
         }
         return saved_scores;
     },
 
     addSavedScore: function (scored_match_for_team) {
         // scored_match_for_team is the output from the scoringDB
+        eventCode = rcsa.matches_and_teams.eventCode
         var saved_scores = rcsa.getSavedScores();
-        saved_scores.push(scored_match_for_team);
+        if (eventCode in saved_scores) {
+            saved_scores[eventCode].push(scored_match_for_team);
+        } else {
+            saved_scores[eventCode] = [scored_match_for_team];
+        }
         localStorage.setItem("rcsa_saved_scores", JSON.stringify(saved_scores));
     },
 
     clearSavedScores: function () {
-        localStorage.setItem("rcsa_saved_scores", JSON.stringify([]));
+        localStorage.setItem("rcsa_saved_scores", JSON.stringify({}));
     }
 }
 
-// NEED SOME LOGIC TO PREVENT RESCORING A TEAM FOR AN EVENT..  At server level.  Silent fail?

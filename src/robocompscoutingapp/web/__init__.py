@@ -195,7 +195,7 @@ def addScores(team_score_for_match:ScoredMatchForTeam):
         matchNumber=team_score_for_match.matchNumber,
         eventCode=_eventCode
     ):
-        raise HTTPException(status_code=400, detail=f"Match #{team_score_for_match.matchNumber} data for team {team_score_for_match.teamNumber} already submitted for this match")
+        raise HTTPException(status_code=409, detail=f"Match #{team_score_for_match.matchNumber} data for team {team_score_for_match.teamNumber} already submitted for this match")
     
     # Store it
     try:

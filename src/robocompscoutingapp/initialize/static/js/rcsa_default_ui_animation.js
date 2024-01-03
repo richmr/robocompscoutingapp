@@ -88,6 +88,8 @@ function matchAndTeamData(match_and_team_data) {
     global_match_and_team_data = match_and_team_data
     $(".match_selector").empty();
     $(".match_selector").append(`<option value=-1>Please choose your match</option>`);
+    $(".team_selector").empty();
+    $(".team_selector").append(`<option value=-1>Please choose a match first</option>`)
     for (const [matchNumber, match_info] of Object.entries(match_and_team_data.matches)) {
         $(".match_selector").append(`<option value=${matchNumber}>${match_info.description}</option>`); 
         // console.log(matchNumber, match_info);
@@ -102,7 +104,7 @@ function setUpMatchSelector(){
         if (chosen_match != -1) {
             // Set the options for pick team
             $(".team_selector").empty();
-            $(".team_selector").append(`<option value=-1>Please chose your team</option>`);
+            $(".team_selector").append(`<option value=-1>Please choose your team</option>`);
             let match_data = global_match_and_team_data.matches[chosen_match];
             $(".team_selector").append(`<option value=${match_data["Red1"]}>Red 1: ${match_data["Red1"]}</option>`);
             $(".team_selector").append(`<option value=${match_data["Red2"]}>Red 2: ${match_data["Red2"]}</option>`);

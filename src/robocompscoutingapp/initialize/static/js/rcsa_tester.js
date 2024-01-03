@@ -278,12 +278,12 @@ function testSuccessfulSendScore(callback) {
     var overall_test_success = true;
 
     function successCallback() {
-        rcsa_tester.success("Score report successfully submitted");
+        rcsa_tester.sendSuccess("Score report successfully submitted");
         callback(true);
     }
 
     function errorCallback(err_msg) {
-        rcsa_tester.error(`Submit score report failed because ${err_msg}`);
+        rcsa_tester.sendError(`Submit score report failed because ${err_msg}`);
         callback(false);
     }
 
@@ -291,7 +291,7 @@ function testSuccessfulSendScore(callback) {
     // Page validation allows multiple buttons with report submit, check each one
     possible_submit_buttons = document.getElementsByClassName("report_submit")
     for (button of possible_submit_buttons) {
-        if ("click" in getEventListeners(button)) {
+        if ("click" in jQuery._data( button, "events" )) {
             // pass
         } else {
             rcsa_tester.error(`Element: ${button} does not have a click event listener.  It will not work when clicked`);
