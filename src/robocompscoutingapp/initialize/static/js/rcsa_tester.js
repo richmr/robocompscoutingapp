@@ -272,6 +272,37 @@ function testScoring(callback) {
     callback(passed);
 }
 
+function testSuccessfulSendScore(callback) {
+    console.log("Testing successful send of score data");
+    rcsa_tester.sendInfo("The scoring submit test only checks if there is an event tied to the scoring submit button and then tests the rcsa_loader mechanics separately.  It will not test clicking your submit button.  Please test manually");
+    var overall_test_success = true;
+
+    function successCallback() {
+        rcsa_tester.success("Score report successfully submitted");
+        callback(true);
+    }
+
+    function errorCallback(err_msg) {
+        rcsa_tester.error(`Submit score report failed because ${err_msg}`);
+        callback(false);
+    }
+
+    // Check for a click event tied to the .report_submit button
+    // Page validation allows multiple buttons with report submit, check each one
+    possible_submit_buttons = document.getElementsByClassName("report_submit")
+    for (button of possible_submit_buttons) {
+        if ("click" in getEventListeners(button)) {
+            // pass
+        } else {
+            rcsa_tester.error(`Element: ${button} does not have a click event listener.  It will not work when clicked`);
+            overall_test_success = false;
+        }
+    }
+
+    // Now test mechanics
+    rcsa.submitScore(successCallback, errorCallback);
+}
+
 function runAutomatedTests () {
     tests = [
         testError,
@@ -283,6 +314,7 @@ function runAutomatedTests () {
         testTeamSelection,
         testModeSelection,
         testScoring,
+        testSuccessfulSendScore,
     ]
 
     rcsa_tester.executeTestsWithDelay(tests)

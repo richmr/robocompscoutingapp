@@ -200,24 +200,55 @@ let rcsa = {
         }
     },
 
-    submitScore: function (success_callback, score_error_callback) {
+    submitScore: function (success_callback, score_error_callback, error_test = false) {
         // success_callback has no parameters
         // error_callback should take one parameter: err_msg
         // This is a different error_callback and the general one will not be used
+        // error_test is used to force the code to handle the data as though the server broke
         console.log("Submit score called");
+        var matchNumber = $(`.match_selector`).val();
+        var teamNumber =  $(`.team_selector`).val();
+        var url = "/api/addScores";
+        if (error_test) {
+            // Force a failure
+            url = "/errorcheck";
+        }
+        var data_to_post = rcsa.scoringDB.generateScoreResult(matchNumber, teamNumber)
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: JSON.stringify(data_to_post),
+            dataType: "json",
+            contentType: 'application/json',
+            processData: false,
+            success: function (response) {
+                rcsa.nextMatch();
+                success_callback();
+            },
+            error: function( jqXHR, textStatus, errorThrown ) {
+                // Add to local storage
+                rcsa.addSavedScore(data_to_post);
+                err_msg = `Unable to save score because ${errorThrown}. The score has been saved to localStorage.  Use the 'Send Saved Scores' option from the main menu to try again later.`;
+                error_callback(err_msg);
+            }
+        });
         // On success or failure: reset important data elements
         // On failure, store scoring information in local storage for later sending
     },
 
     nextMatch: function () {
-        // Resets data but does not reload matches, instead just
-
+        // Resets data but does not reload matches, instead just pops off the match we already did.
+        var matchNumber = $(`.match_selector`).val();
+        delete rcsa.matches_and_teams.matches[matchNumber];
+        rcsa.scoringDB.resetDB();        
+        rcsa.match_callback(rcsa.matches_and_teams);
     },
 
-    initalizeScoringData: function () {
-        // Clear important scoring data
-        rcsa.scoringDB.resetDB();
-    },
+    // initalizeScoringData: function () {
+
+    //     // Clear important scoring data
+    //     rcsa.scoringDB.resetDB();
+    // },
 
     getScoringItems: function () {
         // Call for DB answer
@@ -275,8 +306,22 @@ let rcsa = {
         scriptEle.addEventListener("error", (ev) => {
             console.log(`Error on loading ${FILE_URL}`, ev);
         });
-    }
-      
+    },
+    
+    getSavedScores: function () {
+        var saved_scores = JSON.parse(localStorage.getItem("rcsa_saved_scores"));
+        if (saved_scores === null) {
+            saved_scores = [];
+        }
+        return saved_scores;
+    },
 
+    addSavedScore: function (scored_match_for_team) {
+        // scored_match_for_team is the output from the scoringDB
+        var saved_scores = rcsa.getSavedScores();
+        saved_scores.push(scored_match_for_team);
+        localStorage.setItem("rcsa_saved_scores", JSON.stringify(saved_scores));
+    }
 }
 
+// NEED SOME LOGIC TO PREVENT RESCORING A TEAM FOR AN EVENT..  At server level.  Silent fail?
