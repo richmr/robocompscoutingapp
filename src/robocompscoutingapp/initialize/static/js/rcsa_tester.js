@@ -99,23 +99,23 @@ let rcsa_tester = {
 
     sendError: function (message) {
         this.sendServerMessage("error", message);
-        console.log(message);
+        console.log("ERROR: " + message);
     },
 
     sendWarning: function (message) {
         this.sendServerMessage("warning", message);
-        console.log(message);
+        console.log("WARNING: " + message);
     },
 
     sendInfo: function (message) {
         this.sendServerMessage("info", message);
-        console.log(message);
+        console.log("INFO: " + message);
 
     },
 
     sendSuccess: function (message) {
         this.sendServerMessage("success", message);
-        console.log(message);
+        console.log("SUCCESS!: " + message);
 
     },
 
@@ -303,6 +303,70 @@ function testSuccessfulSendScore(callback) {
     rcsa.submitScore(successCallback, errorCallback);
 }
 
+function testScoreSendFailure(callback) {
+    console.log("Testing failed score send.");
+    // Clear saved scores to make checking easier
+    rcsa.clearSavedScores();
+
+    // Pick the next match
+    var match_to_set = -1;
+    var child_index = 1;
+    while (!(match_to_set in rcsa.matches_and_teams.matches)) {
+        match_to_set = $(`.match_selector option:nth-child(${child_index})`).attr("value");
+        child_index += 1;
+    }
+    // Now set the match selection value
+    $(`.match_selector`).val(match_to_set).change();
+
+    // Pick a team
+    var team_to_set = -1;
+    child_index = 1;
+    while (!(team_to_set in rcsa.matches_and_teams.teams)) {
+        team_to_set = $(`.team_selector option:nth-child(${child_index})`).attr("value");
+        child_index += 1;
+    }
+    // Now set the team selection value
+    $(`.team_selector`).val(team_to_set).change();
+
+    function successCallback() {
+        rcsa_tester.sendError("Score reported as saved, but it was supposed to fail.");
+        callback(false);
+    }
+
+    function errorCallback(err_msg) {
+        // Check the saved scores
+        var scores = rcsa.getSavedScores();
+
+        if ((scores == {}) || (scores === null)) {
+            rcsa_tester.sendError("No scores appear to be saved in localStorage");
+            callback(false);
+        }
+
+        if (!(rcsa.matches_and_teams.eventCode in scores)) {
+            rcsa_tester.sendError(`Expected eventCode ${rcsa.matches_and_teams.eventCode} was not found`);
+            callback(false);
+        }
+
+        if (scores[rcsa.matches_and_teams.eventCode].length == 0) {
+            rcsa_tester.sendError(`There are no saved scored!`);
+            callback(false);
+        }
+
+        if (scores[rcsa.matches_and_teams.eventCode].length > 1) {
+            rcsa_tester.sendError(`There are too many saved scores!`);
+            callback(false);
+        }
+
+        rcsa_tester.sendSuccess("Score save to localStorage passed");
+        callback(true);
+
+        
+    }
+
+    rcsa.submitScore(successCallback, errorCallback, error_test=true);
+
+}
+
 function runAutomatedTests () {
     tests = [
         testError,
@@ -315,6 +379,7 @@ function runAutomatedTests () {
         testModeSelection,
         testScoring,
         testSuccessfulSendScore,
+        testScoreSendFailure,
     ]
 
     rcsa_tester.executeTestsWithDelay(tests)

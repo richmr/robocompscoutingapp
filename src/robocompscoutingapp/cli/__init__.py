@@ -232,6 +232,14 @@ def test(
         server = RunAPIServer()
         with GracefulInterruptHandler() as pause:
             server.run()
+            scoring_page = RCSA_Config.getConfig().ServerConfig.scoring_page.name
+            ip = RCSA_Config.getConfig().ServerConfig.IP_Address
+            port = RCSA_Config.getConfig().ServerConfig.port
+            url = f"http://{ip}:{port}/app/{scoring_page}"
+            msg = f"Please go to {url}"
+            if automate:
+                msg += "?test=true to begin automated testing"
+            ft.success(msg)
             pause.wait()
         server.stop()
 
