@@ -1,0 +1,81 @@
+<html>
+    <!-- 
+        This page allows you to see what scores have been stored in the browser's localStorage and then 
+        send them to the server.  This happens when the scoring page cannot reach the server due to network or
+        other reasons.  You are free make your own version of this following the example seen in the code and this
+        page, but this works pretty well. 
+    -->
+    <head>
+        <title>Send Saved Scores</title>
+
+         <!-- Mobile Specific Metas
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+        <!-- FONT
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+
+        <!-- CSS
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/skeleton.css">
+        <link rel="stylesheet" href="css/custom.css">
+        <link rel="stylesheet" href="css/jquery.toast.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"/>
+
+        <!-- Scripts (Animation and DOM management)
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/9a97c74805.js" crossorigin="anonymous"></script>
+        <script src="js/jquery.toast.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        
+        <!-- Favicon
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link rel="shortcut icon" type="image/png" href="images/robot.png">
+
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="twelve columns">
+                    <a class="text-left" href="/app/index.html"><i class="fa-solid fa-angles-left"></i> Return to Main Menu</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="row" id="startup_message_row">
+                <div class="twelve columns text-center" id="startup_message_text">
+                    Checking for stored scores..
+                </div>
+            </div>
+            <div class="row" id="scores_table_row" hidden>
+                <div class="twelve columns" id="scores_table_table">
+                    <table id="saved_scores_table" class="display">
+                        <thead>
+                            <tr>
+                                <th>Match Number</th>
+                                <th>Scored Team</th>
+                            </tr>
+                        </thead>
+                        <tbody class="dt-body-center">
+                            <!-- Data goes here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row" id="submit_button_row" hidden>
+                <div class="twelve columns text-center">
+                    <button class="button-orange btn-big" id="submit_button">Submit Scores</button>
+                </div>
+            </div>
+        </div>
+    
+    <script src="js/rcsa_loader.js"></script>
+    <script src="js/rcsa_send_scores.js"></script>
+
+</body>
+</html>
