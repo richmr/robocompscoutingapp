@@ -45,6 +45,18 @@ function gameModeSelectionUISetup() {
         
         // Make items that are have a specified mode that is not not this mode unclickable
         $("[data-onlyForMode]").filter(`[data-onlyForMode!=${selected_mode_name}]`).css("pointer-events","none");
+
+        // Set all the background colors per the mode data
+        
+        current_flag_status = rcsa.getFlagStatusForMode(selected_mode_name);
+        // INTEGRATION TO THE APP SERVER HERE ^^^^^^^^^^^
+        for (const [name, flagset] of Object.entries(current_flag_status)) {
+            if (flagset) {
+                $(`[data-scorename='${name}']`).parent().addClass("lgreen-background");    
+            } else {
+                $(`[data-scorename='${name}']`).parent().removeClass("lgreen-background");
+            }
+        }
     });
 
     
@@ -57,8 +69,19 @@ function setupSubmitReport() {
             clickClose: false,
             showClose: false
         });
+
+        // This is used for testing only
+        let force_fail = false;
+        // Check for the testing GET parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("force_fail")) {
+            force_fail = true;
+        }
+
         // CRITICAL INTEGRATION TO THE APP SERVER HERE::  REQUIRED!!
-        rcsa.submitScore(scoreSubmitSuccess, scoreSubmitFailure);
+        // You do not need to use 'force_fail' in your code
+        // You can simply call: rcsa.submitScore(scoreSubmitSuccess, scoreSubmitFailure);
+        rcsa.submitScore(scoreSubmitSuccess, scoreSubmitFailure, force_fail);
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     })
 }
@@ -79,6 +102,11 @@ function setupDataModalCloseButton(errMsg) {
     $("#close_modal_next_match").click(function (e) {
         // Data wrangling handled by rcsa_loader.
         
+        $(".game_mode")[0].click();
+        $("#pick_team_row").hide();
+        $(".match_and_team_selection").show();
+        $(".scoring").hide();
+        $.modal.close();
     })
 }
 
@@ -154,6 +182,7 @@ $(document).ready(function() {
     setupSubmitReport();
     setUpMatchSelector();
     setupTeamSelector();
+    setupDataModalCloseButton();
 
     // CRITICAL INTEGRATION TO THE APP SERVER HERE::  REQUIRED!!
     // Call this before other setup tasks as the RCSA mechanics will tie into the rest of the DOM

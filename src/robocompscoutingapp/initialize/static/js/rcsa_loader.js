@@ -126,6 +126,17 @@ class ScoringDatabase {
         return to_return
     }
 
+    getFlagStatusForMode(modename) {
+        let toreturn = {}
+        for (const [item_name, item_obj] of Object.entries(this.scoringDB[modename])) {
+            if (item_obj.constructor.name  === "rcsa_score_flag") {
+                // Cool int to boolean short cut from: https://codedamn.com/news/javascript/how-to-convert-values-to-boolean
+                toreturn[item_name] = !!item_obj.current_value
+            }
+        }
+        return toreturn
+    }
+
     resetDB() {
         for (const [mode_name, item_dict] of Object.entries(this.scoringDB)) {
             for (const [item_name, item_obj] of Object.entries(item_dict)) {
@@ -151,21 +162,10 @@ let rcsa = {
         // error_callback should take single parameter: err_msg
         rcsa.registerErrorCallback(error_callback);
         // initialize important data elements
-        // tie into mode clicks
-        $(".game_mode").click(function (e) {
-            rcsa.handleModeClick(this);
-        });
-        // Click the first one to get us started
-        $(".game_mode")[0].click();
         // get matches and teams
         rcsa.loadMatches();
         // Get the scoring items
         rcsa.getScoringItems();
-        // Connect to scoring item clicks
-        $("[class*='score_'").click( function(e) {
-            let item_name = $(this).data("scorename");
-            rcsa.scoringDB.itemClicked(rcsa.current_game_mode, item_name);
-        })
         // check if testing
         rcsa.activateTesting();
     },
@@ -273,6 +273,17 @@ let rcsa = {
                 // Build the database.  
                 rcsa.scoringDB = new ScoringDatabase(modes_and_items);
                 rcsa.modes_and_items = modes_and_items;
+                // tie into mode clicks
+                $(".game_mode").click(function (e) {
+                    rcsa.handleModeClick(this);
+                });
+                // Click the first one to get us started
+                $(".game_mode")[0].click();
+                // Connect to scoring item clicks
+                $("[class*='score_'").click( function(e) {
+                    let item_name = $(this).data("scorename");
+                    rcsa.scoringDB.itemClicked(rcsa.current_game_mode, item_name);
+                })
             },
             error: function( jqXHR, textStatus, errorThrown ) {
                 msg = `Unable to get game modes and scoring data because:\n${errorThrown}`
@@ -318,6 +329,11 @@ let rcsa = {
         });
     },
     
+    getFlagStatusForMode: function (modename) {
+        // Returns { scorename: true if set, false if not} for score_flag items in the DB
+        return rcsa.scoringDB.getFlagStatusForMode(modename); getFlagStatusForMode
+    },
+
     getSavedScores: function () {
         var saved_scores = JSON.parse(localStorage.getItem("rcsa_saved_scores"));
         if (saved_scores === null) {
