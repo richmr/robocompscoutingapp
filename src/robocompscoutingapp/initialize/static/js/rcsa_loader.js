@@ -233,6 +233,9 @@ let rcsa = {
                     rcsa.nextMatch();
                     score_error_callback(msg);
                 } else {
+                    if (errorThrown.length == 0) {
+                        errorThrown = "the server could not be reached";
+                    }
                     // Add to local storage
                     rcsa.addSavedScore(data_to_post);
                     rcsa.nextMatch();
