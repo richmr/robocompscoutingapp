@@ -345,9 +345,11 @@ let rcsa = {
         return saved_scores;
     },
 
-    addSavedScore: function (scored_match_for_team) {
+    addSavedScore: function (scored_match_for_team, eventCode = null) {
         // scored_match_for_team is the output from the scoringDB
-        eventCode = rcsa.matches_and_teams.eventCode
+        if (eventCode === null) {
+            eventCode = rcsa.matches_and_teams.eventCode
+        }
         var saved_scores = rcsa.getSavedScores();
         if (eventCode in saved_scores) {
             saved_scores[eventCode].push(scored_match_for_team);

@@ -36,6 +36,11 @@
         –––––––––––––––––––––––––––––––––––––––––––––––––– -->
         <link rel="shortcut icon" type="image/png" href="images/robot.png">
 
+        <!-- jQuery Modal -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+
+
     </head>
     <body>
         <div class="container">
@@ -45,7 +50,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="container">
             <div class="row" id="startup_message_row">
                 <div class="twelve columns text-center" id="startup_message_text">
@@ -74,8 +79,20 @@
             </div>
         </div>
     
-    <script src="js/rcsa_loader.js"></script>
-    <script src="js/rcsa_send_scores.js"></script>
+        <div id="sending_data_modal" class="modal" hidden> 
+            <h3 id="sending_data_modal_title">Sending scores..</h3>
+            <p><span id="successful_send_count">0</span> scores sent successfully</p>
+            <p><span id="failed_send_count">0</span> failed to send</p>
+            <p id="send_error_messages" hidden>
+                <!-- Error messages will go here -->
+            </p>
+            <div id="data_modal_buttons" hidden>
+                <a id="close_modal" class="button" href="#" >Ok</a>
+            </div>
+        </div>
 
-</body>
+        <script src="js/rcsa_loader.js"></script>
+        <script src="js/rcsa_send_scores.js"></script>
+
+    </body>
 </html>
