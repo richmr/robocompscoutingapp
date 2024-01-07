@@ -26,7 +26,8 @@
         –––––––––––––––––––––––––––––––––––––––––––––––––– -->
         <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
-        <script src="https://kit.fontawesome.com/9a97c74805.js" crossorigin="anonymous"></script>
+        <!-- <script src="https://kit.fontawesome.com/9a97c74805.js" crossorigin="anonymous"></script> -->
+        <script src="js/9a97c74805.js" crossorigin="anonymous"></script>
         <script src="js/jquery.toast.min.js"></script>
         <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
         
@@ -95,16 +96,30 @@
                 </div>
             </div>     
         </div>
-    <script>
+    <!-- <script>
+        table_data = [
+            {item_name:"cone"},
+            {item_name:"cube"}
+        ];
+
         new DataTable('#stats_selection_table', {
-            columnDefs: [
-                {
-                    targets: "select_a_stat",
-                    className: 'select-checkbox',
-                }
+            autoWidth: false,
+            searching: false,
+            dom: "Bfrtip",
+            data: table_data,
+            columns: [
+                {data: "item_name"},
+                {defaultContent: '<i id="thing" data-modename="Auton" data-scoreitemthing="cone" data-stattype="sum" class="fa-regular fa-square-check"></i>'},
+                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
+                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
+                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
+                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
+                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
             ]
+            
         });
-    </script>
+    </script> -->
+    <script src="js/rcsa_analysis.js"></script>
     
     </body>
 </html>
