@@ -1,1 +1,110 @@
-exists
+<html>
+    <!-- 
+        Analysis page.  This lets you see the stats you have collected.  Again you are welcome to build
+        your own using this and the accompanying scripts as an example. 
+    -->
+    <head>
+        <title>Team Analysis</title>
+
+         <!-- Mobile Specific Metas
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+        <!-- FONT
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+
+        <!-- CSS
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/skeleton.css">
+        <link rel="stylesheet" href="css/custom.css">
+        <link rel="stylesheet" href="css/jquery.toast.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"/>
+
+        <!-- Scripts (Animation and DOM management)
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/9a97c74805.js" crossorigin="anonymous"></script>
+        <script src="js/jquery.toast.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        
+        <!-- Favicon
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link rel="shortcut icon" type="image/png" href="images/robot.png">
+
+        <!-- jQuery Modal -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+
+
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="twelve columns">
+                    <a class="text-left" href="/app/index.html"><i class="fa-solid fa-angles-left"></i> Return to Main Menu</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" id="select_stats">
+            <h6>Please select the stats to show</h6>
+            <div class="row" id="stats_selection_table_row">
+                <div class="twelve columns" id="stats_selection_table_table">
+                    <table id="stats_selection_table" class="display">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Scoring Item</th>
+                                <th colspan="2">Auton</th>
+                                <th colspan="2">Teleop</th>
+                                <th colspan="2">Totals</th>
+                            </tr>
+                            <tr>
+                                <!-- <th>Item Name</th> -->
+                                <th>Total</th>
+                                <th>Average</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                            </tr>
+                        </thead>
+                        <tbody class="dt-body-center">
+                            <tr>
+                                <td>Cones</td>
+                                <td class="select_a_stat"><input type="checkbox"></td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                            </tr>
+                            <tr>
+                                <td>Cubes</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>     
+        </div>
+    <script>
+        new DataTable('#stats_selection_table', {
+            columnDefs: [
+                {
+                    targets: "select_a_stat",
+                    className: 'select-checkbox',
+                }
+            ]
+        });
+    </script>
+    
+    </body>
+</html>
