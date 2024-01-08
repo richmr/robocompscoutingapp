@@ -1,7 +1,7 @@
 <html>
     <!-- 
         Analysis page.  This lets you see the stats you have collected.  Again you are welcome to build
-        your own using this and the accompanying scripts as an example. 
+        your own using this and the accompanying scripts that exist as an example. 
     -->
     <head>
         <title>Team Analysis</title>
@@ -51,10 +51,11 @@
         </div>
 
         <div class="container" id="select_stats">
-            <h6>Please select the stats to show</h6>
+            <h5 class="text-center">Please select the stats to show</h6>
             <div class="row" id="stats_selection_table_row">
                 <div class="twelve columns" id="stats_selection_table_table">
                     <table id="stats_selection_table" class="display">
+                        <!-- All of this gets replaced dynamically -->
                         <thead>
                             <tr>
                                 <th rowspan="2">Scoring Item</th>
@@ -94,31 +95,58 @@
                         </tbody>
                     </table>
                 </div>
-            </div>     
+            </div>
+            <button class="button-primary" id="show_selected_stats">Show Selected Stats</button>     
         </div>
-    <!-- <script>
-        table_data = [
-            {item_name:"cone"},
-            {item_name:"cube"}
-        ];
+    
+        <div class="container" id="stats_display" hidden>
+            <h5 class="text-center">Current Event Statistics</h6>
+            <div class="row" id="stats_display_table_row">
+                <div class="twelve columns" id="stats_display_table_table">
+                    <table id="stats_display_table" class="display">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Team Number</th>
+                                <th colspan="2">Cones</th>
+                                <th colspan="2">Cubes</th>
+                                <th colspan="2">Totals</th>
+                            </tr>
+                            <tr>
+                                <!-- <th>Item Name</th> -->
+                                <th>Total</th>
+                                <th>Average</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                            </tr>
+                        </thead>
+                        <tbody class="dt-body-center">
+                            <tr>
+                                <td>Cones</td>
+                                <td class="select_a_stat"><input type="checkbox"></td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                            </tr>
+                            <tr>
+                                <td>Cubes</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                                <td class="select_a_stat">box</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <button class="button-primary" id="show_selected_stats">Show Selected Stats</button>     
+        </div>
 
-        new DataTable('#stats_selection_table', {
-            autoWidth: false,
-            searching: false,
-            dom: "Bfrtip",
-            data: table_data,
-            columns: [
-                {data: "item_name"},
-                {defaultContent: '<i id="thing" data-modename="Auton" data-scoreitemthing="cone" data-stattype="sum" class="fa-regular fa-square-check"></i>'},
-                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
-                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
-                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
-                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
-                {defaultContent: '<i class="fa-regular fa-square-check"></i>'},
-            ]
-            
-        });
-    </script> -->
     <script src="js/rcsa_analysis.js"></script>
     
     </body>

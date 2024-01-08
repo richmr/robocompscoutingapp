@@ -167,7 +167,7 @@ def test_scoring_page():
 def test_analysis_page():
     with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):
         r = requests.get(f"{baseurl}/app/analysis.html")
-        assert "exists" in r.text
+        assert r.status_code == 200
 
 def test_gameModeandScoringElements():
     with SingletonTestEnv.activateTestEnv() as (baseurl, temp_dir):

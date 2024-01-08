@@ -17,17 +17,26 @@ from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
 
 _scoring_page_id = None
 
-def getCurrentScoringPageData() -> ScoringPageStatus:
+class ScoringPageStatus_pyd(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    scoring_page_id: int
+    validated:bool
+    integrated:bool
+    tested:bool
+
+def getCurrentScoringPageData() -> ScoringPageStatus_pyd:
     """
-    Uses current scoring page hash to get the scoring page ID
+    Returns the current scoring page status
     """
-    global _scoring_page_id
-    if _scoring_page_id is None:
-        sp = RCSA_Config.getConfig().ServerConfig.scoring_page
-        uhp = UserHTMLProcessing(sp)
-        sps = uhp.checkForValidatedPageEntry()
-        # _scoring_page_id = sps.scoring_page_id
-    return sps
+    # global _scoring_page_id
+    # if _scoring_page_id is None:
+    sp = RCSA_Config.getConfig().ServerConfig.scoring_page
+    uhp = UserHTMLProcessing(sp)
+    sps = uhp.checkForValidatedPageEntry()
+    to_return = ScoringPageStatus_pyd.model_validate(sps)
+    # _scoring_page_id = sps.scoring_page_id
+    return to_return
 
 def setScoringPageTestResult(success:bool, scoring_page_id:int):
     """

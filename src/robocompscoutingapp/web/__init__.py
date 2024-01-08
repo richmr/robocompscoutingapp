@@ -20,7 +20,8 @@ from robocompscoutingapp.GlobalItems import (
 
 from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageData,
-    setScoringPageTestResult
+    setScoringPageTestResult,
+    ScoringPageStatus_pyd
 )
 
 # auto_error = False allows no auth requests to go through to next stage
@@ -224,6 +225,22 @@ def getAllScores() -> AllTeamResults:
     except Exception as badnews:
         raise HTTPException(status_code=500, detail=f"Unable to get scores {badnews}")
     
+
+@rcsa_api_app.get("/api/currentPageStatus")
+def getAllScores() -> ScoringPageStatus_pyd:
+    """
+    Get scoring page data
+
+    Returns
+    -------
+    ScoringPageStatus
+        SPS for the configured scoring page
+    """
+    try:
+        return getCurrentScoringPageData()
+    except Exception as badnews:
+        raise HTTPException(status_code=500, detail=f"Unable to get scoring page info because {badnews}") 
+      
 #####################
 
 class TestMode(BaseModel):
