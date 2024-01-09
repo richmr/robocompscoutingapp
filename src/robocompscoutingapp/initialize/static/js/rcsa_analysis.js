@@ -1,6 +1,7 @@
 
 var analysis_modes_and_items;
 var stats_selection_table = null;
+var stat_display_table = null;
 var current_stored_stat_info = null;
 var scoring_page_id;
 var team_scores = null;
@@ -184,6 +185,7 @@ function getCurrentScores () {
             console.log("Team scores received");
             team_scores = recvd_scores;
             // Show stats table
+            showSelectedStats();
         },
         error: function( jqXHR, textStatus, errorThrown ) {
             msg = `Unable to get current team scores because:\n${errorThrown}`;
@@ -232,7 +234,7 @@ function convertSelectionsToDataStructure () {
         let item_name = $(this).data("scorename");
         let this_item_data = data_to_store["chosen_stats"][item_name];
         if (this_item_data == undefined) {
-            this_item_data = {};
+            this_item_data = {"total_columns":0};
             data_to_store["chosen_stats"][item_name] = this_item_data;
         }
         let modename = $(this).data("modename");
@@ -242,6 +244,7 @@ function convertSelectionsToDataStructure () {
         }
         let type = $(this).data("stattype");
         types_for_this_mode.push(type);
+        data_to_store["chosen_stats"][item_name].total_columns += 1;
         data_to_store["chosen_stats"][item_name][modename] = types_for_this_mode;
     });
 
@@ -249,8 +252,6 @@ function convertSelectionsToDataStructure () {
 }
 
 function showSelectedStats() {
-    let stat_table = $("#stats_display_table");
-
     // Make sure at least one stat has been selected
     let picked_stats = $('.stat-selector').filter('.fa-square-check');
     if (picked_stats.length == 0) {
@@ -258,29 +259,71 @@ function showSelectedStats() {
         return
     }
 
+    let stat_table = $("#stats_display_table");
+    $("#select_stats").hide();
+
+    if (team_scores == null) {
+        $("#stats_display_table_row").hide();
+        $("#stats_message").text("Loading current team scores");
+        getCurrentScores();
+    }
+
     function statsDisplayTableHeader() {
         let thead = $("<thead>");
         // Header Groupings
         let tr_grouping = $("<tr>");
         tr_grouping.append('<th class="dt-head-center" rowspan="2">Team Number</th>');
-        picked_stats.each( function () {
-            let header_text = null // HERE
-        })
-        let modded_mode_names = Object.keys(analysis_modes_and_items.modes);
-        modded_mode_names.push("Totals");
-        for (mode_name of modded_mode_names) {
-            tr_grouping.append(`<th class="dt-head-center" colspan="2">${mode_name}</th>`);
+        let tr_labels = $("<tr>");
+        for (const [stat_name, stat_info] of Object.entries(current_stored_stat_info.chosen_stats)) {
+            tr_grouping.append(`<th class="dt-head-center" rowspan="${stat_info.total_columns}">${stat_name}</th>`);
+            for (const [mode_name, chosen_types] of Object.entries(stat_info)) {
+                if (mode_name === "total_columns") {
+                    // We don't do anything with this
+                    continue;
+                }
+                for (stat_type of chosen_types) {
+                    let col_text = `${mode_name}<br>${stat_type}`;
+                    tr_labels.append(`<th class="dt-head-center">${col_text}</th>`);
+                }
+            }
         }
         thead.append(tr_grouping);
-        // Header labels
-        let tr_labels = $("<tr>");
-        for (mode_name of modded_mode_names) {
-            tr_labels.append(`<th class="dt-head-center" >Total</th>`);
-            tr_labels.append(`<th class="dt-head-center" >Average</th>`);
-        }
         thead.append(tr_labels);
         stat_table.append(thead);
     }
+    
+    function statsDataAndColumns() {
+        /*
+        Structure:
+        [
+            {
+                "teamNumber":team number,
+                "cell_1": Value based on selected stats
+                ..
+            }
+        ]
+        */
+
+        let the_data = [];
+        let the_columns = [];
+
+
+        for (const [teamNumber, team_results] of Object.entries(team_scores.data)) {
+            let this_data = {"teamNumber":teamNumber}
+            let cell_count = 0;
+            for (const [stat_name, stat_info] of Object.entries(current_stored_stat_info.chosen_stats)) {
+                for (const [mode_name, chosen_types] of Object.entries(stat_info)) {
+                    
+
+
+    }
+    // DataTable.destroy()
+    // set up the stored data
+    current_stored_stat_info = convertSelectionsToDataStructure();
+    saveStoredStatInfo();
+
+    // Generate header
+
 }
 
 $(document).ready(function () {
