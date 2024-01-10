@@ -50,3 +50,7 @@ button.btn-big {
     padding-bottom: 15px;
     padding-left: 20px;
 }
+
+.border-right {
+    border-right-style: solid;
+}

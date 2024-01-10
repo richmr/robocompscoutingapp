@@ -71,16 +71,16 @@ function buildStatSelectionTableStructure() {
         let tr_grouping = $("<tr>");
         tr_grouping.append('<th class="dt-head-center" rowspan="2">Scoring Item</th>');
         let modded_mode_names = Object.keys(analysis_modes_and_items.modes);
-        modded_mode_names.push("Totals");
+        modded_mode_names.push("Match");
         for (mode_name of modded_mode_names) {
-            tr_grouping.append(`<th class="dt-head-center" colspan="2">${mode_name}</th>`);
+            tr_grouping.append(`<th class="dt-head-center border-right" colspan="2">${mode_name}</th>`);
         }
         thead.append(tr_grouping);
         // Header labels
         let tr_labels = $("<tr>");
         for (mode_name of modded_mode_names) {
-            tr_labels.append(`<th class="dt-head-center" >Total</th>`);
-            tr_labels.append(`<th class="dt-head-center" >Average</th>`);
+            tr_labels.append(`<th class="dt-head-center border-right" >Total</th>`);
+            tr_labels.append(`<th class="dt-head-center border-right" >Average</th>`);
         }
         thead.append(tr_labels);
         stat_table.append(thead);
@@ -111,12 +111,23 @@ function dataAndColumnStructureForSelectionTable() {
     for (item_name of Object.keys(analysis_modes_and_items.scoring_items)) {
         let this_data = {"name":item_name};
         let modded_mode_names = Object.keys(analysis_modes_and_items.modes);
-        modded_mode_names.push("Totals");
+        modded_mode_names.push("Match");
         let cell_count = 0;
         for (mode_name of modded_mode_names) {
             for (stat_type of ["Total", "Average"]) {
                 let key = `cell_${cell_count}`;
-                let value  = `<i data-modeName="${mode_name}" data-scorename="${item_name}" data-stattype="${stat_type}" class="stat-selector fa-regular fa-square fa-xl"></i>`
+                let box_type = 'fa-square';
+                if (current_stored_stat_info.chosen_stats != undefined) {
+                    if (item_name in current_stored_stat_info.chosen_stats) {
+                        if (mode_name in current_stored_stat_info.chosen_stats[item_name]) {
+                            if (current_stored_stat_info.chosen_stats[item_name].includes(stat_type)) {
+                                // Mark as selected
+                                box_type = "fa-square-check";
+                            }
+                        }
+                    }
+                }
+                let value  = `<i data-modeName="${mode_name}" data-scorename="${item_name}" data-stattype="${stat_type}" class="stat-selector fa-regular ${box_type} fa-xl"></i>`
                 this_data[key] = value;
                 cell_count += 1;
             }
@@ -128,7 +139,7 @@ function dataAndColumnStructureForSelectionTable() {
         for (key of Object.keys(the_data[0])) {
             the_columns.push({
                 data: key,
-                className: 'dt-body-center'
+                className: 'dt-body-center border-right'
             });
         }
     }
@@ -252,30 +263,42 @@ function convertSelectionsToDataStructure () {
 }
 
 function showSelectedStats() {
+    $("#stats_display").show();  // Remove when working
+
     // Make sure at least one stat has been selected
-    let picked_stats = $('.stat-selector').filter('.fa-square-check');
-    if (picked_stats.length == 0) {
+    if (current_stored_stat_info.chosen_stats === undefined) {
         networkError("Please select at least one stat to show.");
+        showStatSelection();
         return
     }
+    // let picked_stats = $('.stat-selector').filter('.fa-square-check');
+    // if (picked_stats.length == 0) {
+    //     networkError("Please select at least one stat to show.");
+    //     return
+    // }
 
     let stat_table = $("#stats_display_table");
     $("#select_stats").hide();
 
     if (team_scores == null) {
+        $("#stats_display").show();
         $("#stats_display_table_row").hide();
         $("#stats_message").text("Loading current team scores");
         getCurrentScores();
+        return
     }
 
+    $("#stats_message").text("Event Stats");
+
     function statsDisplayTableHeader() {
+        $(stat_table).empty();
         let thead = $("<thead>");
         // Header Groupings
         let tr_grouping = $("<tr>");
         tr_grouping.append('<th class="dt-head-center" rowspan="2">Team Number</th>');
         let tr_labels = $("<tr>");
         for (const [stat_name, stat_info] of Object.entries(current_stored_stat_info.chosen_stats)) {
-            tr_grouping.append(`<th class="dt-head-center" rowspan="${stat_info.total_columns}">${stat_name}</th>`);
+            tr_grouping.append(`<th class="dt-head-center border-right" colspan="${stat_info.total_columns}">${stat_name}</th>`);
             for (const [mode_name, chosen_types] of Object.entries(stat_info)) {
                 if (mode_name === "total_columns") {
                     // We don't do anything with this
@@ -283,7 +306,7 @@ function showSelectedStats() {
                 }
                 for (stat_type of chosen_types) {
                     let col_text = `${mode_name}<br>${stat_type}`;
-                    tr_labels.append(`<th class="dt-head-center">${col_text}</th>`);
+                    tr_labels.append(`<th class="dt-head-center border-right">${col_text}</th>`);
                 }
             }
         }
@@ -313,20 +336,64 @@ function showSelectedStats() {
             let cell_count = 0;
             for (const [stat_name, stat_info] of Object.entries(current_stored_stat_info.chosen_stats)) {
                 for (const [mode_name, chosen_types] of Object.entries(stat_info)) {
-                    
+                    if (mode_name === "total_columns") {
+                        continue
+                    }
+                    for (chosen_type of chosen_types) {
+                        let _type = chosen_type.toLowerCase();
+                        let cellname = `cell_${cell_count}`;
+                        if (mode_name == "Match") {
+                            this_data[cellname] = team_results.totals[stat_name][_type];
+                        } else {
+                            this_data[cellname] = team_results.by_mode_results[mode_name].scores[stat_name][_type];
+                        }
+                        cell_count += 1;
+                    }
+                }
+            }
+            the_data.push(this_data);
+        }
 
-
+        if (the_data.length > 0) {
+            for (key of Object.keys(the_data[0])) {
+                the_columns.push({
+                    data: key,
+                    className: 'dt-body-center border-right'
+                });
+            }
+        }
+    
+        return [the_data, the_columns];
     }
-    // DataTable.destroy()
     // set up the stored data
-    current_stored_stat_info = convertSelectionsToDataStructure();
-    saveStoredStatInfo();
+    // current_stored_stat_info = convertSelectionsToDataStructure();
+    // saveStoredStatInfo();
 
     // Generate header
+    statsDisplayTableHeader();
+    
+    if (stat_display_table != null) {
+        stat_display_table.destroy();
+        stat_display_table = null;
+    }
 
+    const [table_data, table_columns] = statsDataAndColumns();
+    stat_display_table = $("#stats_display_table").DataTable({
+        autoWidth: false,
+        // dom: "Bfrtip",
+        data: table_data,
+        columns: table_columns,
+        pageLength: Object.keys(team_scores.data).length
+    });
+    $("#stats_display_table_row").show();
 }
 
 $(document).ready(function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("clear_cache")) {
+        clearStoredStatInfo();
+    }
+
     $('#stats_selection_table').on( 'draw.dt', function () {
         $(".stat-selector").unbind("click");
         $(".stat-selector").click( function (e) {
@@ -335,6 +402,9 @@ $(document).ready(function () {
     } );
 
     $('#show_selected_stats').click( function (e) {
+        // set up the stored data
+        current_stored_stat_info = convertSelectionsToDataStructure();
+        saveStoredStatInfo();
         showSelectedStats();
     });
 
