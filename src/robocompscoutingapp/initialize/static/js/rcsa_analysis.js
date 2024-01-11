@@ -120,6 +120,7 @@ function dataAndColumnStructureForSelectionTable() {
                 if (current_stored_stat_info.chosen_stats != undefined) {
                     if (item_name in current_stored_stat_info.chosen_stats) {
                         if (mode_name in current_stored_stat_info.chosen_stats[item_name]) {
+                            
                             if (current_stored_stat_info.chosen_stats[item_name].includes(stat_type)) {
                                 // Mark as selected
                                 box_type = "fa-square-check";
@@ -149,18 +150,21 @@ function dataAndColumnStructureForSelectionTable() {
 
 function showStatSelection() {
     $("#select_stats").show();
-    if (stats_selection_table == null) {
-        const [table_data, table_columns] = dataAndColumnStructureForSelectionTable();
-        stats_selection_table = $("#stats_selection_table").DataTable( {
-            autoWidth: false,
-            searching: false,
-            dom: "Bfrtip",
-            data: table_data,
-            columns: table_columns,
-        });
-    } else {
-        stats_selection_table.draw();
+    $('#stats_display').hide();
+    $('#stats_display_table_row').hide();
+
+    if (stats_selection_table != null) {
+        stat_display_table.destroy();
     }
+    const [table_data, table_columns] = dataAndColumnStructureForSelectionTable();
+    stats_selection_table = $("#stats_selection_table").DataTable( {
+        autoWidth: false,
+        searching: false,
+        dom: "Bfrtip",
+        data: table_data,
+        columns: table_columns,
+    });
+    
 }
 
 function getScoringItems () {
@@ -408,7 +412,14 @@ $(document).ready(function () {
         showSelectedStats();
     });
 
+    $('#choose_different_stats').click(function (e) {
+        showStatSelection();
+    });
+
     checkStoredPageInfo();
     
 
 });
+
+// Need "go back to stat selection button"
+// check all the hidden/show settings
