@@ -92,7 +92,7 @@ function buildStatSelectionTableStructure() {
     stat_table.append('<tbody class="dt-body-center"></tbody>');
 }
 
-function dataAndColumnStructureForSelectionTable() {
+function dataStructureForSelectionTable() {
     /*
         Structure:
         [
@@ -103,10 +103,8 @@ function dataAndColumnStructureForSelectionTable() {
             }
         ]
 
-        Returns the data and the column structure.
     */
     let the_data = [];
-    let the_columns = [];
    
     for (item_name of Object.keys(analysis_modes_and_items.scoring_items)) {
         let this_data = {"name":item_name};
@@ -120,8 +118,7 @@ function dataAndColumnStructureForSelectionTable() {
                 if (current_stored_stat_info.chosen_stats != undefined) {
                     if (item_name in current_stored_stat_info.chosen_stats) {
                         if (mode_name in current_stored_stat_info.chosen_stats[item_name]) {
-                            
-                            if (current_stored_stat_info.chosen_stats[item_name].includes(stat_type)) {
+                            if (current_stored_stat_info.chosen_stats[item_name][mode_name].includes(stat_type)) {
                                 // Mark as selected
                                 box_type = "fa-square-check";
                             }
@@ -136,8 +133,14 @@ function dataAndColumnStructureForSelectionTable() {
         the_data.push(this_data);
     }
     
-    if (the_data.length > 0) {
-        for (key of Object.keys(the_data[0])) {
+   return the_data;
+}
+
+function columnStructureForSelectionTable(data_structure) {
+    let the_columns = [];
+    
+    if (data_structure.length > 0) {
+        for (key of Object.keys(data_structure[0])) {
             the_columns.push({
                 data: key,
                 className: 'dt-body-center border-right'
@@ -145,7 +148,7 @@ function dataAndColumnStructureForSelectionTable() {
         }
     }
 
-    return [the_data, the_columns];
+    return the_columns;
 }
 
 function showStatSelection() {
@@ -154,17 +157,17 @@ function showStatSelection() {
     $('#stats_display_table_row').hide();
 
     if (stats_selection_table != null) {
-        stat_display_table.destroy();
-    }
-    const [table_data, table_columns] = dataAndColumnStructureForSelectionTable();
+        stat_display_table.draw();
+        stat_display_table = null;
+    } 
+
     stats_selection_table = $("#stats_selection_table").DataTable( {
         autoWidth: false,
         searching: false,
         dom: "Bfrtip",
-        data: table_data,
-        columns: table_columns,
+        data: dataStructureForSelectionTable(),
+        columns: columnStructureForSelectionTable(dataStructureForSelectionTable())
     });
-    
 }
 
 function getScoringItems () {
@@ -268,6 +271,11 @@ function convertSelectionsToDataStructure () {
 
 function showSelectedStats() {
     $("#stats_display").show();  // Remove when working
+    if (stat_display_table != null) {
+        // stat_display_table.draw();
+        stat_display_table.destroy();
+        stat_display_table = null;
+    }
 
     // Make sure at least one stat has been selected
     if (current_stored_stat_info.chosen_stats === undefined) {
@@ -295,6 +303,7 @@ function showSelectedStats() {
     $("#stats_message").text("Event Stats");
 
     function statsDisplayTableHeader() {
+        console.log("Running statsDisplayTableHeader");
         $(stat_table).empty();
         let thead = $("<thead>");
         // Header Groupings
@@ -318,8 +327,9 @@ function showSelectedStats() {
         thead.append(tr_labels);
         stat_table.append(thead);
     }
-    
-    function statsDataAndColumns() {
+    let stat_data_structure = null;
+
+    function statsData() {
         /*
         Structure:
         [
@@ -330,10 +340,9 @@ function showSelectedStats() {
             }
         ]
         */
+        console.log("Running statsData");
 
         let the_data = [];
-        let the_columns = [];
-
 
         for (const [teamNumber, team_results] of Object.entries(team_scores.data)) {
             let this_data = {"teamNumber":teamNumber}
@@ -357,9 +366,18 @@ function showSelectedStats() {
             }
             the_data.push(this_data);
         }
+        stat_data_structure = the_data;
+        console.log(the_data);
+        return the_data;
+    }
 
-        if (the_data.length > 0) {
-            for (key of Object.keys(the_data[0])) {
+    function statsColumns() {
+        console.log("Running statsColumns");
+
+        let the_columns = [];
+
+        if (stat_data_structure.length > 0) {
+            for (key of Object.keys(stat_data_structure[0])) {
                 the_columns.push({
                     data: key,
                     className: 'dt-body-center border-right'
@@ -367,7 +385,7 @@ function showSelectedStats() {
             }
         }
     
-        return [the_data, the_columns];
+        return the_columns;
     }
     // set up the stored data
     // current_stored_stat_info = convertSelectionsToDataStructure();
@@ -376,19 +394,15 @@ function showSelectedStats() {
     // Generate header
     statsDisplayTableHeader();
     
-    if (stat_display_table != null) {
-        stat_display_table.destroy();
-        stat_display_table = null;
-    }
-
-    const [table_data, table_columns] = statsDataAndColumns();
+    
     stat_display_table = $("#stats_display_table").DataTable({
         autoWidth: false,
         // dom: "Bfrtip",
-        data: table_data,
-        columns: table_columns,
+        data: statsData(),
+        columns: statsColumns(),
         pageLength: Object.keys(team_scores.data).length
     });
+    
     $("#stats_display_table_row").show();
 }
 
@@ -413,13 +427,14 @@ $(document).ready(function () {
     });
 
     $('#choose_different_stats').click(function (e) {
-        showStatSelection();
+        if (analysis_modes_and_items == null) {
+            getScoringItems();
+        } else {
+            showStatSelection();
+        }
     });
 
     checkStoredPageInfo();
     
 
 });
-
-// Need "go back to stat selection button"
-// check all the hidden/show settings
