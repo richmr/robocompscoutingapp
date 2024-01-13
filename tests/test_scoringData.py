@@ -29,7 +29,8 @@ from robocompscoutingapp.ScoringData import (
     Score,
     ScoredMatchForTeam,
     teamAlreadyScoredForThisMatch,
-    getAggregrateResultsForAllTeams
+    getAggregrateResultsForAllTeams,
+    getPageIDsUsedForThisEvent
 )
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
@@ -442,6 +443,82 @@ def test_match_data_reset(tmpdir):
         results = agg_object.getAggregrateResults()
         assert results.by_mode_results["Auton"].scores["cone"].count_of_scored_events == 0
 
+def test_PageIDDiscovery(tmpdir):
+    with gen_test_env_and_enter(tmpdir):
+        # Directly put data in the DB
+        with RCSA_DB.getSQLSession() as db:
+            db.add(ScoresForEvent(
+                scoring_page_id = 1,
+                mode_id = 1, 
+                matchNumber = 1,
+                eventCode = "CALA1",
+                teamNumber = 2584,
+                scoring_item_id = 1,
+                value = "1"
+            ))
+            db.commit()
+            # Check this
+            found_ids = getPageIDsUsedForThisEvent("CALA1")
+            assert len(found_ids) == 1
+            #add another
+            db.add(ScoresForEvent(
+                scoring_page_id = 1,
+                mode_id = 1, 
+                matchNumber = 2,
+                eventCode = "CALA1",
+                teamNumber = 2584,
+                scoring_item_id = 1,
+                value = "1"
+            ))
+            db.commit()
+            # Check this
+            found_ids = getPageIDsUsedForThisEvent("CALA1")
+            assert len(found_ids) == 1
+            assert found_ids[0].count_of_scores_found == 2
+
+            # Add another scoring page
+            db.add(ScoresForEvent(
+                scoring_page_id = 2,
+                mode_id = 1, 
+                matchNumber = 1,
+                eventCode = "CALA1",
+                teamNumber = 2584,
+                scoring_item_id = 1,
+                value = "1"
+            ))
+            db.commit()
+            # Check this
+            found_ids = getPageIDsUsedForThisEvent("CALA1")
+            assert len(found_ids) == 2
+            # in order?
+            assert found_ids[0].scoring_page_id == 1
+
+            #  Add two more just to check the ordering
+            # Add another scoring page
+            db.add(ScoresForEvent(
+                scoring_page_id = 2,
+                mode_id = 1, 
+                matchNumber = 2,
+                eventCode = "CALA1",
+                teamNumber = 2584,
+                scoring_item_id = 1,
+                value = "1"
+            ))
+            db.add(ScoresForEvent(
+                scoring_page_id = 2,
+                mode_id = 1, 
+                matchNumber = 3,
+                eventCode = "CALA1",
+                teamNumber = 2584,
+                scoring_item_id = 1,
+                value = "1"
+            ))
+            db.commit()
+            # Check this
+            found_ids = getPageIDsUsedForThisEvent("CALA1")
+            assert len(found_ids) == 2
+            # in order?
+            assert found_ids[0].scoring_page_id == 2
 
 
 

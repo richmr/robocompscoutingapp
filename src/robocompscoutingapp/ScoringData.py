@@ -1,4 +1,4 @@
-from sqlalchemy import select, distinct, func, delete
+from sqlalchemy import select, distinct, func, delete, desc
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Dict, List, Union
@@ -574,5 +574,71 @@ def getAggregrateResultsForAllTeams(eventCode:str, scoring_page_id:int) -> AllTe
             data[team.teamNumber] = score_gen.getAggregrateResults()
 
     return AllTeamResults(data=data)
+
+class PageIDUsedForEvent(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    scoring_page_id:int
+    count_of_scores_found:int
+
+def getPageIDsUsedForThisEvent(eventCode:str) -> List[PageIDUsedForEvent]:
+    """
+    Produces a list of scoring page IDs that have scores for the chosen event
+
+    Parameters
+    ----------
+    eventCode:str
+        The event we are gathering data for
+    
+    Returns
+    -------
+    List[PageIDUsedForEvent]
+        List of PageIDUsedForEvent objects
+    """
+    with RCSA_DB.getSQLSession() as db:
+        stmt = select(
+                ScoresForEvent.scoring_page_id,
+                func.count(ScoresForEvent.score_id).label("count_of_scores_found")
+            ).group_by("scoring_page_id").order_by(desc("count_of_scores_found")).having(ScoresForEvent.eventCode == eventCode)
+        print(stmt)
+        all_ids_used = db.execute(stmt).all()
+        to_return = [PageIDUsedForEvent(scoring_page_id=row[0], count_of_scores_found=row[1]) for row in all_ids_used]
+        return to_return    
+
+class MigratePageResults(BaseModel):
+    success_messages:List[str] = Field(default=[])
+    warning_messages:List[str] = Field(default=[])
+    error_message:List[str] = Field(default=[])
+    
+
+def migrateDataForEventToNewPage(eventCode:str, old_scoring_page_id:int, new_scoring_page_id:int) -> MigratePageResults:
+    """
+    Attempts to migrate data for an event to a new scoring page ID.  Used if teams change scoring pages in the middle of an event.
+
+    Parameters
+    ----------
+    eventCode:str
+        Event code to try
+    old_scoring_page_id:int
+        Page migrating from
+    new_scoring_page_id:int
+        Page migrating to
+
+    Returns
+    -------
+    MigratePageResults
+        Object with messages to pass along
+    """
+    # Get scoring item names from new page number
+    # Get scoring item names from old
+    # diff.  Any in old and not in new will not be moved: generate warning
+    # Iterate over new namea
+        # Find records from old scoring page for event with matching name
+        # Copy record and make new record with new scoring page
+        # save
+        # Keep counts of successful changes per name
+        # Generate an info message of the success
+    
+    
 
 

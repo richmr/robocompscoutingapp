@@ -23,6 +23,7 @@ from robocompscoutingapp.GlobalItems import RCSA_Config, GracefulInterruptHandle
 from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageData,
     setScoringPageTestResult,
+    getPageIDsUsedForThisEvent,
 )
 
 # From: https://github.com/tiangolo/typer/issues/428
@@ -37,10 +38,10 @@ cli_app = typer.Typer(cls=OrderCommands)
 def initialize(destination_path: Annotated[Path, typer.Argument(help="The destination path you want to intialize")],
                overwrite: Annotated[bool, typer.Option(help="Allow overwriting of existing files in the target directory")] = False):
     """
-    Will set up a recommended file structure with a template scoring file as well as template configuration file
+    Will set up the required file structure with a template scoring file as well as template configuration file
     """
     if destination_path.exists() and not overwrite:
-        overwrite = Confirm.ask("[bold red]The target directory already exists, do you want to overwrite the files here?")
+        overwrite = Confirm.ask("[bold red]The target directory already exists, do you want to overwrite the files here? (Any custom files you have in here will not be deleted)")
         if not overwrite:
             ft.print("No files written")
             return            
@@ -87,6 +88,7 @@ def validate(html_file: Annotated[Path, typer.Argument(help="The finely crafted 
                         init.updateTOML(["ServerConfig", "scoring_page"], str(html_file.absolute()), tgt_dir=path_to_toml)
                     except Exception as badnews:
                         ft.error(f"Whoops.  I couldn't update because {badnews}.  You will need to do it manually")
+                        
     else:
         ft.error(f"File {html_file} does not exist.")
 
@@ -282,6 +284,19 @@ def run(
                 integrate = Integrate()
                 integrate.integrate()
                 ft.success("Your scoring page was successfully integrated!")
+
+                # Now need to check for changed scoring page in middle of event
+                used_scoring_pages = getPageIDsUsedForThisEvent(eventCode)
+                # If the page was just now integrated, and no scores for event recorded, this length should be 0
+                if len(used_scoring_pages) > 0:
+                    ft.warning("You have already scored matches for this event with at least one other scoring page.  This data will not be visible in the analytics page.")
+                    ft.warning("If you just made a UI change and kept the scoring items the same names, I can attempt to migrate the previous scored data to this page")
+                    migrate = Confirm.ask("Would you like me to attempt to migrate the data?")
+                    if migrate:
+                        pass
+                    else:
+                        ft.info("Ok, scoring data was not migrated") 
+
             except Exception as badnews:
                 ft.error("Unable to integrate your scoring page for the following reason")
                 ft.error(str(badnews))

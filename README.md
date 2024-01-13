@@ -183,3 +183,26 @@ Need test data load
 - I don't think I need BEGIN_SCORING class and button.  Flow works fine after match and team selection
 
 - Need "Clear saved scores" button on Send Scores in case the scoring page changes during an event?
+
+
+So.
+if
+    - chosen event is the same
+    - there are scores for this event
+    - those scores are tied to scoring_item_ids that do not match the current scoring page
+then
+    - Everything will break
+
+OR:
+    Scores need to be tied to a scoring page ID in the database
+    And a migration command can be written
+
+so it would look like
+if
+    - there are scores for the chosen event that are for wrong scoring page
+then
+    - Warn the user
+
+And build a migration command just in case
+
+
