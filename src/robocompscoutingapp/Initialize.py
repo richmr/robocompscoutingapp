@@ -43,8 +43,9 @@ class Initialize:
         shutil.copytree(str(self.src_path), 
                         str(self.dst_path), 
                         dirs_exist_ok=overwrite,
-                        # Don't copy this file now, it needs to for to user home
-                        ignore=shutil.ignore_patterns(".RCSA_SECRETS.toml")
+                        # Don't copy this file now, it needs to go to user home
+                        # Don't copy test databases
+                        ignore=shutil.ignore_patterns(".RCSA_SECRETS.toml", "*.db")
         )
 
         #  Now copy over the sample secrets file
