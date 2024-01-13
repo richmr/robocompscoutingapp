@@ -374,9 +374,11 @@ def addScoresToDB(eventCode:str, match_score:ScoredMatchForTeam):
     match_score:ScoredMatchForTeam
         ScoredMatchForTeam object
     """
+    scoring_page_id = getCurrentScoringPageData().scoring_page_id
     with RCSA_DB.getSQLSession() as db:
         try:
             to_add = [ScoresForEvent(**a_score.model_dump() | {
+                "scoring_page_id":scoring_page_id,
                 "eventCode":eventCode,
                 "matchNumber":match_score.matchNumber,
                 "teamNumber":match_score.teamNumber
@@ -520,9 +522,9 @@ class GenerateResultsForTeam:
     def getAggregrateResults(self) -> ResultsForTeam:
         # Get all scores for this team number and event
         with RCSA_DB.getSQLSession() as db:
-            self.count_of_scored_events = db.scalars(select(func.count(distinct(ScoresForEvent.matchNumber))).filter_by(teamNumber=self.teamNumber, eventCode=self.eventCode)).one()
+            self.count_of_scored_events = db.scalars(select(func.count(distinct(ScoresForEvent.matchNumber))).filter_by(teamNumber=self.teamNumber, eventCode=self.eventCode, scoring_page_id=self.scoring_page_id)).one()
             self.initializeDataStructures()
-            all_scores_for_team = db.scalars(select(ScoresForEvent).filter_by(teamNumber=self.teamNumber, eventCode=self.eventCode)).all()
+            all_scores_for_team = db.scalars(select(ScoresForEvent).filter_by(teamNumber=self.teamNumber, eventCode=self.eventCode, scoring_page_id=self.scoring_page_id)).all()
             # Route the math per the scoring item type
             for score in all_scores_for_team:
                 scoring_type = self.scoring_items_by_id[score.scoring_item_id].type
