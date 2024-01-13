@@ -40,6 +40,7 @@ function getStoredStatInfo() {
 
 function clearStoredStatInfo() {
     localStorage.setItem("rcsa_stored_selected_stats", null);
+    getStoredStatInfo();
 }
 
 function saveStoredStatInfo() {
@@ -157,8 +158,8 @@ function showStatSelection() {
     $('#stats_display_table_row').hide();
 
     if (stats_selection_table != null) {
-        stat_display_table.draw();
-        stat_display_table = null;
+        stats_selection_table.destroy();
+        stats_selection_table = null;
     } 
 
     stats_selection_table = $("#stats_selection_table").DataTable( {
@@ -229,7 +230,7 @@ function checkStoredPageInfo() {
         contentType: 'application/json',
         success: function (recvd_page_status, text_status, jqXHR) {
             // Give the data to the display code
-            console.log("current page status received");
+            console.log("current page status received", recvd_page_status.scoring_page_id);
             scoring_page_id = recvd_page_status.scoring_page_id;
             if (current_stored_stat_info.scoring_page_id != recvd_page_status.scoring_page_id) {
                 clearStoredStatInfo();
@@ -315,7 +316,7 @@ function showSelectedStats() {
     $("#stats_message").text("Event Stats");
 
     function statsDisplayTableHeader() {
-        console.log("Running statsDisplayTableHeader");
+        // console.log("Running statsDisplayTableHeader");
         $(stat_table).empty();
         let thead = $("<thead>");
         // Header Groupings
@@ -352,7 +353,7 @@ function showSelectedStats() {
             }
         ]
         */
-        console.log("Running statsData");
+        // console.log("Running statsData");
 
         let the_data = [];
 
@@ -379,12 +380,12 @@ function showSelectedStats() {
             the_data.push(this_data);
         }
         stat_data_structure = the_data;
-        console.log(the_data);
+        // console.log(the_data);
         return the_data;
     }
 
     function statsColumns() {
-        console.log("Running statsColumns");
+        // console.log("Running statsColumns");
 
         let the_columns = [];
 
