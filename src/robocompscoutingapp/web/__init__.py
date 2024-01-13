@@ -151,7 +151,7 @@ def matchesAndTeams(unscored_only:bool = True) -> MatchesAndTeams:
         data = getMatchesAndTeams(_eventCode, unscored_only=unscored_only)
         return data
     except Exception as badnews:
-        raise HTTPException(status_code=500, detail=f"Unable to get matches and teams because {badnews}")
+        raise HTTPException(status_code=500, detail=f"Unable to get matches and teams because {type(badnews).__name__}: {badnews}")
 
 @rcsa_api_app.get("/api/getMatches")
 def justMatches(unscored_only:bool = True) -> MatchesAndTeams:
@@ -172,7 +172,7 @@ def justMatches(unscored_only:bool = True) -> MatchesAndTeams:
     try:
         return getMatches(_eventCode, unscored_only=unscored_only)
     except Exception as badnews:
-        raise HTTPException(status_code=500, detail=f"Unable to get matches because {badnews}")
+        raise HTTPException(status_code=500, detail=f"Unable to get matches because {type(badnews).__name__}: {badnews}")
 
 from robocompscoutingapp.ScoringData import (
     addScoresToDB,
@@ -203,7 +203,7 @@ def addScores(team_score_for_match:ScoredMatchForTeam):
         addScoresToDB(eventCode=_eventCode, match_score=team_score_for_match)
         return 
     except Exception as badnews:
-        raise HTTPException(status_code=500, detail=f"Unable to save score because {badnews}")
+        raise HTTPException(status_code=500, detail=f"Unable to save score because {type(badnews).__name__}: {badnews}")
 
 from robocompscoutingapp.ScoringData import (
     getAggregrateResultsForAllTeams,
@@ -223,7 +223,7 @@ def getAllScores() -> AllTeamResults:
     try:
         return getAggregrateResultsForAllTeams(eventCode=_eventCode, scoring_page_id=_scoring_page_id)
     except Exception as badnews:
-        raise HTTPException(status_code=500, detail=f"Unable to get scores {badnews}")
+        raise HTTPException(status_code=500, detail=f"Unable to get scores {type(badnews).__name__}: {badnews}")
     
 
 @rcsa_api_app.get("/api/currentPageStatus")
@@ -239,7 +239,7 @@ def getAllScores() -> ScoringPageStatus_pyd:
     try:
         return getCurrentScoringPageData()
     except Exception as badnews:
-        raise HTTPException(status_code=500, detail=f"Unable to get scoring page info because {badnews}") 
+        raise HTTPException(status_code=500, detail=f"Unable to get scoring page info because {type(badnews).__name__}: {badnews}") 
       
 #####################
 

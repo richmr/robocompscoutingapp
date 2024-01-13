@@ -93,7 +93,7 @@ pip install robocompscoutingapp
         - Well the initial script might just be a loader?
         - That may be a winner and allow for test loads (https://www.educative.io/answers/how-to-dynamically-load-a-js-file-in-javascript) 
     - stores the file in the server location
-        - This won't work.. will break relationship between pages/js/css
+        - This won't work.. will break relationship between falsejs/css
         - Perhaps named by the hash?
     - toml file stores the name of the file to serve
 - test

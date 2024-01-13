@@ -185,6 +185,10 @@ function getScoringItems () {
             showStatSelection();
         },
         error: function( jqXHR, textStatus, errorThrown ) {
+            if (jqXHR.status == 500) {
+                let errorJSON = JSON.parse(jqXHR.responseText);
+                errorThrown = errorJSON.detail
+            }
             msg = `Unable to get game modes and scoring data because:\n${errorThrown}`;
             networkError(msg);
         }
@@ -206,6 +210,10 @@ function getCurrentScores () {
             showSelectedStats();
         },
         error: function( jqXHR, textStatus, errorThrown ) {
+            if (jqXHR.status == 500) {
+                let errorJSON = JSON.parse(jqXHR.responseText);
+                errorThrown = errorJSON.detail
+            }
             msg = `Unable to get current team scores because:\n${errorThrown}`;
             networkError(msg);
         }
@@ -231,6 +239,10 @@ function checkStoredPageInfo() {
             }
         },
         error: function( jqXHR, textStatus, errorThrown ) {
+            if (jqXHR.status == 500) {
+                let errorJSON = JSON.parse(jqXHR.responseText);
+                errorThrown = errorJSON.detail
+            }
             msg = `Unable to get current scoring page info because:\n${errorThrown}`;
             networkError(msg);
         }
