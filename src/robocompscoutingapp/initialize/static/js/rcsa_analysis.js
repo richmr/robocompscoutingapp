@@ -438,7 +438,7 @@ $(document).ready(function () {
         showSelectedStats();
     });
 
-    $('#choose_different_stats').click(function (e) {
+    $('.choose_different_stats').click(function (e) {
         if (analysis_modes_and_items == null) {
             getScoringItems();
         } else {
