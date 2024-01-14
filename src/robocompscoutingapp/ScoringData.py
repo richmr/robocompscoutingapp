@@ -630,6 +630,7 @@ def migrateDataForEventToNewPage(eventCode:str, old_scoring_page_id:int, new_sco
     MigratePageResults
         Object with messages to pass along
     """
+    # NEED TO TRANSFER MODE IDs also
     to_return = MigratePageResults()
     # Get scoring item names from new page number
     new_modes_and_items = getGameModeAndScoringElements(new_scoring_page_id)
