@@ -30,7 +30,8 @@ from robocompscoutingapp.ScoringData import (
     ScoredMatchForTeam,
     teamAlreadyScoredForThisMatch,
     getAggregrateResultsForAllTeams,
-    getPageIDsUsedForThisEvent
+    getPageIDsUsedForThisEvent,
+    migrateDataForEventToNewPage
 )
 from robocompscoutingapp.ORMDefinitionsAndDBAccess import (
     ScoringPageStatus,
@@ -519,6 +520,108 @@ def test_PageIDDiscovery(tmpdir):
             assert len(found_ids) == 2
             # in order?
             assert found_ids[0].scoring_page_id == 2
+
+"""
+Expected data
+sqlite> select * from ModesForScoringPage ;
+mode_id     scoring_page_id  mode_name 
+----------  ---------------  ----------
+1           1                Auton     
+2           1                Teleop    
+sqlite> select * from ScoringItemsForScoringPage ;
+scoring_item_id  scoring_page_id  name        type       
+---------------  ---------------  ----------  -----------
+1                1                cone        score_tally
+2                1                cube        score_tally
+3                1                Attempted   score_flag 
+4                1                Succeeded   score_flag 
+5                1                Auton Mobi  score_flag 
+6                1                Broke       score_flag 
+sqlite> 
+"""
+
+def makeFakePage():
+    # Assumes we are CWD where we want it saved
+    fake_page = """
+    <html><body>
+    <div class="container match_and_team_selection">
+    <select class="u-full-width match_selector"></select>
+    <select class="u-full-width team_selector"></select>
+    </div>
+    <div class="section scoring" id="scoring_controls" hidden>
+        <div class="row game_mode_group">
+            <div id="set-auton" class="six columns text-center click_feedback">
+                <i id="auton_icon" data-modename="Auton" class="fa-solid fa-robot fa-4x game_mode"></i>
+            </div>
+            <div id="set-teleop" class="six columns text-center click_feedback">
+                <i id="tele_icon" data-modename="Teleop" class="fa-solid fa-gamepad fa-4x game_mode"></i>
+            </div>
+        </div>
+        <img id="score_cone" data-scorename="cone" class="score_tally" src="images/cone.png" alt="Cone" width="75" height="75">
+        <img id="score_cube" data-scorename="cube" class="score_tally" src="images/cube.png" alt="Cube" width="75" height="75">
+        <img id="score_cube" data-scorename="newItem" class="score_tally" src="images/cube.png" alt="Cube" width="75" height="75">
+        <button class="button-orange btn-big report_submit">Submit Report</button>  
+    </div>
+    <script src="js/rcsa_loader.js"></script>
+    </body>
+    </html>
+    """
+    path_to_file = Path("static/newscoring.html")
+    with path_to_file.open(mode="w") as f:
+        f.write(fake_page)
+    
+    # Set config file
+    RCSA_Config.getConfig().ServerConfig.scoring_page = f"{path_to_file}"
+    return path_to_file
+
+def test_DataMigrate(tmpdir):
+     with gen_test_env_and_enter(tmpdir):
+        # Directly put data in the DB
+        with RCSA_DB.getSQLSession() as db:
+            # temp env generates an entry for scoring page from the scoring sample
+            # There shouldn't be any scores yet
+            used_ids = getPageIDsUsedForThisEvent("CALA")
+            assert len(used_ids) == 0
+            # Add a score
+            db.add(ScoresForEvent(
+                scoring_page_id = 1,
+                mode_id = 1, 
+                matchNumber = 1,
+                eventCode = "CALA",
+                teamNumber = 2584,
+                scoring_item_id = 1,
+                value = "1"
+            ))
+            db.commit()
+
+            # Integrate a new page
+            new_page_path = makeFakePage()
+            uhp = UserHTMLProcessing(new_page_path)
+            uhp.validate()
+            # Integrate it to set the data
+            int = Integrate()
+            int.integrate()
+            # Should be page 2
+            
+            used_ids = getPageIDsUsedForThisEvent("CALA")
+            assert len(used_ids) == 1
+
+            # migrate the data
+            migrate_results = migrateDataForEventToNewPage("CALA", 1, 2)
+            assert len(migrate_results.success_messages) == 1
+            assert len(migrate_results.warning_messages) == 2
+            assert len(migrate_results.error_message) == 0
+            
+            # make sure it actually migrated
+            # the cone score should have migrated. It should be scoring_item_id = 7 and value = 1
+            scores = db.scalars(select(ScoresForEvent).where(ScoresForEvent.eventCode == "CALA", ScoresForEvent.scoring_page_id == 2)).one()
+            assert scores.scoring_item_id == 7
+            assert scores.value == "1"
+
+
+
+
+
 
 
 

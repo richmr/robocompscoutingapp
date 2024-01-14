@@ -600,7 +600,6 @@ def getPageIDsUsedForThisEvent(eventCode:str) -> List[PageIDUsedForEvent]:
                 ScoresForEvent.scoring_page_id,
                 func.count(ScoresForEvent.score_id).label("count_of_scores_found")
             ).group_by("scoring_page_id").order_by(desc("count_of_scores_found")).having(ScoresForEvent.eventCode == eventCode)
-        print(stmt)
         all_ids_used = db.execute(stmt).all()
         to_return = [PageIDUsedForEvent(scoring_page_id=row[0], count_of_scores_found=row[1]) for row in all_ids_used]
         return to_return    
@@ -629,15 +628,59 @@ def migrateDataForEventToNewPage(eventCode:str, old_scoring_page_id:int, new_sco
     MigratePageResults
         Object with messages to pass along
     """
+    to_return = MigratePageResults()
     # Get scoring item names from new page number
+    new_modes_and_items = getGameModeAndScoringElements(new_scoring_page_id)
     # Get scoring item names from old
+    old_modes_and_items = getGameModeAndScoringElements(old_scoring_page_id)
     # diff.  Any in old and not in new will not be moved: generate warning
-    # Iterate over new namea
-        # Find records from old scoring page for event with matching name
-        # Copy record and make new record with new scoring page
-        # save
-        # Keep counts of successful changes per name
-        # Generate an info message of the success
+    not_migrated_old_names = list(set(old_modes_and_items.scoring_items.keys()) - set((new_modes_and_items.scoring_items.keys())))
+    if len(not_migrated_old_names) > 0:
+        msg = f"The following item(s) will not be migrated because they are not scored in the new scoring page: {', '.join(not_migrated_old_names)}.  This data will not be visible on the analytics page"
+        to_return.warning_messages.append(msg)
+    brand_new_names = list(set(new_modes_and_items.scoring_items.keys()) - set((old_modes_and_items.scoring_items.keys())))
+    if len(brand_new_names) > 0:
+        msg = f"Matches scored before using this page will not have these item(s): {', '.join(brand_new_names)}.  They were not previously logged."
+        to_return.warning_messages.append(msg)
+    names_to_migrate = list(set(new_modes_and_items.scoring_items.keys()).intersection(set(old_modes_and_items.scoring_items.keys())))
+    with RCSA_DB.getSQLSession() as db:        
+        # Iterate over common names
+        # Convert old names to scoring_item_ids for SQL
+        item_ids = [old_modes_and_items.scoring_items[item_name].scoring_item_id for item_name in names_to_migrate]
+        # make dict for lookups for new item ids from old item ids
+        new_item_lookup = {
+            old_modes_and_items.scoring_items[item_name].scoring_item_id:new_modes_and_items.scoring_items[item_name].scoring_item_id
+            for item_name in names_to_migrate
+        }
+        try:
+            old_records = db.scalars(
+                select(ScoresForEvent).
+                where(
+                    ScoresForEvent.eventCode == eventCode, 
+                    ScoresForEvent.scoring_page_id == old_scoring_page_id,
+                    ScoresForEvent.scoring_item_id.in_(item_ids)
+                )
+            ).all()
+            for old_rec in old_records:
+                new_rec = ScoresForEvent(
+                    scoring_page_id = new_scoring_page_id,
+                    mode_id = old_rec.mode_id,
+                    matchNumber = old_rec.matchNumber,
+                    eventCode = eventCode,
+                    teamNumber =  old_rec.teamNumber,
+                    scoring_item_id = new_item_lookup[old_rec.scoring_item_id],
+                    value = old_rec.value
+                )
+                db.add(new_rec)
+            db.commit()
+            msg = f"Successfuly migrated {len(old_records)} {', '.join(names_to_migrate)} records to new scoring page."
+            to_return.success_messages.append(msg)
+        except Exception as badnews:
+            msg = f"Failed to migrate data because {type(badnews).__name__}: {badnews}"
+            to_return.error_message.append(msg)
+
+        return to_return
+         
     
     
 

@@ -24,6 +24,7 @@ from robocompscoutingapp.ScoringData import (
     getCurrentScoringPageData,
     setScoringPageTestResult,
     getPageIDsUsedForThisEvent,
+    migrateDataForEventToNewPage
 )
 
 # From: https://github.com/tiangolo/typer/issues/428
@@ -290,13 +291,24 @@ def run(
                 # If the page was just now integrated, and no scores for event recorded, this length should be 0
                 if len(used_scoring_pages) > 0:
                     ft.warning("You have already scored matches for this event with at least one other scoring page.  This data will not be visible in the analytics page.")
-                    ft.warning("If you just made a UI change and kept the scoring items the same names, I can attempt to migrate the previous scored data to this page")
+                    ft.warning("If you just made a UI change and kept some of the scoring items the same names, I can attempt to migrate the previous scored data to this page")
                     migrate = Confirm.ask("Would you like me to attempt to migrate the data?")
                     if migrate:
-                        pass
+                        # We are only going to migrate the first page on the list.
+                        # "Hopefully" if the users migrate every time it should keep the most recent data updated
+                        old_scoring_page_id = used_scoring_pages[0].scoring_page_id
+                        migrate_results = migrateDataForEventToNewPage(eventCode, old_scoring_page_id, new_scoring_page_id=spr.scoring_page_id)
+                        if len(migrate_results.error_message) > 0:
+                            for msg in migrate_results.error_message:
+                                ft.error(msg)
+                            ft.error("Migration did not happen, you will need to migrate it manually via sqlite3")
+                        else:
+                            for msg in migrate_results.warning_messages:
+                                ft.warning(msg)
+                            for msg in migrate_results.success_messages:
+                                ft.success(msg)
                     else:
                         ft.info("Ok, scoring data was not migrated") 
-
             except Exception as badnews:
                 ft.error("Unable to integrate your scoring page for the following reason")
                 ft.error(str(badnews))
