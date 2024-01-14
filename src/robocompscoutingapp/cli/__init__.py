@@ -141,7 +141,8 @@ def set_event():
 @cli_app.command()
 def prepare_event(
     refresh_match_data: Annotated[bool, typer.Option(help="Updates all unscored matches for the event.  Retains all scoring data")] = False,
-    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info")] = False, 
+    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info")] = False,
+    season: Annotated[int, typer.Option(help="For testing purposes, you may want to choose a season in the past to ensure there are matches to test with")] = None
 ):
     """
     Loads or refreshes the match and team data for the chosen event
@@ -171,7 +172,8 @@ def prepare_event(
         loadEventData(
             eventCode=eventCode,
             reset_all_data=reset_all_data,
-            refresh_match_data=refresh_match_data
+            refresh_match_data=refresh_match_data,
+            season=season
         )
         ft.success(f"{eventCode} event data loaded!")
     except ValueError:
@@ -262,6 +264,7 @@ def test(
 @cli_app.command()
 def run(
     daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop")] = False,
+    season: Annotated[int, typer.Option(help="For testing purposes, you may want to choose a season in the past to ensure there are matches to test with.  Otherwise the current season will be used.")] = None
 ):
     """
     Run the app server.
@@ -273,7 +276,7 @@ def run(
             ft.error("Please specify a valid FRC Event code in the configuration file.  Use the 'set-event' command if you need guided assistance.")
             return
         else:
-            prepare_event()
+            prepare_event(season=season)
         
         spr = getCurrentScoringPageData()
         if (spr is None) or (not spr.validated):
@@ -333,16 +336,11 @@ def run(
             ft.print("Server stopped")
         else:
             ft.error("--daemon not implemented yet")
-            ft.error("Please use 'nohup robocompscoutingapp run' for now (on linux)")            
+            ft.error("Please use 'nohup robocompscoutingapp run &' for now (on linux)")            
         
     except Exception as badnews:
         ft.error("The server has failed because of the following reason")
         ft.error(f"{badnews}")
-
-
-
-
-
 
 def robocompscoutingapp():
     cli_app()

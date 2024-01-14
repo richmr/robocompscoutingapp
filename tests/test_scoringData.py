@@ -618,6 +618,14 @@ def test_DataMigrate(tmpdir):
             assert scores.scoring_item_id == 7
             assert scores.value == "1"
 
+# @pytest.skip("Can only test this under certain conditions")
+def test_PageChange():
+    # Test depends on a fake environment existing at: /tmp/apptest
+    with temp_chdir("/tmp/apptest"):
+        eventCode = RCSA_Config.getConfig().FRCEvents.first_event_id
+        sps = getCurrentScoringPageData()
+        all_scores = getAggregrateResultsForAllTeams(eventCode=eventCode, scoring_page_id=sps.scoring_page_id)
+
 
 
 

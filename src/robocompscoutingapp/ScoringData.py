@@ -34,6 +34,8 @@ def getCurrentScoringPageData() -> ScoringPageStatus_pyd:
     sp = RCSA_Config.getConfig().ServerConfig.scoring_page
     uhp = UserHTMLProcessing(sp)
     sps = uhp.checkForValidatedPageEntry()
+    if sps is None:
+        return None
     to_return = ScoringPageStatus_pyd.model_validate(sps)
     # _scoring_page_id = sps.scoring_page_id
     return to_return
