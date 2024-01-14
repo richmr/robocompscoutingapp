@@ -70,6 +70,7 @@ class ScoringItem(BaseModel):
     type:str
 
 class ModesAndItems(BaseModel):
+    scoring_page_id: int
     modes:Dict[str, GameMode]
     scoring_items:Dict[str, ScoringItem]
 
@@ -92,7 +93,8 @@ def getGameModeAndScoringElements(scoring_page_id:int) -> ModesAndItems:
         mode_dict = {m.mode_name:GameMode.model_validate(m) for m in modes}
         items = db.scalars(select(ScoringItemsForScoringPage).filter_by(scoring_page_id=scoring_page_id)).all()
         item_dict = {i.name:ScoringItem.model_validate(i) for i in items}
-        return ModesAndItems(modes=mode_dict, scoring_items=item_dict)
+        scoring_page_id = getCurrentScoringPageData().scoring_page_id
+        return ModesAndItems(modes=mode_dict, scoring_items=item_dict, scoring_page_id=scoring_page_id)
 
 ################ Match and Team Data ###################
 
@@ -347,6 +349,8 @@ class Score(BaseModel):
 class ScoredMatchForTeam(BaseModel):
     matchNumber:int
     teamNumber:int
+    #  This field added late in development but needed to prevent conflicts
+    scoring_page_id:int = Field(default=None)
     scores:List[Score]
 
 def deleteScoresFromDB(eventCode:str):
@@ -376,11 +380,12 @@ def addScoresToDB(eventCode:str, match_score:ScoredMatchForTeam):
     match_score:ScoredMatchForTeam
         ScoredMatchForTeam object
     """
-    scoring_page_id = getCurrentScoringPageData().scoring_page_id
+    if match_score.scoring_page_id is None:
+        match_score.scoring_page_id = getCurrentScoringPageData().scoring_page_id
     with RCSA_DB.getSQLSession() as db:
         try:
             to_add = [ScoresForEvent(**a_score.model_dump() | {
-                "scoring_page_id":scoring_page_id,
+                "scoring_page_id":match_score.scoring_page_id,
                 "eventCode":eventCode,
                 "matchNumber":match_score.matchNumber,
                 "teamNumber":match_score.teamNumber

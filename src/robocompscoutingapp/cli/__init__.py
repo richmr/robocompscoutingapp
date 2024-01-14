@@ -71,6 +71,11 @@ def validate(html_file: Annotated[Path, typer.Argument(help="The finely crafted 
     Validates your scoring file has all the required hooks for the scoring mechanisms to work
     """
     if html_file.exists():
+        # Does it exist in the static folder?
+        path_to_check = RCSA_Config.getConfig().ServerConfig.user_static_folder/html_file.name
+        if not path_to_check.exists():
+            ft.error(f"Your chosen file exists but it is not located in {RCSA_Config.getConfig().ServerConfig.user_static_folder}.  Please move it there and try again")
+            return
         user_html_processing = UserHTMLProcessing(html_file)
         successful_validation = user_html_processing.validate()
         if not successful_validation:
@@ -86,7 +91,7 @@ def validate(html_file: Annotated[Path, typer.Argument(help="The finely crafted 
                 doit = Confirm.ask(f"Would you like me to update the scoring_page setting to {html_file.name}?")
                 if doit:
                     try:
-                        init.updateTOML(["ServerConfig", "scoring_page"], str(html_file.absolute()), tgt_dir=path_to_toml)
+                        init.updateTOML(["ServerConfig", "scoring_page"], str(html_file.name), tgt_dir=path_to_toml)
                     except Exception as badnews:
                         ft.error(f"Whoops.  I couldn't update because {badnews}.  You will need to do it manually")
                         

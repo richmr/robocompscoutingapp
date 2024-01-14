@@ -131,6 +131,25 @@ def home():
     """
     return HTMLResponse(tosend)
 
+@rcsa_api_app.get("/scoring")
+def goToScoring():
+    """
+    Redirect to the chosen scoring page
+    """
+    print(RCSA_Config.getConfig().ServerConfig.scoring_page.name)
+    tosend = f"""
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <meta http-equiv="refresh" content="1; url='app/{RCSA_Config.getConfig().ServerConfig.scoring_page.name}'" />
+            </head>
+            <body>
+                <p>Redirecting to scoring page</p>
+            </body>
+        </html>
+    """
+    return HTMLResponse(tosend)
+
 @rcsa_api_app.get("/api/getMatchesAndTeams")
 def matchesAndTeams(unscored_only:bool = True) -> MatchesAndTeams:
     """

@@ -161,3 +161,4 @@ src/robocompscoutingapp/data_convert/
 src/robocompscoutingapp/initialize/logs/rcsa_log_config.yaml
 src/robocompscoutingapp/initialize/coretesting.db
 src/robocompscoutingapp/initialize/testing_database_*
+finaltest/

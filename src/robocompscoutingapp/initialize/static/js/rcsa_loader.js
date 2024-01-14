@@ -70,6 +70,7 @@ class ScoringDatabase {
     constructor(modes_and_items) {
         // modes is Dict[str, GameMode object] (see ScoringData.py)
         this.game_modes = modes_and_items.modes;
+        this.scoring_page_id = modes_and_items.scoring_page_id;
         /* 
             Build the 'database'
             {
@@ -110,6 +111,7 @@ class ScoringDatabase {
         let to_return = {
             matchNumber:matchNumber,
             teamNumber:teamNumber,
+            scoring_page_id:this.scoring_page_id,
             scores:[]
         }
         for (const [mode_name, item_dict] of Object.entries(this.scoringDB)) {
@@ -152,7 +154,7 @@ let rcsa = {
     error_callback: undefined,
     current_game_mode: undefined,
     matches_and_teams: undefined,
-    modes_and_items: undefined,     // Raw data used for testing, but not for managing scoring
+    modes_and_items: undefined,     
     scoringDB: {},
 
     startup: function (match_callback, error_callback) {

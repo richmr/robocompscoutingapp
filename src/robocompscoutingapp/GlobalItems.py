@@ -184,6 +184,8 @@ class RCSA_Config:
         """
         # Convert to models
         serverConfig = ServerConfig.model_validate(cls._TOMLDocument["ServerConfig"])
+        # Add static path to the scoring_page
+        serverConfig.scoring_page = serverConfig.user_static_folder/serverConfig.scoring_page
         frcEventsConfig = FRCEventsConfig.model_validate(cls._TOMLDocument["FRCEvents"])
 
         # Secrets has to be read from the correct file
