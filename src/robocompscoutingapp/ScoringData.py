@@ -637,6 +637,7 @@ def migrateDataForEventToNewPage(eventCode:str, old_scoring_page_id:int, new_sco
     # Get scoring item names from old
     old_modes_and_items = getGameModeAndScoringElements(old_scoring_page_id)
     # diff.  Any in old and not in new will not be moved: generate warning
+    # items
     not_migrated_old_names = list(set(old_modes_and_items.scoring_items.keys()) - set((new_modes_and_items.scoring_items.keys())))
     if len(not_migrated_old_names) > 0:
         msg = f"The following item(s) will not be migrated because they are not scored in the new scoring page: {', '.join(not_migrated_old_names)}.  This data will not be visible on the analytics page"
@@ -646,6 +647,18 @@ def migrateDataForEventToNewPage(eventCode:str, old_scoring_page_id:int, new_sco
         msg = f"Matches scored before using this page will not have these item(s): {', '.join(brand_new_names)}.  They were not previously logged."
         to_return.warning_messages.append(msg)
     names_to_migrate = list(set(new_modes_and_items.scoring_items.keys()).intersection(set(old_modes_and_items.scoring_items.keys())))
+    # Modes
+    not_migrated_old_modes = list(set(old_modes_and_items.modes.keys()) - set((new_modes_and_items.modes.keys())))
+    if len(not_migrated_old_modes) > 0:
+        msg = f"The following modes(s) will not be migrated because they are not used in the new scoring page: {', '.join(not_migrated_old_modes)}.  This data will not be visible on the analytics page"
+        to_return.warning_messages.append(msg)
+    brand_new_modes = list(set(new_modes_and_items.modes.keys()) - set((old_modes_and_items.modes.keys())))
+    if len(brand_new_modes) > 0:
+        msg = f"Matches scored before using this page will not have these mode(s): {', '.join(brand_new_modes)}.  They did not previously exist."
+        to_return.warning_messages.append(msg)
+    modes_to_migrate = list(set(new_modes_and_items.modes.keys()).intersection(set(old_modes_and_items.modes.keys())))
+    
+    
     with RCSA_DB.getSQLSession() as db:        
         # Iterate over common names
         # Convert old names to scoring_item_ids for SQL
@@ -655,19 +668,27 @@ def migrateDataForEventToNewPage(eventCode:str, old_scoring_page_id:int, new_sco
             old_modes_and_items.scoring_items[item_name].scoring_item_id:new_modes_and_items.scoring_items[item_name].scoring_item_id
             for item_name in names_to_migrate
         }
+        # Convert old modes to mode_ids for SQL
+        mode_ids = [old_modes_and_items.modes[mode_name].mode_id for mode_name in modes_to_migrate]
+        # make mode dict lookup old_mode_id:new_mode_id
+        new_mode_lookup = {
+            old_modes_and_items.modes[mode_name].mode_id:new_modes_and_items.modes[mode_name].mode_id
+            for mode_name in modes_to_migrate
+        }
         try:
             old_records = db.scalars(
                 select(ScoresForEvent).
                 where(
                     ScoresForEvent.eventCode == eventCode, 
                     ScoresForEvent.scoring_page_id == old_scoring_page_id,
-                    ScoresForEvent.scoring_item_id.in_(item_ids)
+                    ScoresForEvent.scoring_item_id.in_(item_ids),
+                    ScoresForEvent.mode_id.in_(mode_ids)
                 )
             ).all()
             for old_rec in old_records:
                 new_rec = ScoresForEvent(
                     scoring_page_id = new_scoring_page_id,
-                    mode_id = old_rec.mode_id,
+                    mode_id = new_mode_lookup[old_rec.mode_id],
                     matchNumber = old_rec.matchNumber,
                     eventCode = eventCode,
                     teamNumber =  old_rec.teamNumber,
@@ -676,7 +697,7 @@ def migrateDataForEventToNewPage(eventCode:str, old_scoring_page_id:int, new_sco
                 )
                 db.add(new_rec)
             db.commit()
-            msg = f"Successfuly migrated {len(old_records)} {', '.join(names_to_migrate)} records to new scoring page."
+            msg = f"Successfuly migrated {len(old_records)} {', '.join(names_to_migrate)} records for modes {', '.join(modes_to_migrate)} to new scoring page."
             to_return.success_messages.append(msg)
         except Exception as badnews:
             msg = f"Failed to migrate data because {type(badnews).__name__}: {badnews}"
