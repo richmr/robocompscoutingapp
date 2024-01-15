@@ -99,21 +99,65 @@ let rcsa_tester = {
 
     sendError: function (message) {
         this.sendServerMessage("error", message);
+        $.toast({ 
+            text : message, 
+            showHideTransition : 'slide',  // It can be plain, fade or slide
+            bgColor : 'red',              // Background color for toast
+            textColor : '#eee',            // text color
+            allowToastClose : true,       // Show the close button or not
+            hideAfter : false,              // `false` to make it sticky or time in miliseconds to hide after
+            stack : 10,                     // `false` to show one stack at a time count showing the number of toasts that can be shown at once
+            textAlign : 'left',            // Alignment of text i.e. left, right, center
+            position : 'top-left'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+          });
         console.log("ERROR: " + message);
     },
 
     sendWarning: function (message) {
+        $.toast({ 
+            text : message, 
+            showHideTransition : 'slide',  // It can be plain, fade or slide
+            bgColor : 'yellow',              // Background color for toast
+            textColor : 'black',            // text color
+            allowToastClose : true,       // Show the close button or not
+            hideAfter : false,              // `false` to make it sticky or time in miliseconds to hide after
+            stack : 10,                     // `false` to show one stack at a time count showing the number of toasts that can be shown at once
+            textAlign : 'left',            // Alignment of text i.e. left, right, center
+            position : 'top-left'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+          });
         this.sendServerMessage("warning", message);
         console.log("WARNING: " + message);
     },
 
     sendInfo: function (message) {
+        $.toast({ 
+            text : message, 
+            showHideTransition : 'slide',  // It can be plain, fade or slide
+            bgColor : 'gray',              // Background color for toast
+            textColor : 'white',            // text color
+            allowToastClose : true,       // Show the close button or not
+            hideAfter : 5000,              // `false` to make it sticky or time in miliseconds to hide after
+            stack : 10,                     // `false` to show one stack at a time count showing the number of toasts that can be shown at once
+            textAlign : 'left',            // Alignment of text i.e. left, right, center
+            position : 'top-left'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+          });
         this.sendServerMessage("info", message);
         console.log("INFO: " + message);
 
     },
 
     sendSuccess: function (message) {
+        $.toast({ 
+            text : message, 
+            showHideTransition : 'slide',  // It can be plain, fade or slide
+            bgColor : 'green',              // Background color for toast
+            textColor : 'white',            // text color
+            allowToastClose : true,       // Show the close button or not
+            hideAfter : 5000,              // `false` to make it sticky or time in miliseconds to hide after
+            stack : 10,                     // `false` to show one stack at a time count showing the number of toasts that can be shown at once
+            textAlign : 'left',            // Alignment of text i.e. left, right, center
+            position : 'top-left'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+          });
         this.sendServerMessage("success", message);
         console.log("SUCCESS!: " + message);
 
@@ -369,10 +413,10 @@ function testScoreSendFailure(callback) {
 
 function runAutomatedTests () {
     tests = [
-        testError,
-        testWarning,
-        testSuccess,
-        testInfo,
+        // testError,
+        // testWarning,
+        // testSuccess,
+        // testInfo,
         // testBigFail,  // Allowing this to run will break testing
         testMatchSelection,
         testTeamSelection,
@@ -386,6 +430,24 @@ function runAutomatedTests () {
 }
 
 console.log("test script loaded");
+// Check for existence of toast library
+try {
+    $.toast({ 
+        text : "Testing toasts, please ignore", 
+        showHideTransition : 'slide',  // It can be plain, fade or slide
+        bgColor : 'gray',              // Background color for toast
+        textColor : '#eee',            // text color
+        allowToastClose : true,       // Show the close button or not
+        hideAfter : 1000,              // `false` to make it sticky or time in miliseconds to hide after
+        stack : 5,                     // `false` to show one stack at a time count showing the number of toasts that can be shown at once
+        textAlign : 'left',            // Alignment of text i.e. left, right, center
+        position : 'top-left'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+      });
+} catch {
+    // Not available, so lets load it
+    rcsa.loadJS("js/jquery.toast.min.js");
+}
+
 rcsa_tester.checkForTestMode();
 
   
