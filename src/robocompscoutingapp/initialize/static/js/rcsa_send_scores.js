@@ -1,4 +1,12 @@
-// Script to find and send stored scores
+/*
+    We use this when scouts watching events were unable to submit their scoring reports due to loss of network.
+    Once the scout gets signal again, they go to SendScores.html to enable sending of stored scores.
+
+    WARNING:  This will ONLY work if the hostname used for the scoring is the same used when opening this page
+    i.e:
+    - Scored on http://mybotteam.server.com/scoring
+    - Then went to http://mybotteam.server.com/app/SendScores.html to send stored scores
+*/
 
 var stored_scores = [];
 var eventCode = "";

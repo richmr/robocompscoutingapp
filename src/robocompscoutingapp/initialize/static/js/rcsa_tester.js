@@ -1,5 +1,10 @@
 /*
     Automated test code to ensure basic app integration is working
+
+    Used when you run:
+        robocompscoutingapp test --automate
+
+    It should test any arbitrary scoring page that passed validation
 */
 
 let rcsa_tester = {

@@ -1,12 +1,21 @@
+/*
+    This handles all of the UI activity for the scoring sample page.  It has been generalized to use arbitrary modes and 
+    named scoring items.  If you follow the recipe in scoring.html, you can use this UI script as is
+    
+    Please look for comments like this:
+    // INTEGRATION TO THE APP SERVER HERE ^^^^^^^^^^^
+    For critical rcsa_loader callbacks you must make in your own UI script for the scoring mechanisms to work.
+*/
 
 var global_match_and_team_data;
 
 
 function greenFlash(e) {
+    // Feedback for clicking on things.
     $(e).addClass("lgreen-background");
         setTimeout(() => {
             $(e).removeClass("lgreen-background");
-          }, 200);
+          }, 150);
 }
 
 function beginButtonUISetup() {
@@ -18,6 +27,7 @@ function beginButtonUISetup() {
 }
 
 function scoreFeedbackUISetup() {
+    // The div that encapsulates a scoring element has its background changed.  
     $( ".score_flag" ).each(function( index ) {
         $(this).click( function (e) { 
             $(this).parent().toggleClass("lgreen-background");
@@ -101,7 +111,7 @@ function scoreSubmitFailure(errMsg) {
 function setupDataModalCloseButton(errMsg) {
     $("#close_modal_next_match").click(function (e) {
         // Data wrangling handled by rcsa_loader.
-        
+        // Reset for scoring the next match
         $(".game_mode")[0].click();
         $("#pick_team_row").hide();
         $(".match_and_team_selection").show();

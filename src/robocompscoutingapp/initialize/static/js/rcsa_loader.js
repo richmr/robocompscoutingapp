@@ -248,7 +248,6 @@ let rcsa = {
             
         });
         
-        // On failure, store scoring information in local storage for later sending
     },
 
     nextMatch: function () {
@@ -336,7 +335,7 @@ let rcsa = {
     
     getFlagStatusForMode: function (modename) {
         // Returns { scorename: true if set, false if not} for score_flag items in the DB
-        return rcsa.scoringDB.getFlagStatusForMode(modename); getFlagStatusForMode
+        return rcsa.scoringDB.getFlagStatusForMode(modename); 
     },
 
     getSavedScores: function () {

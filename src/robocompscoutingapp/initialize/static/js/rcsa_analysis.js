@@ -1,3 +1,7 @@
+/*
+    This handles the selection and display of recorded statistics and is applicable to any scoring page that passes validation
+*/
+
 
 var analysis_modes_and_items;
 var stats_selection_table = null;
