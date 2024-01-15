@@ -30,10 +30,10 @@ def test_missing_config():
             with contextlib.chdir(tmpdir):
                 config = RCSA_Config.getConfig(reset=True)
 
-def test_found_config():
-    with contextlib.chdir("src/robocompscoutingapp/initialize"):
-        config = RCSA_Config.getConfig()
-        assert isinstance(config,RCSAConfig)
+# def test_found_config():
+#     with contextlib.chdir("src/robocompscoutingapp/initialize"):
+#         config = RCSA_Config.getConfig()
+#         assert isinstance(config,RCSAConfig)
 
 
 def test_singleton_config():

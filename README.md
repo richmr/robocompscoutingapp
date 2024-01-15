@@ -127,7 +127,7 @@ pip install robocompscoutingapp
             |- css/
             |- images/
             |- database/xxx.db
-            |- scoring.html
+            |- scoring_sample.html
             |- readme.txt
     - Done
 - data_dump - X

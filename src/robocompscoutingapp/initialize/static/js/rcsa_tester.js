@@ -221,7 +221,7 @@ function testMatchSelection(callback) {
     while (!(value_to_set in rcsa.matches_and_teams.matches)) {
         value_to_set = $(`.match_selector option:nth-child(${child_index})`).attr("value");
         if (value_to_set === undefined) {
-            rcsa_tester.sendError("Your match_selector is not putting match numbers as the option values.  Please correct.  See the sample scoring.html provided.");
+            rcsa_tester.sendError("Your match_selector is not putting match numbers as the option values.  Please correct.  See the sample scoring_sample.html provided.");
             throw new Error("Match selection test has to pass for testing to continue.  Please see server output.");
         }
         child_index += 1;
@@ -241,7 +241,7 @@ function testTeamSelection(callback) {
     while (!(value_to_set in rcsa.matches_and_teams.teams)) {
         value_to_set = $(`.team_selector option:nth-child(${child_index})`).attr("value");
         if (value_to_set === undefined) {
-            rcsa_tester.sendError("Your team_selector is not putting team numbers as the option values.  Please correct.  See the sample scoring.html provided.");
+            rcsa_tester.sendError("Your team_selector is not putting team numbers as the option values.  Please correct.  See the sample scoring_sample.html provided.");
             throw new Error("Team selection test has to pass for testing to continue.  Please see server output.");
         }
         child_index += 1;

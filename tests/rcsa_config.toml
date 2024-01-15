@@ -18,7 +18,7 @@ port = "80"
 user_static_folder = "data/test_init/static"
 scoring_database = "data/test_init/rcsa_scoring.db"
 log_folder = "data/test_init/logs"
-scoring_page = "scoring.html"
+scoring_page = "scoring_sample.html"
 # If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
 FQDN = false
 

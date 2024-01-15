@@ -217,7 +217,7 @@ def test(
         RCSA_Config.getConfig().ServerConfig.user_static_folder = Path("static").absolute()
         RCSA_Config.getConfig().ServerConfig.log_filename = Path("logs/testlogs.log").absolute()
         RCSA_Config.getConfig().ServerConfig.scoring_database = Path("coretesting.db").absolute()
-        user_html_processing = UserHTMLProcessing(Path("static/scoring.html"))
+        user_html_processing = UserHTMLProcessing(Path("static/scoring_sample.html"))
         successful_validation = user_html_processing.validate()
 
     with configure_for_testing(cleanup=cleanup):

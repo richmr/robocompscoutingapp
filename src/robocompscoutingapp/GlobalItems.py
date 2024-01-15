@@ -58,7 +58,7 @@ class FancyText:
 @pytest.fixture
 def getFullTemplateFile() -> Path:
     current_file_path = Path(__file__)
-    working_template = current_file_path.parent/"initialize/static/scoring.html"
+    working_template = current_file_path.parent/"initialize/static/scoring_sample.html"
     return working_template
 
 # Name of critical scripts that power scoring engine

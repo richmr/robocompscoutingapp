@@ -59,13 +59,13 @@ class SingletonTestEnv:
             init = Initialize(cls._temp_dir_obj.name)
             init.initialize(overwrite=True)
             # Update the location of the scoring page
-            init.updateTOML(["ServerConfig", "scoring_page"], f"{cls._temp_dir_obj.name}/static/scoring.html", tgt_dir = cls._temp_dir_obj.name)
+            init.updateTOML(["ServerConfig", "scoring_page"], f"{cls._temp_dir_obj.name}/static/scoring_sample.html", tgt_dir = cls._temp_dir_obj.name)
             os.chdir(cls._temp_dir_obj.name)
             # Set up some fake credentials
             with open("fake_secrets.toml", "w") as f:
                 f.write(fake_secrets_toml)
             init.updateTOML(["Secrets", "secrets_file"], f"{cls._temp_dir_obj.name}/fake_secrets.toml", tgt_dir = cls._temp_dir_obj.name)
-            uhp = UserHTMLProcessing(f"{cls._temp_dir_obj.name}/static/scoring.html")
+            uhp = UserHTMLProcessing(f"{cls._temp_dir_obj.name}/static/scoring_sample.html")
             uhp.validate()
             # Integrate it to set the data
             int = Integrate()
@@ -102,14 +102,14 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
-    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
+    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring_sample.html", tgt_dir = temp_dir_path)
     # Now enter the directory
     cwd = os.getcwd() 
     # Validate the page
     try:
         os.chdir(temp_dir_path)
         RCSA_Config.getConfig(reset=True)
-        uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring.html")
+        uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring_sample.html")
         uhp.validate()
         # Integrate it to set the data
         int = Integrate()
@@ -133,10 +133,10 @@ def gen_test_environment(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
-    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
+    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring_sample.html", tgt_dir = temp_dir_path)
     # Validate the page
     with temp_chdir(temp_dir_path):
-        uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring.html")
+        uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring_sample.html")
         uhp.validate()
         # Integrate it to set the data
         int = Integrate()

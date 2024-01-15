@@ -1,6 +1,6 @@
 /*
     This handles all of the UI activity for the scoring sample page.  It has been generalized to use arbitrary modes and 
-    named scoring items.  If you follow the recipe in scoring.html, you can use this UI script as is
+    named scoring items.  If you follow the recipe in scoring_sample.html, you can use this UI script as is
     
     Please look for comments like this:
     // INTEGRATION TO THE APP SERVER HERE ^^^^^^^^^^^

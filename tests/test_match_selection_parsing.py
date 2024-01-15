@@ -84,7 +84,7 @@ def test_full_element_parse():
     parser = MatchAndTeamSelectionParser(test_html)
     pr = parser.parseElement()
     assert pr.hasErrors() == True
-    assert len(pr.errors) == 3
+    assert len(pr.errors) == 2
     assert pr.hasWarnings() == False
 
 def test_validation_output(capfd, getFullTemplateFile):

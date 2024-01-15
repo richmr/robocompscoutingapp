@@ -15,7 +15,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     init = Initialize(temp_dir_path)
     init.initialize(overwrite=True)
     # Update the location of the scoring page
-    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring.html", tgt_dir = temp_dir_path)
+    init.updateTOML(["ServerConfig", "scoring_page"], f"{temp_dir_path}/static/scoring_sample.html", tgt_dir = temp_dir_path)
     # Now enter the directory
     cwd = os.getcwd() 
     
@@ -23,7 +23,7 @@ def gen_test_env_and_enter(temp_dir_path:Path):
     try:
         os.chdir(temp_dir_path)
         RCSA_Config.getConfig(reset=True)
-        uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring.html")
+        uhp = UserHTMLProcessing(f"{temp_dir_path}/static/scoring_sample.html")
         uhp.validate()
         # Go do what the test needs
         yield
