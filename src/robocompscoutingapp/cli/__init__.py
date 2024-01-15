@@ -333,15 +333,17 @@ def run(
         
         # We make it here, time to run the app
         server = RunAPIServer(daemon=daemon)
-        if not daemon:
-            with GracefulInterruptHandler() as pause:
-                server.run()
-                pause.wait()
-            server.stop()
-            ft.print("Server stopped")
-        else:
-            ft.error("--daemon not implemented yet")
-            ft.error("Please use 'nohup robocompscoutingapp run &' for now (on linux)")            
+        if daemon:
+            ft.warning("--daemon not implemented yet")
+            ft.warning("Please use 'nohup robocompscoutingapp run &' for now (on linux) to run in background")
+            ft.warning("Alternatively set up a cron item that runs on reboot (on linux)")       
+        with GracefulInterruptHandler() as pause:
+            server.run()
+            ft.success(f"Server is running at http://{RCSA_Config.getConfig().ServerConfig.FQDN}:{RCSA_Config.getConfig().ServerConfig.port}/")
+            pause.wait()
+        server.stop()
+        ft.print("Server stopped")
+             
         
     except Exception as badnews:
         ft.error("The server has failed because of the following reason")
