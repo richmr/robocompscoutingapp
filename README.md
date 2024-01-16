@@ -28,14 +28,13 @@ By following a few guidelines to make a custom HTML-based scoring page, your mat
 
 ### Install steps
 1. Clone this repository to a location of your choosing: 
-   - ![Alt Text](media/gitclone.gif)
+![Cloning the repository](media/gitclone.gif)
 2. `cd` into the cloned repository and use `pip install -e .` to make a [local project installation](https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs) of the package
     - This will make the underlying server code accessible and editable for you if you would like to explore or modify the code
     - You'll also be able to `git pull` and any new code will now be available to you
     - If this is the first time you are doing a pip install on your system, you may see some warnings about setting path variables to access the application.  Be sure to read the warnings and make changes as needed.
-    - video
 3. Test to make sure the app is working with `robocompscoutingapp --help`:
-    - video
+![Installing the app](media/robocomp_install.gif)
 
 ## Using the App
 
@@ -56,7 +55,7 @@ The app is designed to help you set up your server environment by running throug
 ### Initialize
 
 This is the first step.  It generates an expected file structure and makes initial configuration settings:
-- video
+![Initializing](media/initialize.gif)
 
 You will then run all of the subsequent RCSA commands from the root of this newly created file structure.
 
@@ -64,14 +63,13 @@ The app does provide a fully working [example](src/robocompscoutingapp/initializ
 
 #### Set up your .RCSA_SECRETS.toml file
 In addition to creating the directory structure, RCSA will also drop a file in your home `~` directory:
-- video of existence of this file
 
 You will need to edit this file to set your FRC_Events API (and also the username and password you may want to protect your application.  See [Security](#security) below)
-- video of editing
+![Editing secrets](media/editsecrets.gif)
 
 ### Validate
 This step ensures your desired scoring page provides the proper "hooks" for the RCSA application to successfully score a team at a match.  Here I am validating the [scoring_sample.html](src/robocompscoutingapp/initialize/static/scoring_sample.html) file:
-- video
+![Validating sample file](media/validategood.gif)
 
 **Note:** You run the robocompscoutingapp commands from the root of your established file structure.  This is one level up from the `static` subdirectory where you need to store your pages.  This means validation commands will look like this `robocompscoutingapp validate static/my_scoring_page.html`
 
@@ -87,7 +85,7 @@ The app will provide a lot of feedback if you have errors.  For example if I try
 </html>
 ```
 I will get this:
-- video
+![Validating a bad file](media/validatebad.gif)
 
 You must pass validation before you can use a scoring page.  Please see [Creating a Custom Scoring Page](#creating-a-custom-scoring-page) and the [example](src/robocompscoutingapp/initialize/static/scoring_sample.html) for more information on required parts of your scoring page
 
@@ -95,10 +93,10 @@ It is best to set your scoring page up and use it for an entire event.  However,
 
 ### Set up for FIRST Event
 Next you need to choose the event you will be attending and collecting statistics from.  The event code can be placed directly in the rcsa_config.toml file like this:
-- video
+![Setting event directly](media/editingTOML.gif)
 
 Or you can use a built-in command in RCSA to find and set your event code:
-- video of this
+![Using set-event](media/setevent.gif)
 
 There is a chance the event you attend has some issue with their published match schedule.  Please see [Dealing with event restructuring](#dealing-with-event-restructuring) for some built in tools to help
 
@@ -108,7 +106,7 @@ As you format your scoring page, and maybe write custom scripts, you will want t
 The *local-only* server will only respond to web requests from itself.  The general use case here is for developing your scoring web page.  If you want to test on mobile devices or other remote system, you will need to use the `run` command.
 
 *You do not need to restart the server if you only change files in the `static` directory.*
-- video of start and web page opening
+![It lives](media/rcsa_test.gif)
 
 The app will use team and match data from the 2023 Los Angeles Regional (CALA) event.  I do this to be sure there is team and match data available for testing.  The app doesn't know if your chosen scoring items actually existed in 2023.
 
@@ -116,27 +114,26 @@ The test mode will make a temporary database that won't corrupt your actual prod
 
 #### Automated page testing
 This is not mandatory but highly recommended.  After your page passes validation and meets your artistic standards, use `robocompscoutingapp test --automate` and you will be given a link you can cut-and-paste or click on to automatically test your scoring page:
-- video
+![Automated testing](media/automated.gif)
 
-The automated testing will test every game mode and scoring element you define to make sure it all works.  It will also verify users can select matches and teams.  Be sure to pay attention to the messages delivered to the server for issues to address:
-- pic of close up of messages
+The automated testing will test every game mode and scoring element you define to make sure it all works.  It will also verify users can select matches and teams.  Be sure to pay attention to the messages delivered to the server for issues to address
 
 ### Run the server for an Event
 It's game day!  Time to get the server running for the scouts to use.
 
 #### Set up authentication credentials
 In ~/.RCSA_SECRETS.toml set up the username and password to authenticate your scouts to the app.  I highly recommend this because you never know who might discover your server and application and try to disrupt it.
-- video
+![Set basic auth](media/basicauth.png)
 
 #### Configure the FQDN
 Set the FQDN in rcsa_config.toml to your Internet routable domain name:
-- video
+![FQDN](media/fqdn.png)
 
 This will allow the app to generate a URL you can send to your team mates so they can begin scoring.
 
 #### Practice 'run' before going live
 Use `robocompscoutingapp run`:
-- video
+![Running for real](media/run.gif)
 
 Make sure your teammates can connect to the app!  `Ctrl-C` once it looks good.
 
@@ -144,11 +141,10 @@ Make sure your teammates can connect to the app!  `Ctrl-C` once it looks good.
 I recommend using `nohup robocompscoutingapp --daemon &` to ensure the application will not close if your command-line connection to the server is lost.  I freely admit this is a very lazy way to run a mildly resilient background process on linux but I ran out of time to get true daemon mode to work.  And `nohup` sure does work well!
 
 You will be able to see logs in the `logs` directory of your file structure if you so desire:
-- video
 
 ### Sending Saved Scores
 If your scouting device loses network access when you try to submit a score it will provide some warning to you and then store the data in browser cache.  You can later send these scores by going to the main menu and clicking on the "Send Saved Scores to Server" link:
-- video
+![Sending saved scores](media/savescores.gif)
 
 **Please Note**: This will only work if:
  - The browser cache is not cleared (*be careful with incognito and private browsing modes*)
@@ -310,6 +306,8 @@ Maybe after your scouting team starts using the app during an event you decide s
 
 Use the `robocompscoutingapp run` command to have the app detect and attempt to migrate the data.  Don't use `nohup` until the data is migrated. 
 
+### What is 9a97c74805.js
+This is the Font Awesome package I use and I didn't rename it.
 
 ## License
 
