@@ -140,7 +140,7 @@ Make sure your teammates can connect to the app!  `Ctrl-C` once it looks good.
 #### Run for real
 I recommend using `nohup robocompscoutingapp --daemon &` to ensure the application will not close if your command-line connection to the server is lost.  I freely admit this is a very lazy way to run a mildly resilient background process on linux but I ran out of time to get true daemon mode to work.  And `nohup` sure does work well!
 
-You will be able to see logs in the `logs` directory of your file structure if you so desire:
+You will be able to see logs in the `logs` directory of your file structure.
 
 ### Sending Saved Scores
 If your scouting device loses network access when you try to submit a score it will provide some warning to you and then store the data in browser cache.  You can later send these scores by going to the main menu and clicking on the "Send Saved Scores to Server" link:
