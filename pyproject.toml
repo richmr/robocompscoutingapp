@@ -28,7 +28,8 @@ dependencies = [
   "SQLAlchemy",
   "importlib_resources",
   "requests",
-  "pytest"
+  "pytest",
+  "beautifulsoup4"
 ]
 
 [project.urls]
