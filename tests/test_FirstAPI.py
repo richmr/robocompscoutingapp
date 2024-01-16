@@ -48,6 +48,18 @@ def gen_test_env_and_enter(temp_dir_path:Path):
         # API rate?
         # sleep(1.0)
 
+def test_authOutcomes(tmpdir):
+     with gen_test_env_and_enter(tmpdir):
+        config = RCSA_Config.getConfig(reset=True)
+        # No error expected
+        fapi = FirstEventsAPI(config=config)
+
+        # Error expected
+        with pytest.raises(Exception):
+            config.Secrets.FRC_Events_API_Auth_Token = "bad"
+            config.Secrets.FRC_Events_API_Username = "alsobad"
+            fapi2 = FirstEventsAPI(config=config)
+
 def test_getDistricts(tmpdir):
     with gen_test_env_and_enter(tmpdir):
         config = RCSA_Config.getConfig(reset=True)
