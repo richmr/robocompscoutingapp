@@ -152,7 +152,7 @@ If your scouting device loses network access when you try to submit a score it w
 
 ### Viewing Statistics
 The Analysis page included with the app provides you the ability to select and view statistics for the teams at the event:
-- video
+![Statistics](media/statselection.gif)
 
 ## Creating a Custom Scoring Page
 The part you have all been waiting for: how to make your own scoring page for your team.  One of the best ways to learn is to inspect the [example](src/robocompscoutingapp/initialize/static/scoring_sample.html).  All of the code snippets shown below are from that example.
@@ -306,7 +306,7 @@ Maybe after your scouting team starts using the app during an event you decide s
 
 Use the `robocompscoutingapp run` command to have the app detect and attempt to migrate the data.  Don't use `nohup` until the data is migrated. 
 
-### What is 9a97c74805.js
+### What is 9a97c74805.js?
 This is the Font Awesome package I use and I didn't rename it.
 
 ## License
