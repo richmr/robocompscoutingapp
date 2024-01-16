@@ -25,6 +25,10 @@ class UserHTMLProcessing:
         # Need a single dbsession to prevent detached records
         self.dbsession = RCSA_DB.getSQLSession()
 
+    def __del__(self):
+        # Have to release the session
+        self.dbsession.close()
+
     def validate(self) -> bool:
         """
         Runs all validations and returns True if the file is ready for further processing
