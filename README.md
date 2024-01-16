@@ -28,7 +28,7 @@ By following a few guidelines to make a custom HTML-based scoring page, your mat
 
 ### Install steps
 1. Clone this repository to a location of your choosing: 
-   - video
+   - ![Alt Text](media/gitclone.gif)
 2. `cd` into the cloned repository and use `pip install -e .` to make a [local project installation](https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs) of the package
     - This will make the underlying server code accessible and editable for you if you would like to explore or modify the code
     - You'll also be able to `git pull` and any new code will now be available to you
