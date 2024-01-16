@@ -136,7 +136,6 @@ def goToScoring():
     """
     Redirect to the chosen scoring page
     """
-    print(RCSA_Config.getConfig().ServerConfig.scoring_page.name)
     tosend = f"""
         <!DOCTYPE html>
         <html>
