@@ -70,7 +70,7 @@ class ScoringPageParser:
             game_modes.append(mode_name)
 
         if len(game_modes) == 0:
-            warnings.warn(ScoringPageParseWarning(f"No elements with 'game_mode' class detected.  Please see the template file for examples if your competition has multiple phases"))
+            raise ScoringPageParseError(f"No elements with 'game_mode' class detected.  At least one is required.")
         
         return game_modes
     

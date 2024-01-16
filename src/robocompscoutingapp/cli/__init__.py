@@ -335,7 +335,7 @@ def run(
         server = RunAPIServer(daemon=daemon)
         if daemon:
             ft.warning("--daemon not implemented yet")
-            ft.warning("Please use 'nohup robocompscoutingapp run &' for now (on linux) to run in background")
+            ft.warning("Please use 'nohup robocompscoutingapp run --daemon &' for now (on linux) to run in background")
             ft.warning("Alternatively set up a cron item that runs on reboot (on linux)")       
         with GracefulInterruptHandler() as pause:
             server.run()
