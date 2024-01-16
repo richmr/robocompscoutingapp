@@ -27,7 +27,8 @@ dependencies = [
   "tomlkit",
   "SQLAlchemy",
   "importlib_resources",
-  "requests"
+  "requests",
+  "pytest"
 ]
 
 [project.urls]
