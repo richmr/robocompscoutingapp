@@ -27,6 +27,8 @@ def configure_for_testing(cleanup:bool = True):
                 shutil.copy(str(src_db), str(dst_db))
             RCSA_Config.getConfig().ServerConfig.scoring_database = dst_db
             RCSA_Config.getConfig().ServerConfig.log_level = "INFO"
+            # reset the db connection
+            RCSA_DB.getSQLSession(reset=True)
             yield
         except Exception as badnews:
             ft.error(f"Test server failed because {badnews}")
