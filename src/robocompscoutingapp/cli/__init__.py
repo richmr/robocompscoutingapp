@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2023-present Michael Rich <richmr2174@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+import logging
+import traceback
 import typer
 from typer.core import TyperGroup
 from click import Context
@@ -341,8 +343,11 @@ def run(
              
         
     except Exception as badnews:
-        ft.error("The server has failed because of the following reason")
-        ft.error(f"{badnews}")
+        # Need to use uvicorn loggers here or error data will be lost if server running in background mode
+        # See: https://github.com/encode/uvicorn/blob/master/uvicorn/main.py
+        logger = logging.getLogger("uvicorn.error")
+        logger.critical(f"Server failed because:")
+        logger.critical(traceback.format_exc())
 
 def robocompscoutingapp():
     cli_app()
