@@ -29,7 +29,7 @@ log_filename = false
 log_level = "INFO"
 scoring_page = "scoring_sample.html"
 # If you know the domain of your server put it here.  Not necessary but helps with providing a URL to the team
-FQDN = "localhost"
+FQDN = "please.set.me.as.FQDN.in.rcsa_config.toml"
 
 
 
