@@ -268,7 +268,6 @@ def test(
 
 @cli_app.command()
 def run(
-    daemon: Annotated[bool, typer.Option(help="Run the server as a daemon.  This is generally used when an event is actually being scored.  If you don't run in daemon mode and you lose your session to the server, the app server will stop")] = False,
     season: Annotated[int, typer.Option(help="For testing purposes, you may want to choose a season in the past to ensure there are matches to test with.  Otherwise the current season will be used.")] = None
 ):
     """
@@ -332,11 +331,7 @@ def run(
             RCSA_Config.getConfig().ServerConfig.IP_Address = "0.0.0.0"
         
         # We make it here, time to run the app
-        server = RunAPIServer(daemon=daemon)
-        if daemon:
-            ft.warning("--daemon not implemented yet")
-            ft.warning("Please use 'nohup robocompscoutingapp run --daemon &' for now (on linux) to run in background")
-            ft.warning("Alternatively set up a cron item that runs on reboot (on linux)")       
+        server = RunAPIServer()
         with GracefulInterruptHandler() as pause:
             server.run()
             ft.success(f"Server is running at http://{RCSA_Config.getConfig().ServerConfig.FQDN}:{RCSA_Config.getConfig().ServerConfig.port}/")

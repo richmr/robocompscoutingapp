@@ -138,7 +138,9 @@ Use `robocompscoutingapp run`:
 Make sure your teammates can connect to the app!  `Ctrl-C` once it looks good.
 
 #### Run for real
-I recommend using `nohup robocompscoutingapp --daemon &` to ensure the application will not close if your command-line connection to the server is lost.  I freely admit this is a very lazy way to run a mildly resilient background process on linux but I ran out of time to get true daemon mode to work.  And `nohup` sure does work well!
+On game day it's best to run the app as a background process.  The easiest way to do this is by using `nohup robocompscoutingapp run &` to ensure the application will not close if your command-line connection to the server is lost.  
+
+If you want some resilience in case your server reboots during an event you can add it as a [cron job that starts on boot](https://phoenixnap.com/kb/crontab-reboot).
 
 You will be able to see logs in the `logs` directory of your file structure.
 
@@ -304,7 +306,7 @@ Maybe after your scouting team starts using the app during an event you decide s
  - Keep as many mode names the same as possible (defined by `data-modename`)
  - Keep as many scoring item names the same as possible (defined by `data-scorename`)
 
-Use the `robocompscoutingapp run` command to have the app detect and attempt to migrate the data.  Don't use `nohup` until the data is migrated. 
+Use the `robocompscoutingapp run` command to have the app detect and attempt to migrate the data.  Don't run the app as a backround process until the data has been migrated. 
 
 ### What is 9a97c74805.js?
 This is the Font Awesome package I use and I didn't rename it.
