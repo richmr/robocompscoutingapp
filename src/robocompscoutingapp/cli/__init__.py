@@ -220,62 +220,65 @@ def test(
     \n
     If you set --automate it will provide a link to click that will let you watch your scoring page be automatically tested.
     """
-    # Set the global test flag
-    RCSA_Config.getConfig().ServerConfig.test_mode = True
+    try:
+        # Set the global test flag
+        RCSA_Config.getConfig().ServerConfig.test_mode = True
 
-    if not use_config_ip:
-        RCSA_Config.getConfig().ServerConfig.IP_Address = "127.0.0.1"
+        if not use_config_ip:
+            RCSA_Config.getConfig().ServerConfig.IP_Address = "127.0.0.1"
 
-    if app_dev:
-        RCSA_Config.getConfig().ServerConfig.user_static_folder = Path("static").absolute()
-        RCSA_Config.getConfig().ServerConfig.log_filename = Path("logs/testlogs.log").absolute()
-        RCSA_Config.getConfig().ServerConfig.scoring_database = Path("coretesting.db").absolute()
-        user_html_processing = UserHTMLProcessing(Path("static/scoring_sample.html"))
-        successful_validation = user_html_processing.validate()
+        if app_dev:
+            RCSA_Config.getConfig().ServerConfig.user_static_folder = Path("static").absolute()
+            RCSA_Config.getConfig().ServerConfig.log_filename = Path("logs/testlogs.log").absolute()
+            RCSA_Config.getConfig().ServerConfig.scoring_database = Path("coretesting.db").absolute()
+            user_html_processing = UserHTMLProcessing(Path("static/scoring_sample.html"))
+            successful_validation = user_html_processing.validate()
 
-    with configure_for_testing(cleanup=cleanup):
-        ft.print(f"Loading match and team data for the {RCSA_Config.getConfig().FRCEvents.first_event_id} from 2023")
-        loadEventData(RCSA_Config.getConfig().FRCEvents.first_event_id, season=2023)
-        ft.success("Match and team data loaded")
-        spr = getCurrentScoringPageData()
-        if (spr is None) or (not spr.validated):
-            ft.error("Your scoring page has not been validated, please use the validate command!")
-            return
-        if not spr.integrated:
-            ft.print("Your scoring page is not integrated into the database yet, attempting to integrate")
-            try:
-                integrate = Integrate()
-                integrate.integrate()
-                ft.success("Your scoring page was successfully integrated!")
-            except Exception as badnews:
-                ft.error("Unable to integrate your scoring page for the following reason")
-                ft.error(str(badnews))
+        with configure_for_testing(cleanup=cleanup):
+            ft.print(f"Loading match and team data for the {RCSA_Config.getConfig().FRCEvents.first_event_id} from 2023")
+            loadEventData(RCSA_Config.getConfig().FRCEvents.first_event_id, season=2023)
+            ft.success("Match and team data loaded")
+            spr = getCurrentScoringPageData()
+            if (spr is None) or (not spr.validated):
+                ft.error("Your scoring page has not been validated, please use the validate command!")
                 return
+            if not spr.integrated:
+                ft.print("Your scoring page is not integrated into the database yet, attempting to integrate")
+                try:
+                    integrate = Integrate()
+                    integrate.integrate()
+                    ft.success("Your scoring page was successfully integrated!")
+                except Exception as badnews:
+                    ft.error("Unable to integrate your scoring page for the following reason")
+                    ft.error(str(badnews))
+                    return
 
-        server = RunAPIServer()
-        with GracefulInterruptHandler() as pause:
-            server.run()
-            scoring_page = RCSA_Config.getConfig().ServerConfig.scoring_page.name
-            ip = RCSA_Config.getConfig().ServerConfig.IP_Address
-            port = RCSA_Config.getConfig().ServerConfig.port
-            url = f"http://{ip}:{port}/app/{scoring_page}"
-            msg = f"Please go to {url}"
-            if automate:
-                msg += "?test=true to begin automated testing"
-            ft.success(msg)
-            pause.wait()
-        server.stop()
+            server = RunAPIServer()
+            with GracefulInterruptHandler() as pause:
+                server.run()
+                scoring_page = RCSA_Config.getConfig().ServerConfig.scoring_page.name
+                ip = RCSA_Config.getConfig().ServerConfig.IP_Address
+                port = RCSA_Config.getConfig().ServerConfig.port
+                url = f"http://{ip}:{port}/app/{scoring_page}"
+                msg = f"Please go to {url}"
+                if automate:
+                    msg += "?test=true to begin automated testing"
+                ft.success(msg)
+                pause.wait()
+            server.stop()
 
-    if automate:
-        test_messages = RCSA_Config.getTestMessages()
-        if len(test_messages) > 0:
-            ft.print("[orange] ************* TEST MESSAGES *************")
-            for tm in test_messages:
-                tm.display()
-        if RCSA_Config.getConfig().ServerConfig.test_success:
-            ft.success("Automated testing passed!")
-        else:
-            ft.error("Automated testing failed.  Please address issues described above")
+        if automate:
+            test_messages = RCSA_Config.getTestMessages()
+            if len(test_messages) > 0:
+                ft.print("[orange] ************* TEST MESSAGES *************")
+                for tm in test_messages:
+                    tm.display()
+            if RCSA_Config.getConfig().ServerConfig.test_success:
+                ft.success("Automated testing passed!")
+            else:
+                ft.error("Automated testing failed.  Please address issues described above")
+    except Exception as badnews:
+        ft.error(f"Unable to start test server because {badnews}")
                 
     
 
