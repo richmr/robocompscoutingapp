@@ -71,7 +71,6 @@ class FirstEventsAPI:
         self.URL_Root = self.config.URL_Root + f"{season}/"
         # Try the API key out and raise exception if no good
         r = self.api_session.get(self.URL_Root)
-        print(r.status_code)
         if r.status_code == 401:
             raise Exception("Your FRC Events user name and authentication token did not work, please check your settings")
         
