@@ -130,6 +130,8 @@ class FirstEventsAPI:
         r = r.json()
         # t | {"eventCode":eventCode} adds the eventCode to the t dict and returns a dict
         toreturn = [FirstTeam.model_validate(t | {"eventCode":eventCode}) for t in r["teams"]]
+        if len(toreturn) == 0:
+            raise EOFError("teams")
         return toreturn
 
     def getMatchesAtEvent(self, eventCode:str) -> List[FirstMatch]:
@@ -165,6 +167,8 @@ class FirstEventsAPI:
             for team in event["teams"]:
                 event_dict[team["station"]] = team["teamNumber"]
             toreturn.append(FirstMatch.model_validate(event_dict))
+        if len(toreturn) == 0:
+            raise EOFError("matches")
         return toreturn
     
 

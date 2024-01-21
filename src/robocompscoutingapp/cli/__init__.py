@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 import logging
+import sys
 import traceback
 import typer
 from typer.core import TyperGroup
@@ -39,7 +40,7 @@ cli_app = typer.Typer(cls=OrderCommands)
 
 @cli_app.command()
 def initialize(destination_path: Annotated[Path, typer.Argument(help="The destination path you want to intialize")],
-               overwrite: Annotated[bool, typer.Option(help="Allow overwriting of existing files in the target directory")] = False):
+               overwrite: Annotated[bool, typer.Option(help="Force overwriting of existing files in the target directory", show_default=False)] = False):
     """
     Will set up the required file structure with a template scoring file as well as template configuration file
     """
@@ -147,9 +148,9 @@ def set_event():
 
 @cli_app.command()
 def prepare_event(
-    refresh_match_data: Annotated[bool, typer.Option(help="Updates all unscored matches for the event.  Retains all scoring data")] = False,
-    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info")] = False,
-    season: Annotated[int, typer.Option(help="For testing purposes, you may want to choose a season in the past to ensure there are matches to test with")] = None
+    refresh_match_data: Annotated[bool, typer.Option(help="Updates all unscored matches for the event.  Retains all scoring data", show_default=False)] = False,
+    reset_all_data: Annotated[bool, typer.Option(help="Resets the match and team data and also deletes all existing scoring info", show_default=False)] = False,
+    season: Annotated[int, typer.Option(help="For testing purposes, you may want to choose a season in the past to ensure there are matches to test with.  Otherwise will default to the current season.", show_default=False)] = None
 ):
     """
     Loads or refreshes the match and team data for the chosen event
@@ -186,8 +187,18 @@ def prepare_event(
     except ValueError:
         ft.error(f"{eventCode} is not a valid FRC event code.  Please use the set_event command if you need assistance.")
         return
+    except EOFError as badnews:
+        if "matches" in badnews.args:
+            ft.error(f"No matches were found for this event")
+        if "teams" in badnews.args:
+            ft.error("No teams were found for this event")
+        ft.error(f"If you are trying to test your server, please use the '--season' option.  I recommend '--season=2023'")
+        ft.error(f"If this was in preparation for an actual event, check that the event code: {eventCode} is correct.  Use the 'set-event' command to change it if needed")
+        ft.error(f"If everything is correct and this is unexpected, there may be something wrong with the FRC Events API itself.  Please check their website.")
+        sys.exit()
     except Exception as badnews:
         ft.error(f"Unable to load event data because {badnews}")
+        sys.exit()
 
 
 from robocompscoutingapp.SetupForTest import configure_for_testing
@@ -197,7 +208,7 @@ def test(
     automate: Annotated[bool, typer.Option(help="Will automatically test your scoring page and verify the application scored correctly.")] = False,
     cleanup: Annotated[bool, typer.Option(help="Use --no-cleanup if you want to save the temporary database")] = True,
     use_config_ip: Annotated[bool, typer.Option(help="Set --use-config-ip to attach the server to the IP_Address in the TOML.  This can allow for network access.  Otherwise, the server is only attached to localhost")] = False,
-    app_dev: Annotated[bool, typer.Option(help="This is for the very specific purpose of developing the sample files copied when 'initialize' is called.  You probably don't need to use this.")] = False
+    app_dev: Annotated[bool, typer.Option(help="This is for the very specific purpose of developing the sample files copied when 'initialize' is called.  You probably don't need to use this.", show_default=False)] = False
 ):
     """
     Start the application server in test mode.
@@ -270,7 +281,7 @@ def test(
 
 @cli_app.command()
 def run(
-    season: Annotated[int, typer.Option(help="For testing purposes, you may want to choose a season in the past to ensure there are matches to test with.  Otherwise the current season will be used.")] = None
+    season: Annotated[int, typer.Option(help="For testing purposes, you may want to choose a season in the past to ensure there are matches to test with.  Otherwise the current season will be used.", show_default=False)] = None
 ):
     """
     Run the app server.
