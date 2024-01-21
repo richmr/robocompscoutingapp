@@ -33,9 +33,10 @@ def configure_for_testing(cleanup:bool = True):
         finally:
             # Need to copy over the testing status for the scoring page to the original db
             from_temp_db_sps = getCurrentScoringPageData()
-            orig_sps = orig_db.scalars(select(ScoringPageStatus).where(ScoringPageStatus.scoring_page_id==from_temp_db_sps.scoring_page_id)).one()
-            orig_sps.tested = from_temp_db_sps.tested
-            orig_db.commit()
+            if from_temp_db_sps is not None:
+                orig_sps = orig_db.scalars(select(ScoringPageStatus).where(ScoringPageStatus.scoring_page_id==from_temp_db_sps.scoring_page_id)).one()
+                orig_sps.tested = from_temp_db_sps.tested
+                orig_db.commit()
             if cleanup:
                 if RCSA_Config.getConfig().ServerConfig.scoring_database.exists():
                     RCSA_Config.getConfig().ServerConfig.scoring_database.unlink()
