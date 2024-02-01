@@ -1,6 +1,6 @@
 # RoboCompScoutingApp
 
-Courtesy of Team 2584, The Flame Of The West, the RoboCompScoutingApp (RCSA for short) is a fully-configurable system to set up a server that allows for centralized collection of scouting statistics.  
+Courtesy of [Team 2584, The Flame Of The West](https://team2584.com/), the RoboCompScoutingApp (RCSA for short) is a fully-configurable system to set up a server that allows for centralized collection of scouting statistics.  
 
 By following a few guidelines to make a custom HTML-based scoring page, your match scouts can use their phones, tablets, or other mobile devices to collect and submit statistics on the activities your team needs to help you pick alliances.  The statistics are centrally collected and tabulated.  When ready, you can view and sort the collected statistics to help you build your winning alliance.
 
